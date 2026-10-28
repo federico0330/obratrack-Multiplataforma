@@ -4,6 +4,7 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(21)
     androidTarget()
     iosArm64()
     iosSimulatorArm64()
@@ -19,4 +20,8 @@ android {
     namespace = "com.unaj.obratrack.core.firebase"
     compileSdk = 36
     defaultConfig { minSdk = 26 }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
 }

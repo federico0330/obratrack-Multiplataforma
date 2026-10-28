@@ -1,19 +1,33 @@
 # ObraTrack Multiplataforma
 
-Aplicación multiplataforma para gestión de obras, relevamientos de campo y tareas, desarrollada con Kotlin Multiplatform.
+Estamos reconstruyendo ObraTrack desde cero con Kotlin Multiplatform. La idea es compartir reglas y datos entre Android e iOS, y avanzar por partes para entender y probar cada decisión.
 
-La lógica compartida y los límites de arquitectura están organizados en módulos `core:*`. La guía local de configuración y aprendizaje está en `guia.md` (excluida de Git).
+## Lo que ya está hecho
 
-## Arquitectura inicial
+- [x] Repo inicializado y Gradle Wrapper agregado.
+- [x] Módulos separados para dominio, datos, Firebase y las features de acceso e inicio.
+- [x] Login Android con Firebase, sesión persistida y cierre de sesión.
+- [x] Vista inicial **Mis obras** (todavía vacía; aún no consulta Firestore).
+- [x] ViewModel para el estado de acceso, componentes Compose sin estado propio y dependencias conectadas desde `AppContainer`.
+- [x] Primeros tests unitarios comunes para reglas y casos de uso.
 
-`core:domain` contiene reglas puras y contratos. `core:data` implementa repositorios y `core:firebase` encapsula Firebase. `features:auth` publica estado y pantallas; `features:home` renderiza la vista principal. `androidApp` conecta las dependencias y la navegación inicial. Las dependencias de negocio apuntan hacia el dominio.
+## Para seguir
 
-## Estado
+- [ ] Confirmar que Gradle sincroniza y que la app inicia en un emulador.
+- [ ] Probar el login con una cuenta existente de Firebase.
+- [ ] Crear la app anfitriona iOS y verificar Firebase allí.
+- [ ] Implementar obras y continuar con relevamientos, tareas, agenda, informes y sincronización sin conexión.
 
-Primera entrega: inicio de sesión Firebase por email/contraseña, estado de sesión persistente y vista principal Android. iOS y Firestore se incorporarán después.
+## Dónde está cada cosa
 
-## Configuración local
+- `core/domain`: modelos, reglas, casos de uso y contratos.
+- `core/data`: repositorios que conectan el dominio con fuentes de datos.
+- `core/firebase`: acceso al SDK de Firebase.
+- `features/auth` y `features/home`: estado y pantallas.
+- `androidApp`: arranque, dependencias y navegación Android.
 
-El archivo `androidApp/google-services.json` debe descargarse desde el proyecto Firebase ObraTrack para la app Android `com.unaj.appmoviles.obratrack`. Está ignorado por Git. Habilitá Email/Password en Firebase Authentication y utilizá una cuenta existente.
+Las dependencias apuntan hacia el dominio. Las pantallas no llaman a Firebase. La configuración local `androidApp/google-services.json` no se sube a Git; usá la del proyecto Firebase de ObraTrack.
 
-Requisitos: JDK 17 y Android SDK 36. Ejecutá `./gradlew :androidApp:installDebug` para instalar en un dispositivo conectado y `./gradlew :core:domain:allTests` para correr las pruebas comunes.
+**Para compilar:** JDK 21 y Android SDK 36. Desde la terminal: `./gradlew :androidApp:assembleDebug`. Para los tests comunes: `./gradlew :core:domain:allTests`.
+
+La guía de arquitectura y el plan detallado de trabajo están en `guia.md` en la copia local del repo.

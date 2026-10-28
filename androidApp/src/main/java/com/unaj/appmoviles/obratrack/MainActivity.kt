@@ -36,13 +36,14 @@ class MainActivity : ComponentActivity() {
 /** Navegación inicial pequeña; cada destino delega la presentación a su feature. */
 @Composable
 private fun ObraTrackRoot(state: AuthUiState, viewModel: AuthViewModel) {
+    val currentUser = state.user
     ObraTrackTheme {
         Surface(Modifier.fillMaxSize()) {
             when {
                 !state.sessionChecked -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-                state.user != null -> HomeScreen(state.user, viewModel::signOut)
+                currentUser != null -> HomeScreen(currentUser, viewModel::signOut)
                 else -> LoginScreen(
                     state = state,
                     onEmailChanged = viewModel::onEmailChanged,
