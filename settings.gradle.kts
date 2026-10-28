@@ -16,3 +16,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "ObraTrackMultiplataforma"
 include(":shared")
+include(":androidApp")
