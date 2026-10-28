@@ -1,0 +1,23 @@
+plugins {
+    kotlin("multiplatform")
+    id("com.android.library")
+}
+
+kotlin {
+    androidTarget()
+    iosArm64()
+    iosSimulatorArm64()
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+            implementation(project(":core:firebase"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+        }
+    }
+}
+
+android {
+    namespace = "com.unaj.obratrack.core.data"
+    compileSdk = 36
+    defaultConfig { minSdk = 26 }
+}

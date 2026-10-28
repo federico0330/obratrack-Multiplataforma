@@ -2,11 +2,11 @@
 
 Aplicación multiplataforma para gestión de obras, relevamientos de campo y tareas, desarrollada con Kotlin Multiplatform.
 
-La lógica compartida vive en `shared/`. La guía local de configuración y aprendizaje está en `guia.md` (excluida de Git).
+La lógica compartida y los límites de arquitectura están organizados en módulos `core:*`. La guía local de configuración y aprendizaje está en `guia.md` (excluida de Git).
 
 ## Arquitectura inicial
 
-`shared/src/commonMain` contiene dominio puro y un adaptador de Firebase multiplataforma. Las reglas no conocen Firebase ni la interfaz. Los casos de uso dependen de contratos y el adaptador implementa esos contratos; `commonTest` verifica el dominio con repositorios falsos. `androidApp` contiene la aplicación Compose Android.
+`core:domain` contiene reglas puras y contratos. `core:data` implementa repositorios y `core:firebase` encapsula Firebase. `features:auth` publica estado y pantallas; `features:home` renderiza la vista principal. `androidApp` conecta las dependencias y la navegación inicial. Las dependencias de negocio apuntan hacia el dominio.
 
 ## Estado
 
@@ -16,4 +16,4 @@ Primera entrega: inicio de sesión Firebase por email/contraseña, estado de ses
 
 El archivo `androidApp/google-services.json` debe descargarse desde el proyecto Firebase ObraTrack para la app Android `com.unaj.appmoviles.obratrack`. Está ignorado por Git. Habilitá Email/Password en Firebase Authentication y utilizá una cuenta existente.
 
-Requisitos: JDK 17 y Android SDK 36. Ejecutá `./gradlew :androidApp:installDebug` para instalar en un dispositivo conectado y `./gradlew :shared:allTests` para correr las pruebas comunes.
+Requisitos: JDK 17 y Android SDK 36. Ejecutá `./gradlew :androidApp:installDebug` para instalar en un dispositivo conectado y `./gradlew :core:domain:allTests` para correr las pruebas comunes.

@@ -5,6 +5,9 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
+}
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -15,5 +18,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ObraTrackMultiplataforma"
-include(":shared")
+include(":core:domain", ":core:data", ":core:firebase", ":features:auth", ":features:home")
 include(":androidApp")
