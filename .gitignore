@@ -1,0 +1,19 @@
+# Android Studio / IntelliJ
+.idea/
+*.iml
+
+# Gradle
+.gradle/
+**/build/
+
+# Android local SDK configuration
+local.properties
+
+# Firebase configuration (contiene identificadores propios del proyecto)
+google-services.json
+GoogleService-Info.plist
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Guía de trabajo local solicitada por el usuario
+/guia.md
