@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_login_subtitle">Accedi per continuare</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_sign_in">Accedi</string>
+    <string name="auth_show_password">Mostra password</string>
+    <string name="auth_hide_password">Nascondi password</string>
+    <string name="auth_error_invalid_data">Controlla l\'email e la password inserite.</string>
+    <string name="auth_error_invalid_credentials">L\'email o la password non sono corrette.</string>
+    <string name="auth_error_no_connection">Nessuna connessione. Controlla internet e riprova.</string>
+    <string name="auth_error_too_many_attempts">Troppi tentativi. Attendi qualche minuto e riprova.</string>
+    <string name="auth_error_user_disabled">Questo account è stato disattivato.</string>
+    <string name="auth_error_unexpected">Non è stato possibile accedere. Riprova.</string>
+    <string name="auth_error_sign_out_failed">Non è stato possibile uscire. Riprova.</string>
+    <string name="auth_error_session_failed">Non è stato possibile verificare la sessione. Riprova.</string>
+</resources>
