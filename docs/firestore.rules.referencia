@@ -1,0 +1,142 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Funciones auxiliares ----------
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ============================================
+    // USUARIOS (perfil + índice de suscripciones)
+    // ============================================
+    match /usuarios/{userId} {
+      // Cada usuario solo puede leer y escribir su propio perfil
+      allow read, write: if isOwner(userId);
+
+      // Subcolección: índice personal de suscripciones
+      match /suscripciones/{obraId} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+
+    // ============================================
+    // OBRAS
+    // ============================================
+    match /obras/{obraId} {
+
+      function obraData() {
+        return get(/databases/$(database)/documents/obras/$(obraId)).data;
+      }
+
+      // LECTURA: dueño siempre; otros si la obra es pública
+      allow read: if isAuthenticated() &&
+                     (resource.data.userId == request.auth.uid ||
+                      resource.data.publica == true);
+
+      // CREACIÓN: solo el dueño (y el userId debe ser el suyo)
+      allow create: if isAuthenticated() &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // ACTUALIZACIÓN: SOLO el dueño (una única regla, sin huecos)
+      allow update: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid &&
+                       request.resource.data.userId == request.auth.uid;
+
+      // ELIMINACIÓN: solo el dueño
+      allow delete: if isAuthenticated() &&
+                       resource.data.userId == request.auth.uid;
+
+      // ---------- Subcolección: SUSCRIPTORES ----------
+      match /suscriptores/{suscriptorId} {
+
+        function esObraPublica() {
+          return obraData().publica == true;
+        }
+
+        // LECTURA: el dueño de la obra ve todos; cada usuario ve solo la suya
+        allow read: if isAuthenticated() &&
+                       (obraData().userId == request.auth.uid ||
+                        suscriptorId == request.auth.uid);
+
+        // CREACIÓN: solo te puedes crear a ti mismo, en obra pública,
+        // y el campo userId del doc debe coincidir con tu uid
+        allow create: if isAuthenticated() &&
+                         esObraPublica() &&
+                         suscriptorId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ACTUALIZACIÓN: solo tu propia suscripción
+        allow update: if isAuthenticated() &&
+                         suscriptorId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ELIMINACIÓN: tú mismo (desuscribirse) o el dueño (expulsar)
+        allow delete: if isAuthenticated() &&
+                         (suscriptorId == request.auth.uid ||
+                          obraData().userId == request.auth.uid);
+      }
+
+      // ---------- Subcolección: RELEVAMIENTOS ----------
+      match /relevamientos/{relevamientoId} {
+
+        // LECTURA: dueño de la obra, o cualquiera si es pública
+        allow read: if isAuthenticated() &&
+                       (obraData().userId == request.auth.uid ||
+                        obraData().publica == true);
+
+        // CREACIÓN: solo el dueño, con su propio userId
+        allow create: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ACTUALIZACIÓN: solo el dueño
+        allow update: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ELIMINACIÓN: solo el dueño
+        allow delete: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid;
+      }
+
+      // ---------- Subcolección: TAREAS ----------
+      // Privadas del dueño de la obra, aunque la obra sea pública.
+      match /tareas/{tareaId} {
+
+        // LECTURA: solo el dueño de la obra
+        allow read: if isAuthenticated() &&
+                       obraData().userId == request.auth.uid;
+
+        // CREACIÓN: solo el dueño, con su propio userId
+        allow create: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ACTUALIZACIÓN: solo el dueño, sin cambiar el userId a otro
+        allow update: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid &&
+                         request.resource.data.userId == request.auth.uid;
+
+        // ELIMINACIÓN: solo el dueño
+        allow delete: if isAuthenticated() &&
+                         obraData().userId == request.auth.uid;
+      }
+    }
+
+    // ============================================
+    // COLLECTION GROUP: RELEVAMIENTOS
+    // ============================================
+    // Permite consultar relevamientos propios mediante collectionGroup.
+    match /{path=**}/relevamientos/{relevamientoId} {
+      allow read: if isAuthenticated()
+                  && resource.data.userId == request.auth.uid;
+    }
+
+  } // <-- FIN DE match /databases/{database}/documents
+} // <-- FIN DE service cloud.firestore
