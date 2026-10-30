@@ -9,6 +9,9 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
     sourceSets {
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+        }
         commonMain.dependencies {
             implementation("dev.gitlive:firebase-auth:2.7.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")

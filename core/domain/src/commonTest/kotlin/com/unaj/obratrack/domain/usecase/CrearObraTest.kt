@@ -3,13 +3,14 @@ package com.unaj.obratrack.domain.usecase
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.repository.RepositorioObras
 import com.unaj.obratrack.domain.validation.ResultadoValidacion
+import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 class CrearObraTest {
     @Test
-    fun nombreValidoSeNormalizaYSeGuarda() {
+    fun nombreValidoSeNormalizaYSeGuarda() = runTest {
         val repositorio = RepositorioObrasEnMemoria()
         val casoDeUso = CrearObra(repositorio)
 
@@ -20,7 +21,7 @@ class CrearObraTest {
     }
 
     @Test
-    fun nombreVacioSeRechazaSinGuardar() {
+    fun nombreVacioSeRechazaSinGuardar() = runTest {
         val repositorio = RepositorioObrasEnMemoria()
         val casoDeUso = CrearObra(repositorio)
 
@@ -34,7 +35,7 @@ class CrearObraTest {
     }
 
     @Test
-    fun nombreMayorA80CaracteresSeRechaza() {
+    fun nombreMayorA80CaracteresSeRechaza() = runTest {
         val repositorio = RepositorioObrasEnMemoria()
         val resultado = CrearObra(repositorio)(id = "obra-1", nombre = "a".repeat(81))
 
