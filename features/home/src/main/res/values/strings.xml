@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_title">Mis obras</string>
+    <string name="home_signed_in_as">Sesión iniciada como %1$s</string>
+    <string name="home_empty_title">Todavía no hay obras para mostrar.</string>
+    <string name="home_empty_hint">Esta será la vista principal para consultar tus proyectos.</string>
+    <string name="home_sign_out">Cerrar sesión</string>
+</resources>

@@ -11,22 +11,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.Usuario
 
 @Composable
-fun HomeScreen(user: Usuario, onSignOut: () -> Unit) {
+fun HomeScreen(user: Usuario, onSignOut: () -> Unit, errorMessage: String? = null) {
     Column(
         Modifier.fillMaxSize().padding(28.dp),
         verticalArrangement = Arrangement.Center,
     ) {
-        Text("Mis obras", style = MaterialTheme.typography.headlineLarge)
+        Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)
         Spacer(Modifier.height(8.dp))
-        Text("Sesión iniciada como ${user.nombre?.takeIf(String::isNotBlank) ?: user.email}")
+        Text(stringResource(R.string.home_signed_in_as, user.nombre?.takeIf(String::isNotBlank) ?: user.email))
         Spacer(Modifier.height(24.dp))
-        Text("Todavía no hay obras para mostrar.", style = MaterialTheme.typography.bodyLarge)
-        Text("Esta será la vista principal para consultar tus proyectos.")
+        Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.bodyLarge)
+        Text(stringResource(R.string.home_empty_hint))
+        errorMessage?.let {
+            Spacer(Modifier.height(16.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
         Spacer(Modifier.height(24.dp))
-        TextButton(onClick = onSignOut) { Text("Cerrar sesión") }
+        TextButton(onClick = onSignOut) { Text(stringResource(R.string.home_sign_out)) }
     }
 }

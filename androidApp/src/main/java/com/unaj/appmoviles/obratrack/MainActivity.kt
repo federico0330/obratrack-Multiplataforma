@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.unaj.obratrack.features.auth.AuthUiState
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.LoginScreen
+import com.unaj.obratrack.features.auth.message
 import com.unaj.obratrack.features.home.HomeScreen
 import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
 
@@ -43,7 +44,7 @@ private fun ObraTrackRoot(state: AuthUiState, viewModel: AuthViewModel) {
                 !state.sessionChecked -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-                currentUser != null -> HomeScreen(currentUser, viewModel::signOut)
+                currentUser != null -> HomeScreen(currentUser, viewModel::signOut, state.error?.message())
                 else -> LoginScreen(
                     state = state,
                     onEmailChanged = viewModel::onEmailChanged,
