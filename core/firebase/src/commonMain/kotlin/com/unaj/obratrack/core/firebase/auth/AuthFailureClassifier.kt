@@ -1,7 +1,16 @@
 package com.unaj.obratrack.core.firebase.auth
 
 /** Tipo de excepción de GitLive, reducido a lo que importa para clasificar. */
-internal enum class ThrowableKind { Network, TooManyRequests, InvalidCredentials, InvalidUser, Other }
+internal enum class ThrowableKind {
+    Network,
+    TooManyRequests,
+    InvalidCredentials,
+    InvalidUser,
+    WeakPassword,
+    UserCollision,
+    InvalidEmail,
+    Other,
+}
 
 /**
  * Clasificación pura (sin SDK) para poder testearla en commonTest.

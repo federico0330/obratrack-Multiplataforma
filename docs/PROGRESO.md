@@ -24,7 +24,8 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Offline: persistencia de Firestore. A futuro análisis de base local propia (Room KMP o SQLDelight)
 - ¿La UI se comparte (Compose Multiplatform) o queda nativa en Android?
 - Firestore: usar GitLive firebase-firestore 2.7.0 (misma familia que auth; verificado en Maven). Estructura según docs/firestore.rules.referencia (obras en colección raíz con userId).
-- Registro, recuperar contraseña, Google y verificación de email: no existen; no se crea usuarios/{uid}.
+- Registro: RegistrarUsuario, validación de credenciales y clasificador de fallos listos en domain/data/firebase (sin UI ni cableado en AppContainer).
+- Recuperar contraseña, Google y verificación de email: no existen; no se crea usuarios/{uid}.
 - Sin cobertura de tests: capa Firestore (aún no existe) y UI.
 
 ## Decisiones tomadas

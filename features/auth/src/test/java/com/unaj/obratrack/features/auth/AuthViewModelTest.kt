@@ -5,6 +5,7 @@ import com.unaj.obratrack.domain.repository.ErrorAuth
 import com.unaj.obratrack.domain.repository.RepositorioAutenticacion
 import com.unaj.obratrack.domain.repository.ResultadoAcceso
 import com.unaj.obratrack.domain.repository.ResultadoCerrarSesion
+import com.unaj.obratrack.domain.repository.ResultadoRegistro
 import com.unaj.obratrack.domain.usecase.CerrarSesion
 import com.unaj.obratrack.domain.usecase.IniciarSesion
 import com.unaj.obratrack.domain.usecase.ObservarSesion
@@ -255,4 +256,7 @@ private class RepositorioFalso(
         if (resultadoCerrarSesion is ResultadoCerrarSesion.Exito) sesionActual.value = null
         return resultadoCerrarSesion
     }
+
+    override suspend fun registrar(email: String, contrasena: String): ResultadoRegistro =
+        ResultadoRegistro.Exito(Usuario("u1", email, null))
 }
