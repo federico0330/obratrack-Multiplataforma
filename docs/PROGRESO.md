@@ -12,19 +12,17 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Textos de auth y home en recursos es/en/it (italiano a revisar); botón ver/ocultar contraseña.
 - Tests: 64 pasan (domain 16, firebase 11, data 9, auth 28). assembleDebug OK. Comandos en CLAUDE.md.
 - CrearObra y ValidadorNombreObra en domain (sin UI). RepositorioObras es solo una interfaz, sin adaptador.
+- Registro: RegistrarUsuario, validación y clasificador de fallos en domain/data/firebase; pantalla y RegistroViewModel en features/auth, cableados en AppContainer/MainActivity (Login <-> Registro, tras registrarse pasa a Home por la sesión). Textos es/en/it. Falta probarlo contra Firebase real en el teléfono.
 
 ## Próximos pasos (en orden)
-1. Definir la capa local para el requisito offline (ver "Pendiente de decidir").
-2. Adaptador Firestore de RepositorioObras: crear y listar, sin esperar al servidor al escribir.
-3. UI de Crear Obra y listado en "Mis obras" con su ViewModel y caso de uso ListarObras.
-4. Navegación: Login, Mis obras, Crear Obra, Detalle.
-5. Relevamientos, tareas, visitas con aviso y agenda (según la app Android previa).
+1. Adaptador Firestore de RepositorioObras: crear y listar (colección raíz `obras`).
+2. UI de Crear Obra y listado en "Mis obras" con su ViewModel y caso de uso ListarObras.
+3. Navegación: Login, Mis obras, Crear Obra, Detalle.
+4. Relevamientos, tareas, visitas con aviso y agenda (según la app Android previa).
+5. Última etapa: offline con la persistencia propia de Firestore (escrituras sin esperar al servidor, estado "pendiente de sincronizar").
 
 ## Pendiente de decidir
-- Offline: persistencia de Firestore. A futuro análisis de base local propia (Room KMP o SQLDelight)
 - ¿La UI se comparte (Compose Multiplatform) o queda nativa en Android?
-- Firestore: usar GitLive firebase-firestore 2.7.0 (misma familia que auth; verificado en Maven). Estructura según docs/firestore.rules.referencia (obras en colección raíz con userId).
-- Registro: RegistrarUsuario, validación y clasificador de fallos en domain/data/firebase; pantalla y RegistroViewModel en features/auth, cableados en AppContainer/MainActivity (Login <-> Registro, tras registrarse pasa a Home por la sesión). Textos es/en/it. Falta probarlo contra Firebase real en el teléfono.
 - Recuperar contraseña, Google y verificación de email: no existen; no se crea usuarios/{uid}.
 - Sin cobertura de tests: capa Firestore (aún no existe) y UI.
 
@@ -35,3 +33,7 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Fotos a Cloudinary, no a Firebase Storage.
 - Los errores se informan; nada de catch que devuelva éxito.
 - Errores de auth: tipo ErrorAuth en domain, AuthError en UI; el texto sale de recursos.
+- Login y registro cerrados. Sin perfil usuarios/{uid} ni AsegurarPerfil (usuarios solo en Authentication).
+- Offline: última etapa, con la persistencia propia de Firestore; no se diseña ahora.
+- Obras en colección raíz `obras` (userId, publica); reglas publicadas, no se tocan.
+- Firestore: GitLive firebase-firestore 2.7.0 (misma familia que auth; verificado en Maven). Estructura según docs/firestore.rules.referencia.
