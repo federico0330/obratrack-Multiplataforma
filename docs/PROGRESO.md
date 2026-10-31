@@ -10,7 +10,7 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Estado de acceso en un ViewModel; pantallas Compose separadas; dependencias desde AppContainer.
 - Login: errores tipados (ErrorAuth) por tipo/código de GitLive, sin texto; CerrarSesion y ObservarSesion en domain; AuthViewModel solo usa casos de uso y reanuda la observación de sesión tras una falla.
 - Textos de auth y home en recursos es/en/it (italiano a revisar); botón ver/ocultar contraseña.
-- Tests: 121 pasan (domain 31, data 16, firebase 27, auth 47). assembleDebug OK. Comandos en CLAUDE.md.
+- Tests: 121 pasan (domain 31, data 16, firebase 27, auth 47). assembleDebug OK.
 - CrearObra y ValidadorNombreObra en domain (sin UI). RepositorioObras es solo una interfaz, sin adaptador.
 - Toolchain: Kotlin y plugin de Compose en 2.4.21 (antes 2.2.20); AGP 9.4.1 y Gradle 9.6.0 sin cambios. Tests y assembleDebug OK; las klibs de iOS (domain, data, firebase) compilan desde Windows (compileKotlinIosSimulatorArm64). Sin linkear ni probar en iOS.
 - core/* migrado a com.android.kotlin.multiplatform.library (android { } + withHostTest); sus tests corren con testAndroidHostTest. features/* y androidApp siguen con los plugins viejos y los consumen sin cambios.
@@ -38,4 +38,4 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Offline: última etapa, con la persistencia propia de Firestore; no se diseña ahora.
 - Obras en colección raíz `obras` (userId, publica); reglas publicadas, no se tocan.
 - Firestore: GitLive firebase-firestore 2.7.0 (misma familia que auth; verificado en Maven). Estructura según docs/firestore.rules.referencia.
-- UI: la migración a Compose Multiplatform (paso 2 del plan) queda descartada; features/* y androidApp siguen Android. Toda pantalla nueva sigue las reglas de "UI preparada para KMP" de CLAUDE.md (UiState y errores sin android.*, ViewModel sin strings ni Context, pantallas stateless, kotlinx-datetime, sin sumar material-icons-extended).
+- UI: la migración a Compose Multiplatform (paso 2 del plan) queda descartada; features/* y androidApp siguen Android. Reglas para toda pantalla nueva: UiState y errores sin android.*, ViewModel sin strings ni Context, pantallas stateless, fechas con kotlinx-datetime, sin sumar material-icons-extended.
