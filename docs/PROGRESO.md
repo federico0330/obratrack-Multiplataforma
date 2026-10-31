@@ -12,6 +12,7 @@ Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
 - Textos de auth y home en recursos es/en/it (italiano a revisar); botón ver/ocultar contraseña.
 - Tests: 64 pasan (domain 16, firebase 11, data 9, auth 28). assembleDebug OK. Comandos en CLAUDE.md.
 - CrearObra y ValidadorNombreObra en domain (sin UI). RepositorioObras es solo una interfaz, sin adaptador.
+- Toolchain: Kotlin y plugin de Compose en 2.4.21 (antes 2.2.20); AGP 9.4.1 y Gradle 9.6.0 sin cambios. Tests y assembleDebug OK; las klibs de iOS (domain, data, firebase) compilan desde Windows (compileKotlinIosSimulatorArm64). Sin linkear ni probar en iOS.
 - Registro: RegistrarUsuario, validación y clasificador de fallos en domain/data/firebase; pantalla y RegistroViewModel en features/auth, cableados en AppContainer/MainActivity (Login <-> Registro, tras registrarse pasa a Home por la sesión). Textos es/en/it. Falta probarlo contra Firebase real en el teléfono.
 
 ## Próximos pasos (en orden)
