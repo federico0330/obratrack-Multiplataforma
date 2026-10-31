@@ -4,6 +4,15 @@
     <string name="auth_email_label">Email</string>
     <string name="auth_password_label">Password</string>
     <string name="auth_sign_in">Accedi</string>
+    <string name="auth_register_subtitle">Crea il tuo account per iniziare</string>
+    <string name="auth_repeat_password_label">Ripeti la password</string>
+    <string name="auth_create_account">Crea account</string>
+    <string name="auth_have_account">Ho già un account</string>
+    <string name="auth_register_error_invalid_email">L\'indirizzo email non è valido.</string>
+    <string name="auth_register_error_weak_password">La password deve contenere almeno 6 caratteri.</string>
+    <string name="auth_register_error_passwords_mismatch">Le password non coincidono.</string>
+    <string name="auth_register_error_email_in_use">Esiste già un account con questa email.</string>
+    <string name="auth_register_error_unexpected">Non è stato possibile creare l\'account. Riprova.</string>
     <string name="auth_show_password">Mostra password</string>
     <string name="auth_hide_password">Nascondi password</string>
     <string name="auth_error_invalid_data">Controlla l\'email e la password inserite.</string>

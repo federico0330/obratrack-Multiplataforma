@@ -18,6 +18,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ fun LoginScreen(
     onEmailChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onSignIn: () -> Unit,
+    onGoToRegister: () -> Unit,
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -82,6 +84,9 @@ fun LoginScreen(
         Spacer(Modifier.height(20.dp))
         Button(onClick = onSignIn, enabled = state.canSignIn, modifier = Modifier.fillMaxWidth()) {
             if (state.isLoading) CircularProgressIndicator() else Text(stringResource(R.string.auth_sign_in))
+        }
+        TextButton(onClick = onGoToRegister, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.auth_create_account))
         }
     }
 }
