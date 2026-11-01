@@ -33,7 +33,7 @@ jobs:
       - name: Ejecutar recorrido en iOS Simulator
         run: >-
           xcodebuild test
-          -workspace iosApp/iosApp.xcworkspace
+          -workspace iosApp/ObraTrackIOS.xcworkspace
           -scheme ObraTrackIOS
           -destination 'platform=iOS Simulator,name=iPhone 17,OS=26.5'
           -derivedDataPath build/ios
