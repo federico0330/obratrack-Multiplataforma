@@ -1,41 +1,32 @@
 # Progreso de ObraTrack Multiplataforma
 
-Mantener corto (unas 40 líneas). Al agregar algo, condensar lo viejo.
+## Hecho y verificado
+- Gradle configurado; app ejecutada en teléfono Android físico.
+- Login Firebase probado con una cuenta existente; registro implementado.
+- Capas separadas: `core/domain`, `core/data`, `core/firebase`, features Android y `androidApp`.
+- Login/registro con ViewModels, pantallas Compose, errores tipados y dependencias desde `AppContainer`.
+- Textos de auth/home en es/en/it; el italiano requiere revisión.
+- Última verificación registrada antes de esta feature: 121 tests y `assembleDebug` OK.
+- Kotlin 2.4.21, AGP 9.4.1, Gradle 9.6.0, JDK 21. Core compila para iOS; no hay UI ni prueba de app iOS.
 
-## Hecho
-- Repo y Gradle configurados; sincroniza y compila en Android Studio.
-- App ejecutada en teléfono Android físico.
-- Login con Firebase probado con una cuenta existente; al ingresar abre "Mis obras".
-- Módulos separados: core/domain, core/data, core/firebase, features/auth, features/home, androidApp.
-- Estado de acceso en un ViewModel; pantallas Compose separadas; dependencias desde AppContainer.
-- Login: errores tipados (ErrorAuth) por tipo/código de GitLive, sin texto; CerrarSesion y ObservarSesion en domain; AuthViewModel solo usa casos de uso y reanuda la observación de sesión tras una falla.
-- Textos de auth y home en recursos es/en/it (italiano a revisar); botón ver/ocultar contraseña.
-- Tests: 121 pasan (domain 31, data 16, firebase 27, auth 47). assembleDebug OK.
-- CrearObra y ValidadorNombreObra en domain (sin UI). RepositorioObras es solo una interfaz, sin adaptador.
-- Toolchain: Kotlin y plugin de Compose en 2.4.21 (antes 2.2.20); AGP 9.4.1 y Gradle 9.6.0 sin cambios. Tests y assembleDebug OK; las klibs de iOS (domain, data, firebase) compilan desde Windows (compileKotlinIosSimulatorArm64). Sin linkear ni probar en iOS.
-- core/* migrado a com.android.kotlin.multiplatform.library (android { } + withHostTest); sus tests corren con testAndroidHostTest. features/* y androidApp siguen con los plugins viejos y los consumen sin cambios.
-- Registro: RegistrarUsuario, validación y clasificador de fallos en domain/data/firebase; pantalla y RegistroViewModel en features/auth, cableados en AppContainer/MainActivity (Login <-> Registro, tras registrarse pasa a Home por la sesión). Textos es/en/it. Falta probarlo contra Firebase real en el teléfono.
+## En curso: crear y listar obras
+- Dominio, puerto Firestore, repositorio, feature Android y navegación inicial están implementados en la rama `feat/obras-create-list`.
+- La consulta filtra por `userId`; la creación conserva `obras/{id}`, los campos nativos y fechas Firestore Timestamp.
+- `:androidApp:assembleDebug` pasa. Los tests compilan, pero Gradle no consigue cargar sus clases al ejecutarlos (`ClassNotFoundException`).
+- Falta resolver la ejecución de tests y probar el flujo con Firebase en un teléfono.
 
-## Próximos pasos (en orden)
-1. Adaptador Firestore de RepositorioObras: crear y listar (colección raíz `obras`).
-2. UI de Crear Obra y listado en "Mis obras" con su ViewModel y caso de uso ListarObras.
-3. Navegación: Login, Mis obras, Crear Obra, Detalle.
-4. Relevamientos, tareas, visitas con aviso y agenda (según la app Android previa).
-5. Última etapa: offline con la persistencia propia de Firestore (escrituras sin esperar al servidor, estado "pendiente de sincronizar").
+## Próximo
+1. Resolver el fallo del ejecutor y pasar tests de domain/data/firebase/obras.
+2. Prueba manual: lista vacía, crear y volver a ver obra; reiniciar y probar aislamiento entre dos cuentas.
+3. Detalle, edición/eliminación, relevamientos, tareas y visitas según alcance del equipo.
+4. Offline con persistencia de Firestore al final.
 
-## Pendiente de decidir
-- Recuperar contraseña, Google y verificación de email: no existen; no se crea usuarios/{uid}.
-- Sin cobertura de tests: capa Firestore (aún no existe) y UI.
-
-## Decisiones tomadas
-- La próxima visita vive en la obra; un relevamiento solo la propone al crearse.
-- Fechas de calendario en UTC, "hoy" con Clock local, comparar como fecha.
-- Avisos de visita locales, sin FCM, sin plan Blaze ni tarjeta.
-- Fotos a Cloudinary, no a Firebase Storage.
-- Los errores se informan; nada de catch que devuelva éxito.
-- Errores de auth: tipo ErrorAuth en domain, AuthError en UI; el texto sale de recursos.
-- Login y registro cerrados. Sin perfil usuarios/{uid} ni AsegurarPerfil (usuarios solo en Authentication).
-- Offline: última etapa, con la persistencia propia de Firestore; no se diseña ahora.
-- Obras en colección raíz `obras` (userId, publica); reglas publicadas, no se tocan.
-- Firestore: GitLive firebase-firestore 2.7.0 (misma familia que auth; verificado en Maven). Estructura según docs/firestore.rules.referencia.
-- UI: la migración a Compose Multiplatform (paso 2 del plan) queda descartada; features/* y androidApp siguen Android. Reglas para toda pantalla nueva: UiState y errores sin android.*, ViewModel sin strings ni Context, pantallas stateless, fechas con kotlinx-datetime, sin sumar material-icons-extended.
+## Decisiones vigentes
+- UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.
+- Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
+- Compose stateless + UDF; ViewModels no contienen strings ni Context; constructor injection desde `AppContainer`.
+- Mantener `obras` raíz con `userId`, `nombre`, `cliente`, `publica`, `direccion`, `fechaInicio` Timestamp y `estado` minúsculo.
+- No crear `usuarios/{uid}` ni modificar/desplegar reglas. Visibilidad pública no habilita explorar ni seguir obras en este corte.
+- “Hoy” se calcula con la zona local; `fechaInicio` se guarda desde medianoche UTC. La hora de visita son minutos desde medianoche.
+- Sin fotos en Firebase Storage; se acordó Cloudinary. Sin FCM para avisos locales.
+- Errores tipados; cancellation se relanza; no convertir escrituras fallidas en éxito.
