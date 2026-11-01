@@ -12,14 +12,14 @@
 ## En curso: crear y listar obras
 - Dominio, puerto Firestore, repositorio, feature Android y navegación inicial están implementados en la rama `feat/obras-create-list`.
 - La consulta filtra por `userId`; la creación conserva `obras/{id}`, los campos nativos y fechas Firestore Timestamp.
-- `:androidApp:assembleDebug` pasa. Los tests compilan, pero Gradle no consigue cargar sus clases al ejecutarlos (`ClassNotFoundException`).
-- Falta resolver la ejecución de tests y probar el flujo con Firebase en un teléfono.
+- Pasan los tests de domain, data, firebase y obras, y `:androidApp:assembleDebug`.
+- En teléfono: sesión existente, lectura, validación, creación y persistencia tras reiniciar probadas con Firebase.
+- Quedó el registro `PRUEBA_QA_NO_USAR_20261101` para borrar desde Firebase Console.
 
 ## Próximo
-1. Resolver el fallo del ejecutor y pasar tests de domain/data/firebase/obras.
-2. Prueba manual: lista vacía, crear y volver a ver obra; reiniciar y probar aislamiento entre dos cuentas.
-3. Detalle, edición/eliminación, relevamientos, tareas y visitas según alcance del equipo.
-4. Offline con persistencia de Firestore al final.
+1. Probar aislamiento entre dos cuentas.
+2. Detalle, edición/eliminación, relevamientos, tareas y visitas según alcance del equipo.
+3. Offline con persistencia de Firestore al final.
 
 ## Decisiones vigentes
 - UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.
