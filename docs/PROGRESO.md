@@ -9,7 +9,7 @@
 - Última verificación registrada antes de esta feature: 121 tests y `assembleDebug` OK.
 - Kotlin 2.4.21, AGP 9.4.1, Gradle 9.6.0, JDK 21. Core compila para iOS; no hay UI ni prueba de app iOS.
 
-## En curso: crear y listar obras
+## Crear y listar obras
 - Dominio, puerto Firestore, repositorio, feature Android y navegación inicial están implementados en la rama `feat/obras-create-list`.
 - La consulta filtra por `userId`; la creación conserva `obras/{id}`, los campos nativos y fechas Firestore Timestamp.
 - Pasan los tests de domain, data, firebase y obras, y `:androidApp:assembleDebug`.
