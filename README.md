@@ -2,12 +2,12 @@
 
 ## Avances
 
-- [x] Login, registro y sesión con Firebase.
-- [x] Mis obras: listar, crear, ver, editar, cambiar estado y eliminar.
+- [x] Login, registro y gestión de obras en Android con Firebase.
+- [x] Pantallas de acceso y Mis obras compartidas con iOS; navegación login/registro probada en simulador.
+- [ ] Probar autenticación y lectura reales de Firebase en iOS (falta registrar la app y agregar su configuración).
 - [x] Capas separadas para dominio, datos, Firebase y presentación.
 - [x] Pruebas unitarias para reglas, repositorios y ViewModels.
 - [x] Flujo ejecutado en Android físico y emulador.
-- [ ] Interfaz compartida y navegación login/registro/obras en iOS: código agregado; falta validarlo en simulador.
 
 ## Estructura
 
@@ -17,4 +17,4 @@
 - `composeApp`: interfaz común y composición de dependencias.
 - `androidApp` / `iosApp`: entradas nativas de cada plataforma.
 
-`guia.md` contiene el checklist detallado de migración; la configuración Firebase de cada plataforma se mantiene fuera de Git.
+La configuración Firebase de cada plataforma se mantiene fuera de Git.

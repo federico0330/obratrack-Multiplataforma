@@ -7,7 +7,7 @@
 - Login/registro con ViewModels, pantallas Compose, errores tipados y dependencias desde `AppContainer`.
 - Textos de auth/home en es/en/it; el italiano requiere revisión.
 - Última verificación registrada antes de esta feature: 121 tests y `assembleDebug` OK.
-- Kotlin 2.4.21, AGP 9.4.1, Gradle 9.6.0, JDK 21. Core compila para iOS; no hay UI ni prueba de app iOS.
+- Kotlin 2.4.21, AGP 9.4.1, Gradle 9.6.0, JDK 21.
 
 ## Crear y listar obras
 - Dominio, puerto Firestore, repositorio, feature Android y navegación inicial están implementados en la rama `feat/obras-create-list`.
@@ -33,21 +33,21 @@
 
 ## Próximo
 1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
-2. Validar en un simulador iOS el login, registro y listado de obras compartidos; conectar la configuración iOS real de Firebase.
+2. Registrar la app iOS en Firebase y probar login y lectura de obras reales en el simulador.
 3. Después seguir con relevamientos y tareas; dejar offline para el final.
 
 ## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
 - Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
 - `composeApp` contiene el punto de composición de dependencias y navegación común; Android e iOS llaman a la misma interfaz.
-- Se agregó el host SwiftUI de iOS y una prueba de interfaz que recorre login → registro → login en un simulador.
+- Se agregó el host SwiftUI de iOS y una prueba de interfaz que recorre login → registro → login sin inicializar Firebase ni escribir datos.
 - Pasan `assembleDebug` y las pruebas de `core:domain`, `core:data`, `core:firebase`, `features:auth` y `features:obras` desde una ruta de trabajo sin espacios.
 - El APK abre en el emulador Android, recupera la sesión y muestra las obras de Firebase sin hacer escrituras.
-- La compilación del simulador y el test de interfaz quedan pendientes de la ejecución en macOS; esta máquina Windows no tiene Xcode.
-- El flujo iOS real de Firebase requiere registrar `com.unaj.appmoviles.obratrack.ios` en el proyecto Firebase compartido y colocar allí su `GoogleService-Info.plist` (ignorado por Git). El plist de ejemplo solo sirve para pruebas de navegación, no realiza autenticación ni escrituras.
+- El build y la prueba de navegación pasan en iOS Simulator mediante GitHub Actions con runner macOS; no hace falta un dispositivo físico.
+- El flujo real de Firebase en iOS requiere registrar `com.unaj.appmoviles.obratrack.ios` en el proyecto compartido y agregar su `GoogleService-Info.plist` (ignorado por Git). El plist de ejemplo sirve solo para la prueba visual; no autentica ni escribe datos.
 - El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.
 
 ## Decisiones vigentes
-- UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.
+- Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
 - Compose stateless + UDF; ViewModels no contienen strings ni Context; constructor injection desde `AppContainer`.
 - Mantener `obras` raíz con `userId`, `nombre`, `cliente`, `publica`, `direccion`, `fechaInicio` Timestamp y `estado` minúsculo.
