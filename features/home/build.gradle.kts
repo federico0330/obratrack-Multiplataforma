@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "com.unaj.obratrack.features.home"
-    compileSdk = 36
+    compileSdk = 37
     defaultConfig { minSdk = 26 }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21

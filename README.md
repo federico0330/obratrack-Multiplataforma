@@ -2,17 +2,19 @@
 
 ## Avances
 
-- [x] Login y registro con Firebase; probado en Android.
-- [x] Mis obras: listar, crear, ver detalle, editar, cambiar estado y eliminar con sus registros relacionados.
-- [x] Dominio, datos y Firebase separados; pantallas Compose con ViewModels y dependencias desde `AppContainer`.
-- [x] Tests unitarios de dominio, repositorios y ViewModels.
-- [x] App compilada y ejecutada en un teléfono Android; detalle, edición y confirmación de baja revisados en emulador.
+- [x] Login, registro y gestión de obras en Android con Firebase.
+- [x] Pantallas de acceso y Mis obras compartidas con iOS; navegación login/registro probada en simulador.
+- [ ] Probar autenticación y lectura reales de Firebase en iOS (falta registrar la app y agregar su configuración).
+- [x] Capas separadas para dominio, datos, Firebase y presentación.
+- [x] Pruebas unitarias para reglas, repositorios y ViewModels.
+- [x] Flujo ejecutado en Android físico y emulador.
 
 ## Estructura
 
 - `core/domain`: modelos, reglas, casos de uso y contratos.
 - `core/data` y `core/firebase`: repositorios, mapeos y acceso a Firebase.
-- `features`: presentación Android.
-- `androidApp`: inicio, navegación y composición de dependencias.
+- `features`: pantallas y estado de autenticación y obras.
+- `composeApp`: interfaz común y composición de dependencias.
+- `androidApp` / `iosApp`: entradas nativas de cada plataforma.
 
-La configuración local de Firebase no se versiona. `guia.md` contiene el plan de migración en la copia local del repo.
+La configuración Firebase de cada plataforma se mantiene fuera de Git.

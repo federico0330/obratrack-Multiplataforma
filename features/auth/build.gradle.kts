@@ -1,36 +1,41 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    id("com.android.library")
-    id("org.jetbrains.kotlin.android")
+    kotlin("multiplatform")
+    id("com.android.kotlin.multiplatform.library")
+    id("org.jetbrains.compose")
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
-android {
-    namespace = "com.unaj.obratrack.features.auth"
-    compileSdk = 36
-    defaultConfig { minSdk = 26 }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    buildFeatures { compose = true }
-}
-
 kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+    android {
+        namespace = "com.unaj.obratrack.features.auth"
+        compileSdk = 37
+        minSdk = 26
+        withHostTest {}
+        androidResources { enable = true }
+    }
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain.dependencies {
+            implementation(project(":core:domain"))
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
+            implementation(compose.components.resources)
+            implementation(compose.ui)
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.10.0")
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+        }
+        commonTest.dependencies {
+            implementation(kotlin("test"))
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+        }
     }
 }
 
-dependencies {
-    implementation(project(":core:domain"))
-    implementation(platform("androidx.compose:compose-bom:2025.08.01"))
-    implementation("androidx.compose.material3:material3")
-    implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.compose.ui:ui")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
-    testImplementation(kotlin("test"))
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+compose.resources {
+    generateResClass = always
+    packageOfResClass = "com.unaj.obratrack.features.auth.generated.resources"
 }

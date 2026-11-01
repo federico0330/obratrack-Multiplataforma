@@ -1,0 +1,41 @@
+package com.unaj.obratrack.features.auth
+
+import androidx.compose.runtime.Composable
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
+import com.unaj.obratrack.features.auth.generated.resources.Res
+import com.unaj.obratrack.features.auth.generated.resources.*
+import com.unaj.obratrack.domain.repository.ErrorRegistro
+
+/** Error del formulario de registro; el texto sale de recursos, no del ViewModel. */
+enum class RegistroError {
+    InvalidEmail,
+    WeakPassword,
+    PasswordsDoNotMatch,
+    EmailInUse,
+    NoConnection,
+    TooManyAttempts,
+    Unexpected,
+}
+
+fun ErrorRegistro.toRegistroError(): RegistroError = when (this) {
+    ErrorRegistro.EmailInvalido -> RegistroError.InvalidEmail
+    ErrorRegistro.ContrasenaDebil -> RegistroError.WeakPassword
+    ErrorRegistro.EmailYaEnUso -> RegistroError.EmailInUse
+    ErrorRegistro.SinConexion -> RegistroError.NoConnection
+    ErrorRegistro.DemasiadosIntentos -> RegistroError.TooManyAttempts
+    ErrorRegistro.Inesperado -> RegistroError.Unexpected
+}
+
+fun RegistroError.messageRes(): StringResource = when (this) {
+    RegistroError.InvalidEmail -> Res.string.auth_register_error_invalid_email
+    RegistroError.WeakPassword -> Res.string.auth_register_error_weak_password
+    RegistroError.PasswordsDoNotMatch -> Res.string.auth_register_error_passwords_mismatch
+    RegistroError.EmailInUse -> Res.string.auth_register_error_email_in_use
+    RegistroError.NoConnection -> Res.string.auth_error_no_connection
+    RegistroError.TooManyAttempts -> Res.string.auth_error_too_many_attempts
+    RegistroError.Unexpected -> Res.string.auth_register_error_unexpected
+}
+
+@Composable
+fun RegistroError.message(): String = stringResource(messageRes())

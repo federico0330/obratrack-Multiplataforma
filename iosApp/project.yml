@@ -1,0 +1,46 @@
+name: ObraTrackIOS
+options:
+  bundleIdPrefix: com.unaj.appmoviles
+  deploymentTarget:
+    iOS: "16.0"
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "16.0"
+targets:
+  ObraTrackIOS:
+    type: application
+    platform: iOS
+    sources:
+      - path: Sources
+    resources:
+      - path: GoogleService-Info.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.unaj.appmoviles.obratrack.ios
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: ObraTrack
+        INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+  ObraTrackIOSTests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: ObraTrackIOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.unaj.appmoviles.obratrack.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: ObraTrackIOS
+schemes:
+  ObraTrackIOS:
+    build:
+      targets:
+        ObraTrackIOS: all
+        ObraTrackIOSTests: [test]
+    test:
+      targets:
+        - ObraTrackIOSTests
+      deleteScreenshotsWhenEachTestSucceeds: false
