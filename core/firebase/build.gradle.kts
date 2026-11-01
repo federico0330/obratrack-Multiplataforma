@@ -15,6 +15,7 @@ kotlin {
     iosArm64()
     iosSimulatorArm64()
     cocoapods {
+        version = "1.0.0"
         summary = "Acceso multiplataforma a Firebase para ObraTrack"
         homepage = "https://github.com/federico0330/obratrack-Multiplataforma"
         ios.deploymentTarget = "16.0"

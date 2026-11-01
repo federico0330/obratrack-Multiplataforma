@@ -19,6 +19,7 @@ kotlin {
     iosSimulatorArm64()
 
     cocoapods {
+        version = "1.0.0"
         summary = "Interfaz compartida de ObraTrack"
         homepage = "https://github.com/federico0330/obratrack-Multiplataforma"
         ios.deploymentTarget = "16.0"
