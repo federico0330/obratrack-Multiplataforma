@@ -23,6 +23,8 @@ jobs:
         run: cp iosApp/GoogleService-Info.plist.example iosApp/GoogleService-Info.plist
       - name: Generar el Podspec de Kotlin
         run: ./gradlew :composeApp:podspec
+      - name: Preparar framework para CocoaPods
+        run: ./gradlew :composeApp:generateDummyFramework
       - name: Generar proyecto Xcode y resolver Pods
         run: |
           cd iosApp
