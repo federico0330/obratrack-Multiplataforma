@@ -19,6 +19,7 @@ kotlin {
         }
         commonMain.dependencies {
             implementation("dev.gitlive:firebase-auth:2.7.0")
+            implementation("dev.gitlive:firebase-firestore:2.7.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         }
     }

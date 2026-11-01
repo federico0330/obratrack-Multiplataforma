@@ -22,6 +22,7 @@ kotlin {
             implementation(project(":core:domain"))
             implementation(project(":core:firebase"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
         }
     }
 }
