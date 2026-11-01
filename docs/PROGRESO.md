@@ -16,10 +16,20 @@
 - En teléfono: sesión existente, lectura, validación, creación y persistencia tras reiniciar probadas con Firebase.
 - Quedó el registro `PRUEBA_QA_NO_USAR_20261101` para borrar desde Firebase Console.
 
+## Detalle, edición y estado de obras
+- Se agregó el detalle de una obra propia, la edición de sus campos básicos y el cambio entre activa, pausada y finalizada.
+- Las escrituras son parciales: conservan `userId` y campos que el formulario no edita; la fecha continúa guardándose como Timestamp y los estados en minúscula.
+- Al cambiar la sesión, se cancela la consulta anterior y se limpia el detalle/formulario antes de cargar la lista del nuevo UID.
+- Tests de domain, data, Firebase y `features:obras` pasan; `:androidApp:assembleDebug` pasa.
+- En emulador se revisaron el listado, detalle y formulario con los valores existentes. No se guardaron cambios ni se alteraron datos compartidos durante esa revisión.
+- El aislamiento está cubierto en pruebas del ViewModel y repositorio; falta comprobarlo manualmente con dos cuentas reales y contra las reglas publicadas.
+- La eliminación sigue pendiente: el nativo borra tareas, relevamientos y suscriptores antes de la obra, por lo que hay que migrar ese comportamiento con cuidado.
+
 ## Próximo
-1. Probar aislamiento entre dos cuentas.
-2. Detalle, edición/eliminación, relevamientos, tareas y visitas según alcance del equipo.
-3. Offline con persistencia de Firestore al final.
+1. Implementar baja de obra con el borrado relacionado que ya hace el nativo; agregar confirmación y pruebas de fallos parciales.
+2. Verificar manualmente el aislamiento con dos cuentas.
+3. Compartir login y obras en la primera app iOS; después seguir con relevamientos y tareas.
+4. Offline con persistencia de Firestore al final.
 
 ## Decisiones vigentes
 - UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.

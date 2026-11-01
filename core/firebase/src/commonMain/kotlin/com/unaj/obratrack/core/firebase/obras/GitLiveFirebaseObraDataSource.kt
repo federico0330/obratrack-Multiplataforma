@@ -43,6 +43,42 @@ class GitLiveFirebaseObraDataSource(
         FirebaseObraResult.Failure(error.toFailure())
     }
 
+    override suspend fun actualizar(
+        userId: String,
+        obraId: String,
+        fields: ObraUpdateFields,
+    ): FirebaseObraResult<Unit> = writeResult {
+        ownedDocument(userId, obraId).updateFields {
+            FIELD_NOMBRE to fields.nombre
+            FIELD_CLIENTE to fields.cliente
+            FIELD_DIRECCION to fields.direccion
+            FIELD_PUBLICA to fields.publica
+            FIELD_FECHA_INICIO to Timestamp.fromMilliseconds(fields.fechaInicioMillis.toDouble())
+        }
+    }
+
+    override suspend fun cambiarEstado(
+        userId: String,
+        obraId: String,
+        estado: String,
+    ): FirebaseObraResult<Unit> = writeResult {
+        ownedDocument(userId, obraId).updateFields { FIELD_ESTADO to estado }
+    }
+
+    private fun ownedDocument(userId: String, obraId: String) =
+        firestore.collection(COLLECTION).document(obraId).also {
+            require(userId.isNotBlank() && obraId.isNotBlank())
+        }
+
+    private suspend inline fun writeResult(crossinline write: suspend () -> Unit): FirebaseObraResult<Unit> = try {
+        write()
+        FirebaseObraResult.Success(Unit)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        FirebaseObraResult.Failure(error.toFailure())
+    }
+
     private fun dev.gitlive.firebase.firestore.DocumentSnapshot.toDto(): ObraDto {
         val point = if (contains(FIELD_UBICACION)) get<GeoPoint>(FIELD_UBICACION) else null
         return ObraDto(

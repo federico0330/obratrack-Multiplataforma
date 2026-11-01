@@ -30,4 +30,14 @@ sealed interface FirebaseObraResult<out T> {
 interface FirebaseObraDataSource {
     fun observarPropias(userId: String): kotlinx.coroutines.flow.Flow<FirebaseObraResult<List<ObraDto>>>
     suspend fun crear(dto: ObraDto): FirebaseObraResult<ObraDto>
+    suspend fun actualizar(userId: String, obraId: String, fields: ObraUpdateFields): FirebaseObraResult<Unit>
+    suspend fun cambiarEstado(userId: String, obraId: String, estado: String): FirebaseObraResult<Unit>
 }
+
+data class ObraUpdateFields(
+    val nombre: String,
+    val cliente: String,
+    val direccion: String,
+    val publica: Boolean,
+    val fechaInicioMillis: Long,
+)

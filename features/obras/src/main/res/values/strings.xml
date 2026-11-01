@@ -24,4 +24,16 @@
     <string name="obras_error_date">Usá una fecha válida con formato AAAA-MM-DD.</string>
     <string name="obras_error_network">No se pudo conectar. Revisá tu conexión e intentá de nuevo.</string>
     <string name="obras_error_generic">No se pudo completar la operación. Intentá de nuevo.</string>
+    <string name="obras_detail_title">Detalle de la obra</string>
+    <string name="obras_edit_title">Editar obra</string>
+    <string name="obras_edit">Editar</string>
+    <string name="obras_back">Volver</string>
+    <string name="obras_visibility_value">Visibilidad: %1$s</string>
+    <string name="obras_status_value">Estado: %1$s</string>
+    <string name="obras_state_active">Activa</string>
+    <string name="obras_state_paused">Pausada</string>
+    <string name="obras_state_finished">Finalizada</string>
+    <string name="obras_pause">Pausar obra</string>
+    <string name="obras_reactivate">Reactivar obra</string>
+    <string name="obras_finish">Finalizar obra</string>
 </resources>

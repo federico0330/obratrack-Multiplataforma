@@ -2,20 +2,17 @@
 
 ## Avances
 
-- [x] Repo y Gradle configurados; sincronización y compilación completadas en Android Studio.
-- [x] App ejecutada en un teléfono Android físico.
-- [x] Login probado con una cuenta existente de Firebase; al ingresar abre **Mis obras**.
-- [x] Módulos de dominio, datos, Firebase y features separados.
-- [x] Estado de acceso en un ViewModel; pantallas Compose separadas y dependencias conectadas desde `AppContainer`.
-- [x] Tests unitarios comunes escritos para reglas y casos de uso (falta ejecutarlos).
-
-La pantalla **Mis obras** todavía no lee Firestore, por eso aparece vacía.
+- [x] Login y registro con Firebase; probado en Android.
+- [x] Mis obras: listar, crear, ver detalle, editar y cambiar estado.
+- [x] Dominio, datos y Firebase separados; pantallas Compose con ViewModels y dependencias desde `AppContainer`.
+- [x] Tests unitarios de dominio, repositorios y ViewModels.
+- [x] App compilada y ejecutada en un teléfono Android; detalle y edición revisados en emulador.
 
 ## Estructura
 
 - `core/domain`: modelos, reglas, casos de uso y contratos.
-- `core/data` y `core/firebase`: repositorios y acceso a Firebase.
-- `features/auth` y `features/home`: estado y pantallas.
-- `androidApp`: inicio y conexión de dependencias Android.
+- `core/data` y `core/firebase`: repositorios, mapeos y acceso a Firebase.
+- `features`: presentación Android.
+- `androidApp`: inicio, navegación y composición de dependencias.
 
-La configuración local de Firebase no se versiona. `guia.md` contiene el checklist de arquitectura y la continuidad del proyecto en la copia local del repo.
+La configuración local de Firebase no se versiona. `guia.md` contiene el plan de migración en la copia local del repo.

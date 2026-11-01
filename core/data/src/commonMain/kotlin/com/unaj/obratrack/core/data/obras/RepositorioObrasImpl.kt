@@ -46,6 +46,37 @@ class RepositorioObrasImpl(
         ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
     }
 
+    override suspend fun actualizar(
+        userId: String,
+        obraId: String,
+        draft: ObraDraft,
+    ): ResultadoObra<Unit> = try {
+        remote.actualizar(userId, obraId, draft.toUpdateFields())
+            .toDomainResult()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
+    }
+
+    override suspend fun cambiarEstado(
+        userId: String,
+        obraId: String,
+        estado: EstadoObra,
+    ): ResultadoObra<Unit> = try {
+        remote.cambiarEstado(userId, obraId, estado.toFirestoreValue())
+            .toDomainResult()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
+    }
+
+    private fun FirebaseObraResult<Unit>.toDomainResult(): ResultadoObra<Unit> = when (this) {
+        is FirebaseObraResult.Success -> ResultadoObra.Exito(Unit)
+        is FirebaseObraResult.Failure -> ResultadoObra.Fallo(error.toDomain())
+    }
+
     private fun FirebaseObraFailure.toDomain(): ErrorObra = when (this) {
         FirebaseObraFailure.PermissionDenied -> ErrorObra.NO_AUTORIZADA
         FirebaseObraFailure.Network -> ErrorObra.RED

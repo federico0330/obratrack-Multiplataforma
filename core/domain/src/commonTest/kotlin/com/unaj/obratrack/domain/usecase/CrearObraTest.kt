@@ -75,4 +75,10 @@ private class RepositorioObrasFalso : RepositorioObras {
                 .also { created = it },
         )
     }
+
+    override suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft) =
+        ResultadoObra.Exito(Unit)
+
+    override suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra) =
+        ResultadoObra.Exito(Unit)
 }

@@ -43,4 +43,10 @@ private class RepositorioObrasFalsoLista : RepositorioObras {
 
     override suspend fun crear(userId: String, draft: ObraDraft, estado: EstadoObra) =
         ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
+
+    override suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft) =
+        ResultadoObra.Exito(Unit)
+
+    override suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra) =
+        ResultadoObra.Exito(Unit)
 }

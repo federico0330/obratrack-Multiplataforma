@@ -3,9 +3,13 @@ package com.unaj.obratrack.features.obras
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.unaj.obratrack.domain.model.ObraDraft
+import com.unaj.obratrack.domain.model.Obra
+import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.repository.ErrorObra
 import com.unaj.obratrack.domain.repository.ResultadoObra
 import com.unaj.obratrack.domain.usecase.CrearObra
+import com.unaj.obratrack.domain.usecase.ActualizarObra
+import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.CancellationException
@@ -18,12 +22,15 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 class ObrasViewModel(
     private val observarSesion: ObservarSesion,
     private val observarObras: ObservarObras,
     private val crearObra: CrearObra,
+    private val actualizarObra: ActualizarObra,
+    private val cambiarEstadoObra: CambiarEstadoObra,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ObrasUiState())
     val state = _state.asStateFlow()
@@ -37,14 +44,28 @@ class ObrasViewModel(
                     if (error is CancellationException) throw error
                     userId = null
                     listaJob?.cancel()
-                    _state.update { it.copy(lista = ListaObrasUiState.Error(ErrorObrasUi.SESION)) }
+                    _state.update {
+                        it.copy(
+                            lista = ListaObrasUiState.Error(ErrorObrasUi.SESION),
+                            obraSeleccionada = null,
+                            formularioVisible = false,
+                            formulario = FormularioObraUiState(),
+                        )
+                    }
                 }
                 .collect { result ->
                     when (result) {
                         null -> {
                             userId = null
                             listaJob?.cancel()
-                            _state.update { it.copy(lista = ListaObrasUiState.Error(ErrorObrasUi.SESION)) }
+                            _state.update {
+                                it.copy(
+                                    lista = ListaObrasUiState.Error(ErrorObrasUi.SESION),
+                                    obraSeleccionada = null,
+                                    formularioVisible = false,
+                                    formulario = FormularioObraUiState(),
+                                )
+                            }
                         }
                         else -> observeWorks(result.id)
                     }
@@ -56,7 +77,15 @@ class ObrasViewModel(
         if (userId == id && listaJob?.isActive == true) return
         userId = id
         listaJob?.cancel()
-        _state.update { it.copy(lista = ListaObrasUiState.Cargando) }
+        _state.update {
+            it.copy(
+                lista = ListaObrasUiState.Cargando,
+                obraSeleccionada = null,
+                formularioVisible = false,
+                formulario = FormularioObraUiState(),
+                errorOperacion = null,
+            )
+        }
         listaJob = viewModelScope.launch {
             observarObras(id)
                 .catch { error ->
@@ -65,11 +94,16 @@ class ObrasViewModel(
                 }
                 .collect { result ->
                     _state.update {
-                        it.copy(lista = when (result) {
+                        val listState = when (result) {
                             is ResultadoObra.Exito -> result.dato.takeIf { it.isNotEmpty() }
                                 ?.let(ListaObrasUiState::Contenido) ?: ListaObrasUiState.Vacia
                             is ResultadoObra.Fallo -> ListaObrasUiState.Error(result.error.toUiError())
-                        })
+                        }
+                        val selected = when (listState) {
+                            is ListaObrasUiState.Contenido -> listState.obras.firstOrNull { obra -> obra.id == it.obraSeleccionada?.id }
+                            else -> null
+                        }
+                        it.copy(lista = listState, obraSeleccionada = selected)
                     }
                 }
         }
@@ -82,6 +116,28 @@ class ObrasViewModel(
     fun abrirFormulario() {
         val hoyLocal = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
         _state.update { it.copy(formularioVisible = true, formulario = FormularioObraUiState(fechaInicio = hoyLocal)) }
+    }
+
+    fun abrirDetalle(obra: Obra) = _state.update { it.copy(obraSeleccionada = obra, errorOperacion = null) }
+
+    fun cerrarDetalle() = _state.update { it.copy(obraSeleccionada = null, errorOperacion = null) }
+
+    fun editarSeleccionada() {
+        val obra = _state.value.obraSeleccionada ?: return
+        val fecha = obra.fechaInicio.toLocalDateTime(TimeZone.UTC).date.toString()
+        _state.update {
+            it.copy(
+                formularioVisible = true,
+                formulario = FormularioObraUiState(
+                    obraId = obra.id,
+                    nombre = obra.nombre,
+                    cliente = obra.cliente,
+                    direccion = obra.direccion,
+                    fechaInicio = fecha,
+                    publica = obra.publica,
+                ),
+            )
+        }
     }
 
     fun cerrarFormulario() = _state.update { it.copy(formularioVisible = false) }
@@ -107,9 +163,15 @@ class ObrasViewModel(
         updateForm { copy(guardando = true, error = null) }
         viewModelScope.launch {
             try {
-                when (val result = crearObra(owner, draft)) {
+                val obraId = form.obraId
+                val result = if (obraId == null) crearObra(owner, draft) else actualizarObra(owner, obraId, draft)
+                when (result) {
                     is ResultadoObra.Exito -> _state.update {
-                        it.copy(formularioVisible = false, formulario = FormularioObraUiState())
+                        it.copy(
+                            formularioVisible = false,
+                            formulario = FormularioObraUiState(),
+                            obraSeleccionada = if (obraId == null) null else it.obraSeleccionada,
+                        )
                     }
                     is ResultadoObra.Fallo -> updateForm { copy(guardando = false, error = result.error.toUiError()) }
                 }
@@ -117,6 +179,27 @@ class ObrasViewModel(
                 throw cancelled
             } catch (_: Exception) {
                 updateForm { copy(guardando = false, error = ErrorObrasUi.DESCONOCIDO) }
+            }
+        }
+    }
+
+    fun cambiarEstado(estado: EstadoObra) {
+        val owner = userId ?: return _state.update { it.copy(errorOperacion = ErrorObrasUi.SESION) }
+        val obra = _state.value.obraSeleccionada ?: return
+        if (_state.value.actualizando) return
+        _state.update { it.copy(actualizando = true, errorOperacion = null) }
+        viewModelScope.launch {
+            try {
+                when (val result = cambiarEstadoObra(owner, obra.id, estado)) {
+                    is ResultadoObra.Exito -> Unit // La suscripción en tiempo real actualiza el detalle.
+                    is ResultadoObra.Fallo -> _state.update { it.copy(errorOperacion = result.error.toUiError()) }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.update { it.copy(errorOperacion = ErrorObrasUi.DESCONOCIDO) }
+            } finally {
+                _state.update { it.copy(actualizando = false) }
             }
         }
     }

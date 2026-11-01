@@ -4,6 +4,7 @@ import com.unaj.obratrack.core.firebase.obras.FirebaseObraDataSource
 import com.unaj.obratrack.core.firebase.obras.FirebaseObraFailure
 import com.unaj.obratrack.core.firebase.obras.FirebaseObraResult
 import com.unaj.obratrack.core.firebase.obras.ObraDto
+import com.unaj.obratrack.core.firebase.obras.ObraUpdateFields
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.ObraDraft
 import com.unaj.obratrack.domain.repository.ErrorObra
@@ -64,6 +65,42 @@ class RepositorioObrasImplTest {
         assertEquals(ResultadoObra.Fallo(ErrorObra.RED), repo.observarPropias("uid").first())
     }
 
+    @Test
+    fun actualizarMapeaCamposSinIncluirUidNiEstado() = runTest {
+        val source = ObrasRemoteFalso()
+        val fecha = Instant.parse("2026-11-01T00:00:00Z")
+
+        val result = RepositorioObrasImpl(source).actualizar(
+            "uid-2", "obra-8", com.unaj.obratrack.domain.model.ObraDraft("Casa", "Cliente", "Calle", true, fecha),
+        )
+
+        assertEquals(ResultadoObra.Exito(Unit), result)
+        assertEquals("uid-2", source.updatedUserId)
+        assertEquals("obra-8", source.updatedObraId)
+        assertEquals(
+            ObraUpdateFields("Casa", "Cliente", "Calle", true, fecha.toEpochMilliseconds()),
+            source.updatedFields,
+        )
+    }
+
+    @Test
+    fun estadoSeCodificaEnMinusculaYPermisosSeTipan() = runTest {
+        val source = ObrasRemoteFalso()
+        val repo = RepositorioObrasImpl(source)
+
+        assertEquals(ResultadoObra.Exito(Unit), repo.cambiarEstado("uid-1", "obra-1", EstadoObra.FINALIZADA))
+        assertEquals("finalizada", source.updatedState)
+
+        source.updateResult = FirebaseObraResult.Failure(FirebaseObraFailure.PermissionDenied)
+        assertEquals(
+            ResultadoObra.Fallo(ErrorObra.NO_AUTORIZADA),
+            repo.actualizar(
+                "uid-1", "obra-1",
+                com.unaj.obratrack.domain.model.ObraDraft("N", "C", "D", false, Instant.fromEpochMilliseconds(0)),
+            ),
+        )
+    }
+
     private fun dto(id: String = "obra-1") = ObraDto(
         id = id, userId = "uid-1", nombre = "Escuela", cliente = "Municipio", direccion = "Calle 1",
         publica = false, estado = "activa", fechaInicioMillis = Instant.parse("2026-11-01T00:00:00Z").toEpochMilliseconds(),
@@ -75,6 +112,11 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
     var createdDto: ObraDto? = null
     var listResult: FirebaseObraResult<List<ObraDto>> = FirebaseObraResult.Success(emptyList())
     var createResult: FirebaseObraResult<ObraDto> = FirebaseObraResult.Failure(FirebaseObraFailure.Unexpected)
+    var updatedUserId: String? = null
+    var updatedObraId: String? = null
+    var updatedFields: ObraUpdateFields? = null
+    var updatedState: String? = null
+    var updateResult: FirebaseObraResult<Unit> = FirebaseObraResult.Success(Unit)
 
     override fun observarPropias(userId: String): Flow<FirebaseObraResult<List<ObraDto>>> {
         queriedUserId = userId
@@ -84,5 +126,19 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
     override suspend fun crear(dto: ObraDto): FirebaseObraResult<ObraDto> {
         createdDto = dto
         return createResult
+    }
+
+    override suspend fun actualizar(userId: String, obraId: String, fields: ObraUpdateFields): FirebaseObraResult<Unit> {
+        updatedUserId = userId
+        updatedObraId = obraId
+        updatedFields = fields
+        return updateResult
+    }
+
+    override suspend fun cambiarEstado(userId: String, obraId: String, estado: String): FirebaseObraResult<Unit> {
+        updatedUserId = userId
+        updatedObraId = obraId
+        updatedState = estado
+        return updateResult
     }
 }

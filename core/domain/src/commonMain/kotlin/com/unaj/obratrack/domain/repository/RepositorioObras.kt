@@ -23,4 +23,6 @@ sealed interface ResultadoObra<out T> {
 interface RepositorioObras {
     fun observarPropias(userId: String): Flow<ResultadoObra<List<Obra>>>
     suspend fun crear(userId: String, draft: ObraDraft, estado: EstadoObra): ResultadoObra<Obra>
+    suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft): ResultadoObra<Unit>
+    suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra): ResultadoObra<Unit>
 }

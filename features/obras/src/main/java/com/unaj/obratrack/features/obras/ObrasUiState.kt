@@ -1,6 +1,7 @@
 package com.unaj.obratrack.features.obras
 
 import com.unaj.obratrack.domain.model.Obra
+import com.unaj.obratrack.domain.model.EstadoObra
 
 sealed interface ListaObrasUiState {
     data object Cargando : ListaObrasUiState
@@ -12,6 +13,7 @@ sealed interface ListaObrasUiState {
 enum class ErrorObrasUi { SESION, NOMBRE, CLIENTE, DIRECCION, FECHA, RED, PERMISOS, DESCONOCIDO }
 
 data class FormularioObraUiState(
+    val obraId: String? = null,
     val nombre: String = "",
     val cliente: String = "",
     val direccion: String = "",
@@ -23,6 +25,9 @@ data class FormularioObraUiState(
 
 data class ObrasUiState(
     val lista: ListaObrasUiState = ListaObrasUiState.Cargando,
+    val obraSeleccionada: Obra? = null,
     val formularioVisible: Boolean = false,
     val formulario: FormularioObraUiState = FormularioObraUiState(),
+    val actualizando: Boolean = false,
+    val errorOperacion: ErrorObrasUi? = null,
 )

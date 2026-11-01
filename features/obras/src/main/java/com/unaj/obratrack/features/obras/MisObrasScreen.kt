@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.Obra
+import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Usuario
 
 @Composable
@@ -34,6 +36,10 @@ fun MisObrasScreen(
     onCreate: () -> Unit,
     onRetry: () -> Unit,
     onSignOut: () -> Unit,
+    onSelectObra: (Obra) -> Unit,
+    onBackToList: () -> Unit,
+    onEditObra: () -> Unit,
+    onChangeStatus: (EstadoObra) -> Unit,
     onCloseForm: () -> Unit,
     onNameChange: (String) -> Unit,
     onClientChange: (String) -> Unit,
@@ -51,7 +57,10 @@ fun MisObrasScreen(
         authErrorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         TextButton(onClick = onSignOut) { Text(stringResource(R.string.obras_sign_out)) }
         if (state.formularioVisible) {
-            Text(stringResource(R.string.obras_create_title), style = MaterialTheme.typography.titleLarge)
+            Text(
+                stringResource(if (state.formulario.obraId == null) R.string.obras_create_title else R.string.obras_edit_title),
+                style = MaterialTheme.typography.titleLarge,
+            )
             OutlinedTextField(state.formulario.nombre, onNameChange, label = { Text(stringResource(R.string.obras_name)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(state.formulario.cliente, onClientChange, label = { Text(stringResource(R.string.obras_client)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
             OutlinedTextField(state.formulario.direccion, onAddressChange, label = { Text(stringResource(R.string.obras_address)) }, modifier = Modifier.fillMaxWidth(), singleLine = true)
@@ -72,6 +81,35 @@ fun MisObrasScreen(
                     Text(stringResource(R.string.obras_cancel))
                 }
             }
+        } else if (state.obraSeleccionada != null) {
+            val obra = state.obraSeleccionada
+            Text(stringResource(R.string.obras_detail_title), style = MaterialTheme.typography.titleLarge)
+            Text(obra.nombre, style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.obras_client_value, obra.cliente))
+            Text(obra.direccion)
+            Text(stringResource(R.string.obras_visibility_value, stringResource(if (obra.publica) R.string.obras_public else R.string.obras_private)))
+            Text(stringResource(R.string.obras_status_value, estadoNombre(obra.estado)))
+            HorizontalDivider()
+            state.errorOperacion?.let { Text(errorMessage(it), color = MaterialTheme.colorScheme.error) }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(onClick = onBackToList) { Text(stringResource(R.string.obras_back)) }
+                Button(onClick = onEditObra) { Text(stringResource(R.string.obras_edit)) }
+            }
+            if (state.actualizando) CircularProgressIndicator()
+            when (obra.estado) {
+                EstadoObra.ACTIVA -> OutlinedButton(onClick = { onChangeStatus(EstadoObra.PAUSADA) }, enabled = !state.actualizando) {
+                    Text(stringResource(R.string.obras_pause))
+                }
+                EstadoObra.PAUSADA -> OutlinedButton(onClick = { onChangeStatus(EstadoObra.ACTIVA) }, enabled = !state.actualizando) {
+                    Text(stringResource(R.string.obras_reactivate))
+                }
+                EstadoObra.FINALIZADA -> Unit
+            }
+            if (obra.estado != EstadoObra.FINALIZADA) {
+                OutlinedButton(onClick = { onChangeStatus(EstadoObra.FINALIZADA) }, enabled = !state.actualizando) {
+                    Text(stringResource(R.string.obras_finish))
+                }
+            }
         } else {
             when (val list = state.lista) {
                 ListaObrasUiState.Cargando -> CircularProgressIndicator()
@@ -79,7 +117,7 @@ fun MisObrasScreen(
                     Text(stringResource(R.string.obras_empty_title), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.obras_empty_hint))
                 }
-                is ListaObrasUiState.Contenido -> list.obras.forEach { ObraRow(it) }
+                is ListaObrasUiState.Contenido -> list.obras.forEach { ObraRow(it, onSelectObra) }
                 is ListaObrasUiState.Error -> {
                     Text(errorMessage(list.motivo), color = MaterialTheme.colorScheme.error)
                     TextButton(onClick = onRetry) { Text(stringResource(R.string.obras_retry)) }
@@ -92,13 +130,25 @@ fun MisObrasScreen(
 }
 
 @Composable
-private fun ObraRow(obra: Obra) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-        Text(obra.nombre, style = MaterialTheme.typography.titleMedium)
-        Text(stringResource(R.string.obras_client_value, obra.cliente))
-        Text(obra.direccion)
+private fun ObraRow(obra: Obra, onClick: (Obra) -> Unit) {
+    TextButton(onClick = { onClick(obra) }, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            Text(obra.nombre, style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.obras_client_value, obra.cliente))
+            Text(obra.direccion)
+            Text(stringResource(R.string.obras_status_value, estadoNombre(obra.estado)))
+        }
     }
 }
+
+@Composable
+private fun estadoNombre(estado: EstadoObra): String = stringResource(
+    when (estado) {
+        EstadoObra.ACTIVA -> R.string.obras_state_active
+        EstadoObra.PAUSADA -> R.string.obras_state_paused
+        EstadoObra.FINALIZADA -> R.string.obras_state_finished
+    },
+)
 
 @Composable
 private fun errorMessage(error: ErrorObrasUi): String = stringResource(

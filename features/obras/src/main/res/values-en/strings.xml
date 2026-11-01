@@ -24,4 +24,16 @@
     <string name="obras_error_date">Enter a valid date in YYYY-MM-DD format.</string>
     <string name="obras_error_network">Could not connect. Check your connection and try again.</string>
     <string name="obras_error_generic">The operation could not be completed. Try again.</string>
+    <string name="obras_detail_title">Work details</string>
+    <string name="obras_edit_title">Edit work</string>
+    <string name="obras_edit">Edit</string>
+    <string name="obras_back">Back</string>
+    <string name="obras_visibility_value">Visibility: %1$s</string>
+    <string name="obras_status_value">Status: %1$s</string>
+    <string name="obras_state_active">Active</string>
+    <string name="obras_state_paused">Paused</string>
+    <string name="obras_state_finished">Finished</string>
+    <string name="obras_pause">Pause work</string>
+    <string name="obras_reactivate">Reactivate work</string>
+    <string name="obras_finish">Finish work</string>
 </resources>
