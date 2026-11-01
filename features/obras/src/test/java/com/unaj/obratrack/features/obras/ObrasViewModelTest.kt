@@ -13,6 +13,7 @@ import com.unaj.obratrack.domain.repository.ResultadoRegistro
 import com.unaj.obratrack.domain.usecase.CrearObra
 import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
+import com.unaj.obratrack.domain.usecase.EliminarObra
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.Dispatchers
@@ -38,7 +39,7 @@ class ObrasViewModelTest {
             val repo = ObrasRepoFalso()
             val session = AuthRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo),
+                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
             )
             advanceUntilIdle()
 
@@ -72,7 +73,7 @@ class ObrasViewModelTest {
             repo.obrasPorUsuario["uid-2"] = listOf(obraB)
             val session = AuthRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo),
+                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
             )
             advanceUntilIdle()
 
@@ -94,7 +95,7 @@ class ObrasViewModelTest {
         try {
             val repo = ObrasRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo),
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra("obra-1", "uid-1", "Nombre anterior"))
@@ -118,7 +119,7 @@ class ObrasViewModelTest {
         try {
             val repo = ObrasRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo),
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra("obra-1", "uid-1", "Casa"))
@@ -129,6 +130,34 @@ class ObrasViewModelTest {
             assertEquals("obra-1", repo.updatedObraId)
             assertEquals(EstadoObra.PAUSADA, repo.updatedState)
             assertFalse(viewModel.state.value.actualizando)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun soloEliminaAlConfirmarYUsaLaSesionActual() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val repo = ObrasRepoFalso()
+            val viewModel = ObrasViewModel(
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+            )
+            advanceUntilIdle()
+            viewModel.abrirDetalle(obra("obra-1", "uid-1", "Casa"))
+            viewModel.solicitarEliminacion()
+            viewModel.cancelarEliminacion()
+            advanceUntilIdle()
+            assertNull(repo.deletedObraId)
+
+            viewModel.solicitarEliminacion()
+            viewModel.confirmarEliminacion()
+            advanceUntilIdle()
+
+            assertEquals("uid-1", repo.deletedUserId)
+            assertEquals("obra-1", repo.deletedObraId)
+            assertNull(viewModel.state.value.obraSeleccionada)
+            assertFalse(viewModel.state.value.eliminando)
         } finally {
             Dispatchers.resetMain()
         }
@@ -163,6 +192,8 @@ private class ObrasRepoFalso : RepositorioObras {
     var updatedObraId: String? = null
     var updatedDraft: ObraDraft? = null
     var updatedState: EstadoObra? = null
+    var deletedUserId: String? = null
+    var deletedObraId: String? = null
     override fun observarPropias(userId: String): Flow<ResultadoObra<List<Obra>>> {
         usuariosConsultados += userId
         return flowOf(ResultadoObra.Exito(obrasPorUsuario[userId].orEmpty()))
@@ -185,6 +216,12 @@ private class ObrasRepoFalso : RepositorioObras {
         updatedUserId = userId
         updatedObraId = obraId
         updatedState = estado
+        return ResultadoObra.Exito(Unit)
+    }
+
+    override suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit> {
+        deletedUserId = userId
+        deletedObraId = obraId
         return ResultadoObra.Exito(Unit)
     }
 }

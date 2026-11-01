@@ -15,6 +15,7 @@ import com.unaj.obratrack.domain.usecase.CrearObra
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
+import com.unaj.obratrack.domain.usecase.EliminarObra
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.obras.ObrasViewModel
@@ -38,12 +39,15 @@ class AppContainer {
     private val crearObra = CrearObra(obrasRepository)
     private val actualizarObra = ActualizarObra(obrasRepository)
     private val cambiarEstadoObra = CambiarEstadoObra(obrasRepository)
+    private val eliminarObra = EliminarObra(obrasRepository)
 
     val obrasViewModelFactory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             require(modelClass.isAssignableFrom(ObrasViewModel::class.java))
-            return ObrasViewModel(observarSesion, observarObras, crearObra, actualizarObra, cambiarEstadoObra) as T
+            return ObrasViewModel(
+                observarSesion, observarObras, crearObra, actualizarObra, cambiarEstadoObra, eliminarObra,
+            ) as T
         }
     }
 

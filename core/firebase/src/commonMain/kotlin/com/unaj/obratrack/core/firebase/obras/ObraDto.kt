@@ -19,6 +19,7 @@ data class ObraDto(
 sealed interface FirebaseObraFailure {
     data object PermissionDenied : FirebaseObraFailure
     data object Network : FirebaseObraFailure
+    data object Partial : FirebaseObraFailure
     data object Unexpected : FirebaseObraFailure
 }
 
@@ -32,6 +33,7 @@ interface FirebaseObraDataSource {
     suspend fun crear(dto: ObraDto): FirebaseObraResult<ObraDto>
     suspend fun actualizar(userId: String, obraId: String, fields: ObraUpdateFields): FirebaseObraResult<Unit>
     suspend fun cambiarEstado(userId: String, obraId: String, estado: String): FirebaseObraResult<Unit>
+    suspend fun eliminar(userId: String, obraId: String): FirebaseObraResult<Unit>
 }
 
 data class ObraUpdateFields(

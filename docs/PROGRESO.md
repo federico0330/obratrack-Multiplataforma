@@ -23,13 +23,18 @@
 - Tests de domain, data, Firebase y `features:obras` pasan; `:androidApp:assembleDebug` pasa.
 - En emulador se revisaron el listado, detalle y formulario con los valores existentes. No se guardaron cambios ni se alteraron datos compartidos durante esa revisión.
 - El aislamiento está cubierto en pruebas del ViewModel y repositorio; falta comprobarlo manualmente con dos cuentas reales y contra las reglas publicadas.
-- La eliminación sigue pendiente: el nativo borra tareas, relevamientos y suscriptores antes de la obra, por lo que hay que migrar ese comportamiento con cuidado.
+
+## Baja de obras
+- La eliminación pide confirmación y verifica en servidor que la obra pertenezca a la sesión actual.
+- Se borran primero las tareas, relevamientos y suscriptores en lotes; la obra se borra al final. Si falla después de borrar datos relacionados, se informa que el resultado puede ser parcial.
+- Se agregaron tests de dominio, repositorio y ViewModel, incluyendo que cancelar no invoque la baja.
+- Pasan los tests de domain, data, firebase y `features:obras`, y `:androidApp:assembleDebug`.
+- En emulador se revisaron el detalle y el diálogo de confirmación; se canceló la baja y no se modificaron datos de Firebase.
 
 ## Próximo
-1. Implementar baja de obra con el borrado relacionado que ya hace el nativo; agregar confirmación y pruebas de fallos parciales.
-2. Verificar manualmente el aislamiento con dos cuentas.
-3. Compartir login y obras en la primera app iOS; después seguir con relevamientos y tareas.
-4. Offline con persistencia de Firestore al final.
+1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
+2. Preparar y compartir login y obras en la primera app iOS.
+3. Después seguir con relevamientos y tareas; dejar offline para el final.
 
 ## Decisiones vigentes
 - UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.

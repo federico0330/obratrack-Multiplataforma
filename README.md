@@ -3,10 +3,10 @@
 ## Avances
 
 - [x] Login y registro con Firebase; probado en Android.
-- [x] Mis obras: listar, crear, ver detalle, editar y cambiar estado.
+- [x] Mis obras: listar, crear, ver detalle, editar, cambiar estado y eliminar con sus registros relacionados.
 - [x] Dominio, datos y Firebase separados; pantallas Compose con ViewModels y dependencias desde `AppContainer`.
 - [x] Tests unitarios de dominio, repositorios y ViewModels.
-- [x] App compilada y ejecutada en un teléfono Android; detalle y edición revisados en emulador.
+- [x] App compilada y ejecutada en un teléfono Android; detalle, edición y confirmación de baja revisados en emulador.
 
 ## Estructura
 

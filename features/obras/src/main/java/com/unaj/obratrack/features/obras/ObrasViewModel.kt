@@ -10,6 +10,7 @@ import com.unaj.obratrack.domain.repository.ResultadoObra
 import com.unaj.obratrack.domain.usecase.CrearObra
 import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
+import com.unaj.obratrack.domain.usecase.EliminarObra
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.CancellationException
@@ -31,6 +32,7 @@ class ObrasViewModel(
     private val crearObra: CrearObra,
     private val actualizarObra: ActualizarObra,
     private val cambiarEstadoObra: CambiarEstadoObra,
+    private val eliminarObra: EliminarObra,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ObrasUiState())
     val state = _state.asStateFlow()
@@ -50,6 +52,8 @@ class ObrasViewModel(
                             obraSeleccionada = null,
                             formularioVisible = false,
                             formulario = FormularioObraUiState(),
+                            confirmarEliminacion = false,
+                            eliminando = false,
                         )
                     }
                 }
@@ -64,6 +68,8 @@ class ObrasViewModel(
                                     obraSeleccionada = null,
                                     formularioVisible = false,
                                     formulario = FormularioObraUiState(),
+                                    confirmarEliminacion = false,
+                                    eliminando = false,
                                 )
                             }
                         }
@@ -84,6 +90,8 @@ class ObrasViewModel(
                 formularioVisible = false,
                 formulario = FormularioObraUiState(),
                 errorOperacion = null,
+                confirmarEliminacion = false,
+                eliminando = false,
             )
         }
         listaJob = viewModelScope.launch {
@@ -204,6 +212,41 @@ class ObrasViewModel(
         }
     }
 
+    fun solicitarEliminacion() = _state.update { it.copy(confirmarEliminacion = true, errorOperacion = null) }
+
+    fun cancelarEliminacion() = _state.update { it.copy(confirmarEliminacion = false) }
+
+    fun confirmarEliminacion() {
+        val owner = userId ?: return _state.update { it.copy(errorOperacion = ErrorObrasUi.SESION) }
+        val obra = _state.value.obraSeleccionada ?: return
+        if (_state.value.eliminando) return
+        _state.update { it.copy(confirmarEliminacion = false, eliminando = true, errorOperacion = null) }
+        viewModelScope.launch {
+            try {
+                when (val result = eliminarObra(owner, obra.id)) {
+                    is ResultadoObra.Exito -> _state.update {
+                        if (userId == owner && it.obraSeleccionada?.id == obra.id) {
+                            it.copy(obraSeleccionada = null, eliminando = false)
+                        } else it
+                    }
+                    is ResultadoObra.Fallo -> _state.update {
+                        if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(errorOperacion = result.error.toUiError()) else it
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                _state.update {
+                    if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(errorOperacion = ErrorObrasUi.DESCONOCIDO) else it
+                }
+            } finally {
+                _state.update {
+                    if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(eliminando = false) else it
+                }
+            }
+        }
+    }
+
     private fun updateForm(transform: FormularioObraUiState.() -> FormularioObraUiState) =
         _state.update { it.copy(formulario = it.formulario.transform()) }
 
@@ -213,6 +256,7 @@ class ObrasViewModel(
         ErrorObra.DIRECCION_VACIA -> ErrorObrasUi.DIRECCION
         ErrorObra.NO_AUTORIZADA -> ErrorObrasUi.PERMISOS
         ErrorObra.RED -> ErrorObrasUi.RED
+        ErrorObra.FALLO_PARCIAL -> ErrorObrasUi.BAJA_PARCIAL
         ErrorObra.DESCONOCIDO -> ErrorObrasUi.DESCONOCIDO
     }
 }

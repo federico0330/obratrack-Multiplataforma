@@ -36,4 +36,8 @@
     <string name="obras_pause">Pause work</string>
     <string name="obras_reactivate">Reactivate work</string>
     <string name="obras_finish">Finish work</string>
+    <string name="obras_delete">Delete work</string>
+    <string name="obras_delete_title">Delete work</string>
+    <string name="obras_delete_confirmation">“%1$s” and its tasks, surveys, and subscribers will be deleted. This cannot be undone.</string>
+    <string name="obras_error_partial_delete">Some related records could not be deleted. The work may be partly deleted; refresh the list and try again.</string>
 </resources>

@@ -72,6 +72,14 @@ class RepositorioObrasImpl(
         ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
     }
 
+    override suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit> = try {
+        remote.eliminar(userId, obraId).toDomainResult()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
+    }
+
     private fun FirebaseObraResult<Unit>.toDomainResult(): ResultadoObra<Unit> = when (this) {
         is FirebaseObraResult.Success -> ResultadoObra.Exito(Unit)
         is FirebaseObraResult.Failure -> ResultadoObra.Fallo(error.toDomain())
@@ -80,6 +88,7 @@ class RepositorioObrasImpl(
     private fun FirebaseObraFailure.toDomain(): ErrorObra = when (this) {
         FirebaseObraFailure.PermissionDenied -> ErrorObra.NO_AUTORIZADA
         FirebaseObraFailure.Network -> ErrorObra.RED
+        FirebaseObraFailure.Partial -> ErrorObra.FALLO_PARCIAL
         FirebaseObraFailure.Unexpected -> ErrorObra.DESCONOCIDO
     }
 }

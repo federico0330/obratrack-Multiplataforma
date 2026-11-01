@@ -49,4 +49,6 @@ private class RepositorioObrasFalsoLista : RepositorioObras {
 
     override suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra) =
         ResultadoObra.Exito(Unit)
+
+    override suspend fun eliminar(userId: String, obraId: String) = ResultadoObra.Exito(Unit)
 }

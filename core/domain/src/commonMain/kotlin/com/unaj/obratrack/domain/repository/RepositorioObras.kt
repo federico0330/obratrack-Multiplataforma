@@ -10,6 +10,7 @@ enum class ErrorObra {
     CLIENTE_VACIO,
     DIRECCION_VACIA,
     NO_AUTORIZADA,
+    FALLO_PARCIAL,
     RED,
     DESCONOCIDO,
 }
@@ -25,4 +26,5 @@ interface RepositorioObras {
     suspend fun crear(userId: String, draft: ObraDraft, estado: EstadoObra): ResultadoObra<Obra>
     suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft): ResultadoObra<Unit>
     suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra): ResultadoObra<Unit>
+    suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit>
 }

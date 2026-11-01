@@ -36,4 +36,8 @@
     <string name="obras_pause">Metti in pausa</string>
     <string name="obras_reactivate">Riattiva lavoro</string>
     <string name="obras_finish">Termina lavoro</string>
+    <string name="obras_delete">Elimina lavoro</string>
+    <string name="obras_delete_title">Elimina lavoro</string>
+    <string name="obras_delete_confirmation">«%1$s» e le sue attività, i rilievi e gli iscritti verranno eliminati. L’azione non può essere annullata.</string>
+    <string name="obras_error_partial_delete">Non è stato possibile eliminare tutti i dati collegati. Il lavoro potrebbe essere stato eliminato solo in parte; aggiorna l’elenco e riprova.</string>
 </resources>

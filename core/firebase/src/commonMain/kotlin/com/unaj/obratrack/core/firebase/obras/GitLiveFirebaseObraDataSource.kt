@@ -5,6 +5,7 @@ import dev.gitlive.firebase.FirebaseNetworkException
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.FirebaseFirestoreException
 import dev.gitlive.firebase.firestore.GeoPoint
+import dev.gitlive.firebase.firestore.Source
 import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.code
 import dev.gitlive.firebase.firestore.firestore
@@ -63,6 +64,46 @@ class GitLiveFirebaseObraDataSource(
         estado: String,
     ): FirebaseObraResult<Unit> = writeResult {
         ownedDocument(userId, obraId).updateFields { FIELD_ESTADO to estado }
+    }
+
+    override suspend fun eliminar(userId: String, obraId: String): FirebaseObraResult<Unit> {
+        if (userId.isBlank() || obraId.isBlank()) {
+            return FirebaseObraResult.Failure(FirebaseObraFailure.PermissionDenied)
+        }
+        val obra = firestore.collection(COLLECTION).document(obraId)
+        val snapshot = try {
+            obra.get(Source.SERVER)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            return FirebaseObraResult.Failure(error.toFailure())
+        }
+        if (!snapshot.exists) return FirebaseObraResult.Success(Unit)
+        if (snapshot.get<String>(FIELD_USER_ID) != userId) {
+            return FirebaseObraResult.Failure(FirebaseObraFailure.PermissionDenied)
+        }
+
+        var huboBorrado = false
+        return try {
+            listOf(SUBCOLLECTION_TAREAS, SUBCOLLECTION_RELEVAMIENTOS, SUBCOLLECTION_SUSCRIPTORES)
+                .forEach { subcoleccion ->
+                    val documentos = obra.collection(subcoleccion).get(Source.SERVER).documents
+                    documentos.chunked(BATCH_SIZE).forEach { grupo ->
+                        val batch = firestore.batch()
+                        grupo.forEach { batch.delete(it.reference) }
+                        batch.commit()
+                        huboBorrado = true
+                    }
+                }
+            obra.delete()
+            FirebaseObraResult.Success(Unit)
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            FirebaseObraResult.Failure(
+                if (huboBorrado) FirebaseObraFailure.Partial else error.toFailure(),
+            )
+        }
     }
 
     private fun ownedDocument(userId: String, obraId: String) =
@@ -131,5 +172,9 @@ class GitLiveFirebaseObraDataSource(
         const val FIELD_UBICACION = "ubicacion"
         const val FIELD_PROXIMA_VISITA = "proximaVisita"
         const val FIELD_HORA_VISITA = "horaVisita"
+        const val SUBCOLLECTION_TAREAS = "tareas"
+        const val SUBCOLLECTION_RELEVAMIENTOS = "relevamientos"
+        const val SUBCOLLECTION_SUSCRIPTORES = "suscriptores"
+        const val BATCH_SIZE = 500
     }
 }

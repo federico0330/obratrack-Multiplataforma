@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +41,9 @@ fun MisObrasScreen(
     onBackToList: () -> Unit,
     onEditObra: () -> Unit,
     onChangeStatus: (EstadoObra) -> Unit,
+    onRequestDelete: () -> Unit,
+    onCancelDelete: () -> Unit,
+    onConfirmDelete: () -> Unit,
     onCloseForm: () -> Unit,
     onNameChange: (String) -> Unit,
     onClientChange: (String) -> Unit,
@@ -56,6 +60,19 @@ fun MisObrasScreen(
         Text(stringResource(R.string.obras_signed_in, user.nombre?.takeIf(String::isNotBlank) ?: user.email))
         authErrorMessage?.let { Text(it, color = MaterialTheme.colorScheme.error) }
         TextButton(onClick = onSignOut) { Text(stringResource(R.string.obras_sign_out)) }
+        if (state.confirmarEliminacion) {
+            AlertDialog(
+                onDismissRequest = onCancelDelete,
+                title = { Text(stringResource(R.string.obras_delete_title)) },
+                text = { Text(stringResource(R.string.obras_delete_confirmation, state.obraSeleccionada?.nombre.orEmpty())) },
+                confirmButton = {
+                    TextButton(onClick = onConfirmDelete) { Text(stringResource(R.string.obras_delete)) }
+                },
+                dismissButton = {
+                    TextButton(onClick = onCancelDelete) { Text(stringResource(R.string.obras_cancel)) }
+                },
+            )
+        }
         if (state.formularioVisible) {
             Text(
                 stringResource(if (state.formulario.obraId == null) R.string.obras_create_title else R.string.obras_edit_title),
@@ -92,9 +109,13 @@ fun MisObrasScreen(
             HorizontalDivider()
             state.errorOperacion?.let { Text(errorMessage(it), color = MaterialTheme.colorScheme.error) }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = onBackToList) { Text(stringResource(R.string.obras_back)) }
-                Button(onClick = onEditObra) { Text(stringResource(R.string.obras_edit)) }
+                OutlinedButton(onClick = onBackToList, enabled = !state.eliminando) { Text(stringResource(R.string.obras_back)) }
+                Button(onClick = onEditObra, enabled = !state.eliminando) { Text(stringResource(R.string.obras_edit)) }
             }
+            OutlinedButton(onClick = onRequestDelete, enabled = !state.eliminando && !state.actualizando) {
+                Text(stringResource(R.string.obras_delete))
+            }
+            if (state.eliminando) CircularProgressIndicator()
             if (state.actualizando) CircularProgressIndicator()
             when (obra.estado) {
                 EstadoObra.ACTIVA -> OutlinedButton(onClick = { onChangeStatus(EstadoObra.PAUSADA) }, enabled = !state.actualizando) {
@@ -159,6 +180,7 @@ private fun errorMessage(error: ErrorObrasUi): String = stringResource(
         ErrorObrasUi.DIRECCION -> R.string.obras_error_address
         ErrorObrasUi.FECHA -> R.string.obras_error_date
         ErrorObrasUi.RED -> R.string.obras_error_network
+        ErrorObrasUi.BAJA_PARCIAL -> R.string.obras_error_partial_delete
         ErrorObrasUi.DESCONOCIDO -> R.string.obras_error_generic
     },
 )

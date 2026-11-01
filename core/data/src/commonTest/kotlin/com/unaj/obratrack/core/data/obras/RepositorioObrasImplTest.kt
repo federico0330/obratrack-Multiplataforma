@@ -101,6 +101,22 @@ class RepositorioObrasImplTest {
         )
     }
 
+    @Test
+    fun eliminaConUidEIdYTipaElFalloParcial() = runTest {
+        val source = ObrasRemoteFalso()
+        val repo = RepositorioObrasImpl(source)
+
+        assertEquals(ResultadoObra.Exito(Unit), repo.eliminar("uid-8", "obra-4"))
+        assertEquals("uid-8", source.deletedUserId)
+        assertEquals("obra-4", source.deletedObraId)
+
+        source.deleteResult = FirebaseObraResult.Failure(FirebaseObraFailure.Partial)
+        assertEquals(
+            ResultadoObra.Fallo(ErrorObra.FALLO_PARCIAL),
+            repo.eliminar("uid-8", "obra-4"),
+        )
+    }
+
     private fun dto(id: String = "obra-1") = ObraDto(
         id = id, userId = "uid-1", nombre = "Escuela", cliente = "Municipio", direccion = "Calle 1",
         publica = false, estado = "activa", fechaInicioMillis = Instant.parse("2026-11-01T00:00:00Z").toEpochMilliseconds(),
@@ -117,6 +133,9 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
     var updatedFields: ObraUpdateFields? = null
     var updatedState: String? = null
     var updateResult: FirebaseObraResult<Unit> = FirebaseObraResult.Success(Unit)
+    var deleteResult: FirebaseObraResult<Unit> = FirebaseObraResult.Success(Unit)
+    var deletedUserId: String? = null
+    var deletedObraId: String? = null
 
     override fun observarPropias(userId: String): Flow<FirebaseObraResult<List<ObraDto>>> {
         queriedUserId = userId
@@ -140,5 +159,11 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
         updatedObraId = obraId
         updatedState = estado
         return updateResult
+    }
+
+    override suspend fun eliminar(userId: String, obraId: String): FirebaseObraResult<Unit> {
+        deletedUserId = userId
+        deletedObraId = obraId
+        return deleteResult
     }
 }

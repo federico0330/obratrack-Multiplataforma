@@ -10,7 +10,7 @@ sealed interface ListaObrasUiState {
     data class Error(val motivo: ErrorObrasUi) : ListaObrasUiState
 }
 
-enum class ErrorObrasUi { SESION, NOMBRE, CLIENTE, DIRECCION, FECHA, RED, PERMISOS, DESCONOCIDO }
+enum class ErrorObrasUi { SESION, NOMBRE, CLIENTE, DIRECCION, FECHA, RED, PERMISOS, BAJA_PARCIAL, DESCONOCIDO }
 
 data class FormularioObraUiState(
     val obraId: String? = null,
@@ -30,4 +30,6 @@ data class ObrasUiState(
     val formulario: FormularioObraUiState = FormularioObraUiState(),
     val actualizando: Boolean = false,
     val errorOperacion: ErrorObrasUi? = null,
+    val confirmarEliminacion: Boolean = false,
+    val eliminando: Boolean = false,
 )

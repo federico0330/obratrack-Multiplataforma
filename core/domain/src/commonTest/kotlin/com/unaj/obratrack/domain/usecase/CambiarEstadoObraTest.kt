@@ -53,4 +53,6 @@ private class CambiarEstadoRepositoryFake : RepositorioObras {
         this.estado = estado
         return ResultadoObra.Exito(Unit)
     }
+
+    override suspend fun eliminar(userId: String, obraId: String) = ResultadoObra.Exito(Unit)
 }
