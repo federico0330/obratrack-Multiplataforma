@@ -1,0 +1,27 @@
+<resources>
+    <string name="obras_title">Mis obras</string>
+    <string name="obras_signed_in">Sesión iniciada como %1$s</string>
+    <string name="obras_sign_out">Cerrar sesión</string>
+    <string name="obras_empty_title">Todavía no tenés obras</string>
+    <string name="obras_empty_hint">Creá una obra para empezar a organizarla.</string>
+    <string name="obras_create">Crear obra</string>
+    <string name="obras_create_title">Nueva obra</string>
+    <string name="obras_name">Nombre</string>
+    <string name="obras_client">Cliente</string>
+    <string name="obras_address">Dirección</string>
+    <string name="obras_start_date">Fecha de inicio</string>
+    <string name="obras_date_hint">Formato AAAA-MM-DD</string>
+    <string name="obras_private">Privada</string>
+    <string name="obras_public">Pública</string>
+    <string name="obras_save">Guardar</string>
+    <string name="obras_cancel">Cancelar</string>
+    <string name="obras_retry">Reintentar</string>
+    <string name="obras_client_value">Cliente: %1$s</string>
+    <string name="obras_error_session">La sesión no está disponible. Iniciá sesión nuevamente.</string>
+    <string name="obras_error_name">Ingresá el nombre de la obra.</string>
+    <string name="obras_error_client">Ingresá el nombre del cliente.</string>
+    <string name="obras_error_address">Ingresá la dirección.</string>
+    <string name="obras_error_date">Usá una fecha válida con formato AAAA-MM-DD.</string>
+    <string name="obras_error_network">No se pudo conectar. Revisá tu conexión e intentá de nuevo.</string>
+    <string name="obras_error_generic">No se pudo completar la operación. Intentá de nuevo.</string>
+</resources>

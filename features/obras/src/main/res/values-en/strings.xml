@@ -1,0 +1,27 @@
+<resources>
+    <string name="obras_title">My works</string>
+    <string name="obras_signed_in">Signed in as %1$s</string>
+    <string name="obras_sign_out">Sign out</string>
+    <string name="obras_empty_title">You do not have any works yet</string>
+    <string name="obras_empty_hint">Create a work to start organizing it.</string>
+    <string name="obras_create">Create work</string>
+    <string name="obras_create_title">New work</string>
+    <string name="obras_name">Name</string>
+    <string name="obras_client">Client</string>
+    <string name="obras_address">Address</string>
+    <string name="obras_start_date">Start date</string>
+    <string name="obras_date_hint">Format YYYY-MM-DD</string>
+    <string name="obras_private">Private</string>
+    <string name="obras_public">Public</string>
+    <string name="obras_save">Save</string>
+    <string name="obras_cancel">Cancel</string>
+    <string name="obras_retry">Try again</string>
+    <string name="obras_client_value">Client: %1$s</string>
+    <string name="obras_error_session">Your session is unavailable. Sign in again.</string>
+    <string name="obras_error_name">Enter the work name.</string>
+    <string name="obras_error_client">Enter the client name.</string>
+    <string name="obras_error_address">Enter the address.</string>
+    <string name="obras_error_date">Enter a valid date in YYYY-MM-DD format.</string>
+    <string name="obras_error_network">Could not connect. Check your connection and try again.</string>
+    <string name="obras_error_generic">The operation could not be completed. Try again.</string>
+</resources>

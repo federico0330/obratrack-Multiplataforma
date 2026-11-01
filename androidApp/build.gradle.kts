@@ -37,6 +37,7 @@ dependencies {
     implementation(project(":core:firebase"))
     implementation(project(":features:auth"))
     implementation(project(":features:home"))
+    implementation(project(":features:obras"))
     implementation(platform("androidx.compose:compose-bom:2025.08.01"))
     implementation("androidx.activity:activity-compose:1.10.1")
     implementation("androidx.compose.material3:material3")

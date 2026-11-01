@@ -1,0 +1,27 @@
+<resources>
+    <string name="obras_title">I miei lavori</string>
+    <string name="obras_signed_in">Accesso effettuato come %1$s</string>
+    <string name="obras_sign_out">Esci</string>
+    <string name="obras_empty_title">Non hai ancora lavori</string>
+    <string name="obras_empty_hint">Crea un lavoro per iniziare a organizzarlo.</string>
+    <string name="obras_create">Crea lavoro</string>
+    <string name="obras_create_title">Nuovo lavoro</string>
+    <string name="obras_name">Nome</string>
+    <string name="obras_client">Cliente</string>
+    <string name="obras_address">Indirizzo</string>
+    <string name="obras_start_date">Data di inizio</string>
+    <string name="obras_date_hint">Formato AAAA-MM-GG</string>
+    <string name="obras_private">Privato</string>
+    <string name="obras_public">Pubblico</string>
+    <string name="obras_save">Salva</string>
+    <string name="obras_cancel">Annulla</string>
+    <string name="obras_retry">Riprova</string>
+    <string name="obras_client_value">Cliente: %1$s</string>
+    <string name="obras_error_session">Sessione non disponibile. Accedi di nuovo.</string>
+    <string name="obras_error_name">Inserisci il nome del lavoro.</string>
+    <string name="obras_error_client">Inserisci il nome del cliente.</string>
+    <string name="obras_error_address">Inserisci l’indirizzo.</string>
+    <string name="obras_error_date">Inserisci una data valida nel formato AAAA-MM-GG.</string>
+    <string name="obras_error_network">Connessione non riuscita. Controlla la rete e riprova.</string>
+    <string name="obras_error_generic">Operazione non riuscita. Riprova.</string>
+</resources>
