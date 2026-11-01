@@ -1,28 +1,46 @@
 package com.unaj.obratrack.domain.usecase
 
+import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
+import com.unaj.obratrack.domain.model.ObraDraft
+import com.unaj.obratrack.domain.repository.ErrorObra
 import com.unaj.obratrack.domain.repository.RepositorioObras
-import com.unaj.obratrack.domain.validation.ResultadoValidacion
-import com.unaj.obratrack.domain.validation.ValidadorNombreObra
+import com.unaj.obratrack.domain.repository.ResultadoObra
 
-sealed interface ResultadoCrearObra {
-    data class Creada(val obra: Obra) : ResultadoCrearObra
-    data class Rechazada(val motivo: ResultadoValidacion) : ResultadoCrearObra
+sealed interface ValidacionObra {
+    data object Valida : ValidacionObra
+    data object NombreVacio : ValidacionObra
+    data object ClienteVacio : ValidacionObra
+    data object DireccionVacia : ValidacionObra
 }
 
-/** Caso de uso: valida la petición y solo persiste si cumple la regla del dominio. */
+class ValidadorObra {
+    fun validar(draft: ObraDraft): ValidacionObra = when {
+        draft.nombre.isBlank() -> ValidacionObra.NombreVacio
+        draft.cliente.isBlank() -> ValidacionObra.ClienteVacio
+        draft.direccion.isBlank() -> ValidacionObra.DireccionVacia
+        else -> ValidacionObra.Valida
+    }
+}
+
 class CrearObra(
     private val repositorio: RepositorioObras,
-    private val validador: ValidadorNombreObra = ValidadorNombreObra(),
+    private val validador: ValidadorObra = ValidadorObra(),
 ) {
-    suspend operator fun invoke(id: String, nombre: String): ResultadoCrearObra {
-        val validacion = validador.validar(nombre)
-        if (validacion != ResultadoValidacion.Valido) {
-            return ResultadoCrearObra.Rechazada(validacion)
+    suspend operator fun invoke(userId: String, draft: ObraDraft): ResultadoObra<Obra> {
+        if (userId.isBlank()) return ResultadoObra.Fallo(ErrorObra.NO_AUTORIZADA)
+        val validacion = validador.validar(draft)
+        when (validacion) {
+            ValidacionObra.Valida -> Unit
+            ValidacionObra.NombreVacio -> return ResultadoObra.Fallo(ErrorObra.NOMBRE_VACIO)
+            ValidacionObra.ClienteVacio -> return ResultadoObra.Fallo(ErrorObra.CLIENTE_VACIO)
+            ValidacionObra.DireccionVacia -> return ResultadoObra.Fallo(ErrorObra.DIRECCION_VACIA)
         }
-
-        val obra = Obra(id = id, nombre = nombre.trim())
-        repositorio.crear(obra)
-        return ResultadoCrearObra.Creada(obra)
+        val normalizado = draft.copy(
+            nombre = draft.nombre.trim(),
+            cliente = draft.cliente.trim(),
+            direccion = draft.direccion.trim(),
+        )
+        return repositorio.crear(userId, normalizado, EstadoObra.ACTIVA)
     }
 }
