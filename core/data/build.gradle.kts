@@ -7,7 +7,7 @@ kotlin {
     jvmToolchain(21)
     android {
         namespace = "com.unaj.obratrack.core.data"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 26
         withHostTest {}
     }

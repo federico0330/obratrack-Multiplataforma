@@ -33,8 +33,18 @@
 
 ## Próximo
 1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
-2. Preparar y compartir login y obras en la primera app iOS.
+2. Validar en un simulador iOS el login, registro y listado de obras compartidos; conectar la configuración iOS real de Firebase.
 3. Después seguir con relevamientos y tareas; dejar offline para el final.
+
+## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
+- Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
+- `composeApp` contiene el punto de composición de dependencias y navegación común; Android e iOS llaman a la misma interfaz.
+- Se agregó el host SwiftUI de iOS y una prueba de interfaz que recorre login → registro → login en un simulador.
+- Pasan `assembleDebug` y las pruebas de `core:domain`, `core:data`, `core:firebase`, `features:auth` y `features:obras` desde una ruta de trabajo sin espacios.
+- El APK abre en el emulador Android, recupera la sesión y muestra las obras de Firebase sin hacer escrituras.
+- La compilación del simulador y el test de interfaz quedan pendientes de la ejecución en macOS; esta máquina Windows no tiene Xcode.
+- El flujo iOS real de Firebase requiere registrar `com.unaj.appmoviles.obratrack.ios` en el proyecto Firebase compartido y colocar allí su `GoogleService-Info.plist` (ignorado por Git). El plist de ejemplo solo sirve para pruebas de navegación, no realiza autenticación ni escrituras.
+- El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.
 
 ## Decisiones vigentes
 - UI Android por ahora; no migrar features a Compose Multiplatform en esta etapa.

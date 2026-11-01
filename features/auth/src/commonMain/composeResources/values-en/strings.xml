@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_login_subtitle">Sign in to continue</string>
+    <string name="auth_email_label">Email</string>
+    <string name="auth_password_label">Password</string>
+    <string name="auth_sign_in">Sign in</string>
+    <string name="auth_register_subtitle">Create your account to get started</string>
+    <string name="auth_repeat_password_label">Repeat password</string>
+    <string name="auth_create_account">Create account</string>
+    <string name="auth_have_account">I already have an account</string>
+    <string name="auth_register_error_invalid_email">The email address is not valid.</string>
+    <string name="auth_register_error_weak_password">The password must be at least 6 characters long.</string>
+    <string name="auth_register_error_passwords_mismatch">The passwords do not match.</string>
+    <string name="auth_register_error_email_in_use">An account with that email already exists.</string>
+    <string name="auth_register_error_unexpected">We couldn't create the account. Please try again.</string>
+    <string name="auth_show_password">Show password</string>
+    <string name="auth_hide_password">Hide password</string>
+    <string name="auth_error_invalid_data">Check the email and password you entered.</string>
+    <string name="auth_error_invalid_credentials">The email or password is incorrect.</string>
+    <string name="auth_error_no_connection">No connection. Check your internet and try again.</string>
+    <string name="auth_error_too_many_attempts">Too many attempts. Wait a few minutes and try again.</string>
+    <string name="auth_error_user_disabled">This account has been disabled.</string>
+    <string name="auth_error_unexpected">We couldn't sign you in. Please try again.</string>
+    <string name="auth_error_sign_out_failed">We couldn't sign you out. Please try again.</string>
+    <string name="auth_error_session_failed">We couldn't check your session. Please try again.</string>
+</resources>
