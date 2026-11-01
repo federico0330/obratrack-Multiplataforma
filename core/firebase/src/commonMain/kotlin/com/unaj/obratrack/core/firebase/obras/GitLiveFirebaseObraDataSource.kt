@@ -78,7 +78,7 @@ class GitLiveFirebaseObraDataSource(
 
     private fun Throwable.toFailure(): FirebaseObraFailure = when (this) {
         is FirebaseNetworkException -> FirebaseObraFailure.Network
-        is FirebaseFirestoreException -> classifyFirestoreFailure(code)
+        is FirebaseFirestoreException -> classifyFirestoreFailure(code.name)
         else -> FirebaseObraFailure.Unexpected
     }
 
