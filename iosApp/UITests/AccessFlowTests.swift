@@ -3,7 +3,7 @@ import XCTest
 final class AccessFlowTests: XCTestCase {
     func testLoginAndRegistrationNavigation() {
         let app = XCUIApplication()
-        app.launchArguments += ["-AppleLanguages", "(es)", "-AppleLocale", "es_AR"]
+        app.launchArguments += ["-ui-testing", "-AppleLanguages", "(es)", "-AppleLocale", "es_AR"]
         app.launch()
 
         XCTAssertTrue(app.staticTexts["Ingresá para continuar"].waitForExistence(timeout: 15))

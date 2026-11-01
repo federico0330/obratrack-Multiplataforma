@@ -12,7 +12,8 @@ struct ObraTrackIOSApp: App {
 
 private struct ComposeHost: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        MainViewControllerKt.MainViewController()
+        let uiTesting = ProcessInfo.processInfo.arguments.contains("-ui-testing")
+        return MainViewControllerKt.MainViewController(uiTesting: uiTesting)
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}

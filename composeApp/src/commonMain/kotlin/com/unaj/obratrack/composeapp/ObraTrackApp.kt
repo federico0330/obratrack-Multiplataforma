@@ -26,7 +26,12 @@ import com.unaj.obratrack.features.obras.ObrasViewModel
 
 /** Punto de entrada común para Android y SwiftUI. */
 @Composable
-fun ObraTrackApp() {
+fun ObraTrackApp(uiTesting: Boolean = false) {
+    if (uiTesting) {
+        AccessFlowPreview()
+        return
+    }
+
     val graph = remember { AppGraph() }
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
