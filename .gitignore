@@ -16,5 +16,8 @@ GoogleService-Info.plist
 **/google-services.json
 **/GoogleService-Info.plist
 
+# Podspecs generados por el plugin de CocoaPods de Kotlin
+*.podspec
+
 # Guía de trabajo local solicitada por el usuario
 /guia.md
