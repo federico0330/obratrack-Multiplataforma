@@ -44,6 +44,8 @@
 - El APK abre en el emulador Android, recupera la sesión y muestra las obras de Firebase sin hacer escrituras.
 - El build y la prueba de navegación pasan en iOS Simulator mediante GitHub Actions con runner macOS; no hace falta un dispositivo físico.
 - El flujo real de Firebase en iOS requiere registrar `com.unaj.appmoviles.obratrack.ios` en el proyecto compartido y agregar su `GoogleService-Info.plist` (ignorado por Git). El plist de ejemplo sirve solo para la prueba visual; no autentica ni escribe datos.
+- Estado de la verificación en iOS: compila y recorre login/registro en el simulador del CI con el plist de ejemplo. El login real con Firebase solo está probado en Android; no hay dispositivo ni Mac propia. Si hace falta, se puede probar en el CI cargando el plist como secreto del repo y sumando una prueba de UI de solo lectura.
+- Los `*.podspec` son generados (`.\gradlew :composeApp:podspec`) y están ignorados por Git; el plist real va en `iosApp/` y tampoco se versiona.
 - El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.
 
 ## Decisiones vigentes
