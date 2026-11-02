@@ -53,6 +53,7 @@ fun MisObrasScreen(
     onDateChange: (String) -> Unit,
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
+    detailExtra: @Composable () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -133,6 +134,7 @@ fun MisObrasScreen(
                     Text(stringResource(Res.string.obras_finish))
                 }
             }
+            detailExtra()
         } else {
             when (val list = state.lista) {
                 ListaObrasUiState.Cargando -> CircularProgressIndicator()
