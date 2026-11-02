@@ -31,6 +31,11 @@
 - Pasan los tests de domain, data, firebase y `features:obras`, y `:androidApp:assembleDebug`.
 - En emulador se revisaron el detalle y el diálogo de confirmación; se canceló la baja y no se modificaron datos de Firebase.
 
+## Tareas de obra (rama `feat/tareas`)
+- Dominio, puerto Firestore (`obras/{id}/tareas`, fechas ISO, enums por nombre), repositorio y pantalla integrada al detalle de la obra: listado con resumen y atrasadas, alta, edición, cambio de estado y baja eligiendo si los relevamientos vinculados se desvinculan o se eliminan. Textos en es/en/it (el italiano requiere revisión).
+- Pasan los tests de domain, data, firebase y `features:obras`; `:androidApp:assembleDebug` pasa. Falta probar con Firebase real en el teléfono y el aislamiento con dos cuentas; iOS solo compila en el CI.
+- Las escrituras de obras y tareas esperan al servidor; hay que revisarlas para el requisito offline.
+
 ## Próximo
 1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
 2. Registrar la app iOS en Firebase y probar login y lectura de obras reales en el simulador.
