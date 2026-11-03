@@ -53,6 +53,11 @@
 - Sin íconos nuevos: `features:obras` no usa `materialIconsExtended`. `BackHandler` común (`ui-backhandler`) está deprecado a favor de `NavigationEventHandler`; migrar cuando haya navegación real con back stack.
 - Pasan `assembleDebug`, los tests de `features:auth` y `features:obras` y la compilación de `features:obras` para iOS. Falta la revisión visual en el emulador (claro y oscuro) y el CI de iOS.
 
+## Barra inferior y perfil (rama `feat/barra-inferior`)
+- Barra inferior con Obras y Mi perfil en `composeApp` (solo texto: `composeApp` no resuelve los íconos de Material sin `materialIconsExtended`, que no se suma). Se oculta en el detalle y el formulario de obras; Atrás desde Perfil vuelve a Obras. `composeApp` tiene ahora recursos de texto en es/en/it.
+- `PerfilScreen` (en `features:auth`) muestra nombre (o el correo si no hay) y correo, sin campos nuevos. Cerrar sesión pasó de Obras a Perfil, con diálogo de confirmación; `MisObrasScreen` ya no recibe `onSignOut`.
+- Pendiente para la capa offline: cerrar sesión con escrituras sin sincronizar debe revisarse (qué pasa con los cambios pendientes de ese usuario antes de salir).
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
