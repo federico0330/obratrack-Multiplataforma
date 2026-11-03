@@ -30,6 +30,7 @@
 - Se agregaron tests de dominio, repositorio y ViewModel, incluyendo que cancelar no invoque la baja.
 - Pasan los tests de domain, data, firebase y `features:obras`, y `:androidApp:assembleDebug`.
 - En emulador se revisaron el detalle y el diálogo de confirmación; se canceló la baja y no se modificaron datos de Firebase.
+- Corregido (`fix/baja-obra-trabada`): la lista en vivo quitaba la obra seleccionada antes de que la baja confirmara y la barra de progreso quedaba trabada, bloqueando editar y eliminar hasta reiniciar; ahora la baja se cierra por sesión y el error de una baja que falla se muestra en la lista.
 
 ## Próximo
 1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
