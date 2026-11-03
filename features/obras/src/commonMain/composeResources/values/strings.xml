@@ -40,4 +40,8 @@
     <string name="obras_delete_title">Eliminar obra</string>
     <string name="obras_delete_confirmation">Se eliminarán «%1$s» y sus tareas, relevamientos y suscriptores. Esta acción no se puede deshacer.</string>
     <string name="obras_error_partial_delete">No se pudieron eliminar todos los registros relacionados. La obra puede haber quedado parcialmente eliminada; actualizá la lista e intentá de nuevo.</string>
+    <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
+    <string name="obras_visibility">Visibilidad</string>
+    <string name="obras_pick_date">Elegir fecha</string>
+    <string name="obras_accept">Aceptar</string>
 </resources>

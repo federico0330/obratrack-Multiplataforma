@@ -40,4 +40,8 @@
     <string name="obras_delete_title">Elimina lavoro</string>
     <string name="obras_delete_confirmation">«%1$s» e le sue attività, i rilievi e gli iscritti verranno eliminati. L’azione non può essere annullata.</string>
     <string name="obras_error_partial_delete">Non è stato possibile eliminare tutti i dati collegati. Il lavoro potrebbe essere stato eliminato solo in parte; aggiorna l’elenco e riprova.</string>
+    <string name="obras_start_date_value">Data di inizio: %1$s</string>
+    <string name="obras_visibility">Visibilità</string>
+    <string name="obras_pick_date">Scegli la data</string>
+    <string name="obras_accept">Conferma</string>
 </resources>
