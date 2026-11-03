@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
@@ -25,6 +24,8 @@ import com.unaj.obratrack.composeapp.generated.resources.Res
 import com.unaj.obratrack.composeapp.generated.resources.nav_obras
 import com.unaj.obratrack.composeapp.generated.resources.nav_perfil
 import org.jetbrains.compose.resources.stringResource
+
+private val AlturaItem = 80.dp
 
 enum class PestanaPrincipal { OBRAS, PERFIL }
 
@@ -61,9 +62,10 @@ fun BarraInferior(
 private fun RowScope.ItemTexto(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
     val colores = MaterialTheme.colorScheme
     Column(
+        // Altura fija: NavigationBar solo define un mínimo, y con fillMaxHeight() cada ítem ocuparía toda la pantalla.
         modifier = Modifier
             .weight(1f)
-            .fillMaxHeight()
+            .height(AlturaItem)
             .selectable(selected = seleccionado, onClick = onClick, role = Role.Tab),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
