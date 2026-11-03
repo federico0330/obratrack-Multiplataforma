@@ -29,10 +29,8 @@ import org.jetbrains.compose.resources.stringResource
 fun MisObrasScreen(
     user: Usuario,
     state: ObrasUiState,
-    authErrorMessage: String? = null,
     onCreate: () -> Unit,
     onRetry: () -> Unit,
-    onSignOut: () -> Unit,
     onSelectObra: (Obra) -> Unit,
     onBackToList: () -> Unit,
     onEditObra: () -> Unit,
@@ -90,11 +88,6 @@ fun MisObrasScreen(
                             ) { Text(stringResource(Res.string.obras_back)) }
                         }
                     },
-                    actions = {
-                        if (!enFormulario && !enDetalle) {
-                            TextButton(onClick = onSignOut) { Text(stringResource(Res.string.obras_sign_out)) }
-                        }
-                    },
                 )
                 if (state.actualizando || state.eliminando) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -132,7 +125,6 @@ fun MisObrasScreen(
             else -> ListaObrasContent(
                 user = user,
                 lista = state.lista,
-                authErrorMessage = authErrorMessage,
                 onRetry = onRetry,
                 onSelectObra = onSelectObra,
                 padding = padding,

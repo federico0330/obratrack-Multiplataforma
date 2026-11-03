@@ -1,7 +1,6 @@
 <resources>
     <string name="obras_title">I miei lavori</string>
     <string name="obras_signed_in">Accesso effettuato come %1$s</string>
-    <string name="obras_sign_out">Esci</string>
     <string name="obras_empty_title">Non hai ancora lavori</string>
     <string name="obras_empty_hint">Crea un lavoro per iniziare a organizzarlo.</string>
     <string name="obras_create">Crea lavoro</string>
@@ -10,7 +9,6 @@
     <string name="obras_client">Cliente</string>
     <string name="obras_address">Indirizzo</string>
     <string name="obras_start_date">Data di inizio</string>
-    <string name="obras_date_hint">Formato AAAA-MM-GG</string>
     <string name="obras_private">Privato</string>
     <string name="obras_public">Pubblico</string>
     <string name="obras_save">Salva</string>
@@ -29,7 +27,6 @@
     <string name="obras_edit">Modifica</string>
     <string name="obras_back">Indietro</string>
     <string name="obras_visibility_value">Visibilità: %1$s</string>
-    <string name="obras_status_value">Stato: %1$s</string>
     <string name="obras_state_active">Attivo</string>
     <string name="obras_state_paused">In pausa</string>
     <string name="obras_state_finished">Completato</string>

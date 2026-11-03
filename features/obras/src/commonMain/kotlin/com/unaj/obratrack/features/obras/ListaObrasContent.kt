@@ -25,7 +25,6 @@ import org.jetbrains.compose.resources.stringResource
 internal fun ListaObrasContent(
     user: Usuario,
     lista: ListaObrasUiState,
-    authErrorMessage: String?,
     onRetry: () -> Unit,
     onSelectObra: (Obra) -> Unit,
     padding: PaddingValues,
@@ -48,7 +47,6 @@ internal fun ListaObrasContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        authErrorMessage?.let { item { ErrorBlock(it) } }
         when (lista) {
             ListaObrasUiState.Cargando -> item {
                 Box(Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {
