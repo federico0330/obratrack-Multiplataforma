@@ -58,7 +58,6 @@
     <string name="tareas_complete">Completa</string>
     <string name="tareas_reopen">Riapri</string>
     <string name="tareas_overdue">In ritardo</string>
-    <string name="tareas_category_status">%1$s · %2$s</string>
     <string name="tareas_dates_value">%1$s → %2$s</string>
     <string name="tareas_state_pending">In sospeso</string>
     <string name="tareas_state_in_progress">In corso</string>

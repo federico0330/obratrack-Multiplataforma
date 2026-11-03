@@ -58,7 +58,6 @@
     <string name="tareas_complete">Complete</string>
     <string name="tareas_reopen">Reopen</string>
     <string name="tareas_overdue">Overdue</string>
-    <string name="tareas_category_status">%1$s · %2$s</string>
     <string name="tareas_dates_value">%1$s → %2$s</string>
     <string name="tareas_state_pending">Pending</string>
     <string name="tareas_state_in_progress">In progress</string>
