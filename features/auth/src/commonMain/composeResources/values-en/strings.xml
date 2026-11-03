@@ -30,4 +30,14 @@
     <string name="perfil_sign_out_title">Sign out</string>
     <string name="perfil_sign_out_confirmation">Do you want to sign out of %1$s?</string>
     <string name="perfil_cancel">Cancel</string>
+    <string name="perfil_resumen_title">Works summary</string>
+    <string name="perfil_resumen_total">Total: %1$s</string>
+    <string name="perfil_resumen_activas">Active: %1$s</string>
+    <string name="perfil_resumen_pausadas">Paused: %1$s</string>
+    <string name="perfil_resumen_finalizadas">Finished: %1$s</string>
+    <string name="perfil_resumen_retry">Retry</string>
+    <string name="perfil_resumen_error_session">We couldn’t verify your session. Please sign in again.</string>
+    <string name="perfil_resumen_error_network">Could not connect. Check your connection and try again.</string>
+    <string name="perfil_resumen_error_permissions">You do not have permission to view your works. Please sign in again.</string>
+    <string name="perfil_resumen_error_generic">The summary could not be loaded. Please try again.</string>
 </resources>

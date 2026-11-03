@@ -31,4 +31,14 @@
     <string name="perfil_sign_out_title">Cerrar sesión</string>
     <string name="perfil_sign_out_confirmation">¿Querés cerrar la sesión de %1$s?</string>
     <string name="perfil_cancel">Cancelar</string>
+    <string name="perfil_resumen_title">Resumen de obras</string>
+    <string name="perfil_resumen_total">Total: %1$s</string>
+    <string name="perfil_resumen_activas">Activas: %1$s</string>
+    <string name="perfil_resumen_pausadas">Pausadas: %1$s</string>
+    <string name="perfil_resumen_finalizadas">Finalizadas: %1$s</string>
+    <string name="perfil_resumen_retry">Reintentar</string>
+    <string name="perfil_resumen_error_session">No pudimos verificar tu sesión. Iniciá sesión nuevamente.</string>
+    <string name="perfil_resumen_error_network">No se pudo conectar. Revisá tu conexión e intentá de nuevo.</string>
+    <string name="perfil_resumen_error_permissions">No tenés permiso para ver tus obras. Iniciá sesión nuevamente.</string>
+    <string name="perfil_resumen_error_generic">No se pudo cargar el resumen. Intentá de nuevo.</string>
 </resources>
