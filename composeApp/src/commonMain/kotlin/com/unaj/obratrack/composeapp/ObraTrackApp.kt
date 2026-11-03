@@ -79,7 +79,6 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                     authErrorMessage = authState.error?.message(),
                                     onCreate = obrasViewModel::abrirFormulario,
                                     onRetry = obrasViewModel::reintentar,
-                                    onSignOut = authViewModel::signOut,
                                     onSelectObra = obrasViewModel::abrirDetalle,
                                     onBackToList = obrasViewModel::cerrarDetalle,
                                     onEditObra = obrasViewModel::editarSeleccionada,

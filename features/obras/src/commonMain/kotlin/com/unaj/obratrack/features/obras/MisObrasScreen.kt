@@ -32,7 +32,6 @@ fun MisObrasScreen(
     authErrorMessage: String? = null,
     onCreate: () -> Unit,
     onRetry: () -> Unit,
-    onSignOut: () -> Unit,
     onSelectObra: (Obra) -> Unit,
     onBackToList: () -> Unit,
     onEditObra: () -> Unit,
@@ -88,11 +87,6 @@ fun MisObrasScreen(
                                 onClick = if (enFormulario) onCloseForm else onBackToList,
                                 enabled = !state.formulario.guardando && !state.eliminando,
                             ) { Text(stringResource(Res.string.obras_back)) }
-                        }
-                    },
-                    actions = {
-                        if (!enFormulario && !enDetalle) {
-                            TextButton(onClick = onSignOut) { Text(stringResource(Res.string.obras_sign_out)) }
                         }
                     },
                 )
