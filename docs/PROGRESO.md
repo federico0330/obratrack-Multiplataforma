@@ -58,6 +58,11 @@
 - `PerfilScreen` (en `features:auth`) muestra nombre (o el correo si no hay) y correo, sin campos nuevos. Cerrar sesión pasó de Obras a Perfil, con diálogo de confirmación; `MisObrasScreen` ya no recibe `onSignOut`.
 - Pendiente para la capa offline: cerrar sesión con escrituras sin sincronizar debe revisarse (qué pasa con los cambios pendientes de ese usuario antes de salir).
 
+## Perfil con resumen de obras (rama `feat/perfil-datos`)
+- `resumenObras` (función pura en `core:domain`) cuenta total, activas, pausadas y finalizadas. `PerfilViewModel` y `PerfilScreen` están en `features:auth` y reutilizan `ObservarObras`; no dependen de `features:obras` ni modifican `ObrasViewModel`. Los datos de la cuenta se ven siempre; el resumen tiene su propio estado de carga y error con "Reintentar", y distingue 0 obras de "no se pudo cargar".
+- La consulta corre solo mientras la pestaña Perfil está visible (5 s de gracia). Al volver se muestra el último valor mientras actualiza; cerrar sesión no muestra error y descarta el valor, para que otra cuenta nunca vea el resumen de la anterior.
+- Perfil y Mis obras son dos suscripciones a la misma consulta de obras; se espera que el SDK de Firestore las agrupe, pero no está verificado. Pasan los tests de `core:domain` y `features:auth`; falta la revisión visual y el CI de iOS.
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
