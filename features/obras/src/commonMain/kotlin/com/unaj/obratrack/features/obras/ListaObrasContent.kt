@@ -25,6 +25,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun ListaObrasContent(
     user: Usuario,
     lista: ListaObrasUiState,
+    errorOperacion: ErrorObrasUi?,
     onRetry: () -> Unit,
     onSelectObra: (Obra) -> Unit,
     padding: PaddingValues,
@@ -47,6 +48,8 @@ internal fun ListaObrasContent(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+        // Error de una operación (p. ej. una baja que falló) cuando la obra ya no está en pantalla.
+        errorOperacion?.let { error -> item { ErrorBlock(errorMessage(error)) } }
         when (lista) {
             ListaObrasUiState.Cargando -> item {
                 Box(Modifier.fillMaxWidth().padding(top = 48.dp), contentAlignment = Alignment.Center) {

@@ -123,7 +123,9 @@ class ObrasViewModel(
 
     fun abrirFormulario() {
         val hoyLocal = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
-        _state.update { it.copy(formularioVisible = true, formulario = FormularioObraUiState(fechaInicio = hoyLocal)) }
+        _state.update {
+            it.copy(formularioVisible = true, formulario = FormularioObraUiState(fechaInicio = hoyLocal), errorOperacion = null)
+        }
     }
 
     fun abrirDetalle(obra: Obra) = _state.update { it.copy(obraSeleccionada = obra, errorOperacion = null) }
@@ -222,26 +224,24 @@ class ObrasViewModel(
         if (_state.value.eliminando) return
         _state.update { it.copy(confirmarEliminacion = false, eliminando = true, errorOperacion = null) }
         viewModelScope.launch {
-            try {
-                when (val result = eliminarObra(owner, obra.id)) {
-                    is ResultadoObra.Exito -> _state.update {
-                        if (userId == owner && it.obraSeleccionada?.id == obra.id) {
-                            it.copy(obraSeleccionada = null, eliminando = false)
-                        } else it
-                    }
-                    is ResultadoObra.Fallo -> _state.update {
-                        if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(errorOperacion = result.error.toUiError()) else it
-                    }
-                }
+            val error = try {
+                (eliminarObra(owner, obra.id) as? ResultadoObra.Fallo)?.error?.toUiError()
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                _state.update {
-                    if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(errorOperacion = ErrorObrasUi.DESCONOCIDO) else it
-                }
-            } finally {
-                _state.update {
-                    if (userId == owner && it.obraSeleccionada?.id == obra.id) it.copy(eliminando = false) else it
+                ErrorObrasUi.DESCONOCIDO
+            }
+            // La lista en vivo puede quitar la obra seleccionada antes de que la baja confirme, así que
+            // el cierre depende solo de que siga la misma sesión y no de la selección.
+            _state.update {
+                if (userId != owner) {
+                    it
+                } else {
+                    it.copy(
+                        eliminando = false,
+                        errorOperacion = error,
+                        obraSeleccionada = if (error == null && it.obraSeleccionada?.id == obra.id) null else it.obraSeleccionada,
+                    )
                 }
             }
         }
