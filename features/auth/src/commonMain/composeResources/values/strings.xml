@@ -24,4 +24,11 @@
     <string name="auth_error_unexpected">No pudimos iniciar sesión. Intentá nuevamente.</string>
     <string name="auth_error_sign_out_failed">No pudimos cerrar la sesión. Intentá nuevamente.</string>
     <string name="auth_error_session_failed">No pudimos verificar tu sesión. Intentá nuevamente.</string>
+    <string name="perfil_title">Mi perfil</string>
+    <string name="perfil_name">Nombre</string>
+    <string name="perfil_email">Correo electrónico</string>
+    <string name="perfil_sign_out">Cerrar sesión</string>
+    <string name="perfil_sign_out_title">Cerrar sesión</string>
+    <string name="perfil_sign_out_confirmation">¿Querés cerrar la sesión de %1$s?</string>
+    <string name="perfil_cancel">Cancelar</string>
 </resources>

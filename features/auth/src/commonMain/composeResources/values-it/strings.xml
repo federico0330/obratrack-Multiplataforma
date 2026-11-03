@@ -23,4 +23,11 @@
     <string name="auth_error_unexpected">Non è stato possibile accedere. Riprova.</string>
     <string name="auth_error_sign_out_failed">Non è stato possibile uscire. Riprova.</string>
     <string name="auth_error_session_failed">Non è stato possibile verificare la sessione. Riprova.</string>
+    <string name="perfil_title">Il mio profilo</string>
+    <string name="perfil_name">Nome</string>
+    <string name="perfil_email">Email</string>
+    <string name="perfil_sign_out">Esci</string>
+    <string name="perfil_sign_out_title">Esci</string>
+    <string name="perfil_sign_out_confirmation">Vuoi uscire da %1$s?</string>
+    <string name="perfil_cancel">Annulla</string>
 </resources>

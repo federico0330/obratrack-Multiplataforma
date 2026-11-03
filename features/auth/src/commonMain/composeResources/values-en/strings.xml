@@ -23,4 +23,11 @@
     <string name="auth_error_unexpected">We couldn't sign you in. Please try again.</string>
     <string name="auth_error_sign_out_failed">We couldn't sign you out. Please try again.</string>
     <string name="auth_error_session_failed">We couldn't check your session. Please try again.</string>
+    <string name="perfil_title">My profile</string>
+    <string name="perfil_name">Name</string>
+    <string name="perfil_email">Email</string>
+    <string name="perfil_sign_out">Sign out</string>
+    <string name="perfil_sign_out_title">Sign out</string>
+    <string name="perfil_sign_out_confirmation">Do you want to sign out of %1$s?</string>
+    <string name="perfil_cancel">Cancel</string>
 </resources>
