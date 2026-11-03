@@ -92,6 +92,16 @@ class BajaObraTest {
         }
 
     @Test
+    fun elErrorDeLaBajaSeLimpiaAlEmpezarOtraAccion() =
+        conViewModel(RepoConListaEnVivo(obra, refrescaAntes = true, resultado = ResultadoObra.Fallo(ErrorObra.RED))) { viewModel ->
+            assertEquals(ErrorObrasUi.RED, viewModel.state.value.errorOperacion)
+
+            viewModel.abrirFormulario()
+
+            assertNull(viewModel.state.value.errorOperacion)
+        }
+
+    @Test
     fun siFallaSinQuitarseDeLaListaMantieneElDetalleConElError() =
         conViewModel(
             RepoConListaEnVivo(obra, refrescaAntes = false, resultado = ResultadoObra.Fallo(ErrorObra.FALLO_PARCIAL)),

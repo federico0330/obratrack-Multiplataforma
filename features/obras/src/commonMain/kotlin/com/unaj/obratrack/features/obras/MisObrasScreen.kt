@@ -125,6 +125,7 @@ fun MisObrasScreen(
             else -> ListaObrasContent(
                 user = user,
                 lista = state.lista,
+                errorOperacion = state.errorOperacion,
                 onRetry = onRetry,
                 onSelectObra = onSelectObra,
                 padding = padding,

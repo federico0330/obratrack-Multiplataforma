@@ -123,7 +123,9 @@ class ObrasViewModel(
 
     fun abrirFormulario() {
         val hoyLocal = Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()
-        _state.update { it.copy(formularioVisible = true, formulario = FormularioObraUiState(fechaInicio = hoyLocal)) }
+        _state.update {
+            it.copy(formularioVisible = true, formulario = FormularioObraUiState(fechaInicio = hoyLocal), errorOperacion = null)
+        }
     }
 
     fun abrirDetalle(obra: Obra) = _state.update { it.copy(obraSeleccionada = obra, errorOperacion = null) }
