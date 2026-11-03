@@ -1,7 +1,6 @@
 <resources>
     <string name="obras_title">Mis obras</string>
     <string name="obras_signed_in">Sesión iniciada como %1$s</string>
-    <string name="obras_sign_out">Cerrar sesión</string>
     <string name="obras_empty_title">Todavía no tenés obras</string>
     <string name="obras_empty_hint">Creá una obra para empezar a organizarla.</string>
     <string name="obras_create">Crear obra</string>
@@ -10,7 +9,6 @@
     <string name="obras_client">Cliente</string>
     <string name="obras_address">Dirección</string>
     <string name="obras_start_date">Fecha de inicio</string>
-    <string name="obras_date_hint">Formato AAAA-MM-DD</string>
     <string name="obras_private">Privada</string>
     <string name="obras_public">Pública</string>
     <string name="obras_save">Guardar</string>
@@ -29,7 +27,6 @@
     <string name="obras_edit">Editar</string>
     <string name="obras_back">Volver</string>
     <string name="obras_visibility_value">Visibilidad: %1$s</string>
-    <string name="obras_status_value">Estado: %1$s</string>
     <string name="obras_state_active">Activa</string>
     <string name="obras_state_paused">Pausada</string>
     <string name="obras_state_finished">Finalizada</string>
@@ -94,4 +91,8 @@
     <string name="tareas_cat_waterproofing">Impermeabilización</string>
     <string name="tareas_cat_cleaning">Limpieza</string>
     <string name="tareas_cat_other">Otros</string>
+    <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
+    <string name="obras_visibility">Visibilidad</string>
+    <string name="obras_pick_date">Elegir fecha</string>
+    <string name="obras_accept">Aceptar</string>
 </resources>

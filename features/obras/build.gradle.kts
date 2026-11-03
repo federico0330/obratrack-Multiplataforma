@@ -24,6 +24,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(compose.ui)
+            implementation("org.jetbrains.compose.ui:ui-backhandler:1.12.2")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.10.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")

@@ -43,6 +43,8 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material3)
             implementation(compose.ui)
+            implementation(compose.components.resources)
+            implementation("org.jetbrains.compose.ui:ui-backhandler:1.12.2")
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
         }
         commonTest.dependencies {
@@ -50,4 +52,9 @@ kotlin {
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
         }
     }
+}
+
+compose.resources {
+    generateResClass = always
+    packageOfResClass = "com.unaj.obratrack.composeapp.generated.resources"
 }

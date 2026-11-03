@@ -30,6 +30,7 @@
 - Se agregaron tests de dominio, repositorio y ViewModel, incluyendo que cancelar no invoque la baja.
 - Pasan los tests de domain, data, firebase y `features:obras`, y `:androidApp:assembleDebug`.
 - En emulador se revisaron el detalle y el diálogo de confirmación; se canceló la baja y no se modificaron datos de Firebase.
+- Corregido (`fix/baja-obra-trabada`): la lista en vivo quitaba la obra seleccionada antes de que la baja confirmara y la barra de progreso quedaba trabada, bloqueando editar y eliminar hasta reiniciar; ahora la baja se cierra por sesión y el error de una baja que falla se muestra en la lista.
 
 ## Tareas de obra (rama `feat/tareas`)
 - Dominio, puerto Firestore (`obras/{id}/tareas`, fechas ISO, enums por nombre), repositorio y pantalla integrada al detalle de la obra: listado con resumen y atrasadas, alta, edición, cambio de estado y baja eligiendo si los relevamientos vinculados se desvinculan o se eliminan. Textos en es/en/it (el italiano requiere revisión).
@@ -52,6 +53,21 @@
 - Estado de la verificación en iOS: compila y recorre login/registro en el simulador del CI con el plist de ejemplo. El login real con Firebase solo está probado en Android; no hay dispositivo ni Mac propia. Si hace falta, se puede probar en el CI cargando el plist como secreto del repo y sumando una prueba de UI de solo lectura.
 - Los `*.podspec` son generados (`.\gradlew :composeApp:podspec`) y están ignorados por Git; el plist real va en `iosApp/` y tampoco se versiona.
 - El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.
+
+## Mejora de interfaces (rama `feat/ui-pantallas`)
+- Tema completo (claro y oscuro, con tipografía y formas), componentes comunes de acceso con acciones de teclado, y lista, detalle y formulario de obras rediseñados con barra superior, tarjetas con etiqueta de estado, selector de fecha de Material 3 y botón Atrás. `MisObrasScreen` mantiene sus parámetros, sin cambios para quien conecta Firestore.
+- Sin íconos nuevos: `features:obras` no usa `materialIconsExtended`. `BackHandler` común (`ui-backhandler`) está deprecado a favor de `NavigationEventHandler`; migrar cuando haya navegación real con back stack.
+- Pasan `assembleDebug`, los tests de `features:auth` y `features:obras` y la compilación de `features:obras` para iOS. Falta la revisión visual en el emulador (claro y oscuro) y el CI de iOS.
+
+## Barra inferior y perfil (rama `feat/barra-inferior`)
+- Barra inferior con Obras y Mi perfil en `composeApp` (solo texto: `composeApp` no resuelve los íconos de Material sin `materialIconsExtended`, que no se suma). Se oculta en el detalle y el formulario de obras; Atrás desde Perfil vuelve a Obras. `composeApp` tiene ahora recursos de texto en es/en/it.
+- `PerfilScreen` (en `features:auth`) muestra nombre (o el correo si no hay) y correo, sin campos nuevos. Cerrar sesión pasó de Obras a Perfil, con diálogo de confirmación; `MisObrasScreen` ya no recibe `onSignOut`.
+- Pendiente para la capa offline: cerrar sesión con escrituras sin sincronizar debe revisarse (qué pasa con los cambios pendientes de ese usuario antes de salir).
+
+## Perfil con resumen de obras (rama `feat/perfil-datos`)
+- `resumenObras` (función pura en `core:domain`) cuenta total, activas, pausadas y finalizadas. `PerfilViewModel` y `PerfilScreen` están en `features:auth` y reutilizan `ObservarObras`; no dependen de `features:obras` ni modifican `ObrasViewModel`. Los datos de la cuenta se ven siempre; el resumen tiene su propio estado de carga y error con "Reintentar", y distingue 0 obras de "no se pudo cargar".
+- La consulta corre solo mientras la pestaña Perfil está visible (5 s de gracia). Al volver se muestra el último valor mientras actualiza; cerrar sesión no muestra error y descarta el valor, para que otra cuenta nunca vea el resumen de la anterior.
+- Perfil y Mis obras son dos suscripciones a la misma consulta de obras; se espera que el SDK de Firestore las agrupe, pero no está verificado. Pasan los tests de `core:domain` y `features:auth`; falta la revisión visual y el CI de iOS.
 
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
