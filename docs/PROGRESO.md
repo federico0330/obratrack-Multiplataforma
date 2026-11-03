@@ -48,6 +48,11 @@
 - Los `*.podspec` son generados (`.\gradlew :composeApp:podspec`) y están ignorados por Git; el plist real va en `iosApp/` y tampoco se versiona.
 - El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.
 
+## Mejora de interfaces (rama `feat/ui-pantallas`)
+- Tema completo (claro y oscuro, con tipografía y formas), componentes comunes de acceso con acciones de teclado, y lista, detalle y formulario de obras rediseñados con barra superior, tarjetas con etiqueta de estado, selector de fecha de Material 3 y botón Atrás. `MisObrasScreen` mantiene sus parámetros, sin cambios para quien conecta Firestore.
+- Sin íconos nuevos: `features:obras` no usa `materialIconsExtended`. `BackHandler` común (`ui-backhandler`) está deprecado a favor de `NavigationEventHandler`; migrar cuando haya navegación real con back stack.
+- Pasan `assembleDebug`, los tests de `features:auth` y `features:obras` y la compilación de `features:obras` para iOS. Falta la revisión visual en el emulador (claro y oscuro) y el CI de iOS.
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
