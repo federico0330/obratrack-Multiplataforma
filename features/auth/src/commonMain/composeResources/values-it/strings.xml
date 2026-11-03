@@ -30,4 +30,14 @@
     <string name="perfil_sign_out_title">Esci</string>
     <string name="perfil_sign_out_confirmation">Vuoi uscire da %1$s?</string>
     <string name="perfil_cancel">Annulla</string>
+    <string name="perfil_resumen_title">Riepilogo dei lavori</string>
+    <string name="perfil_resumen_total">Totale: %1$s</string>
+    <string name="perfil_resumen_activas">Attivi: %1$s</string>
+    <string name="perfil_resumen_pausadas">In pausa: %1$s</string>
+    <string name="perfil_resumen_finalizadas">Completati: %1$s</string>
+    <string name="perfil_resumen_retry">Riprova</string>
+    <string name="perfil_resumen_error_session">Non è stato possibile verificare la sessione. Accedi di nuovo.</string>
+    <string name="perfil_resumen_error_network">Impossibile connettersi. Controlla la connessione e riprova.</string>
+    <string name="perfil_resumen_error_permissions">Non hai l’autorizzazione per vedere i tuoi lavori. Accedi di nuovo.</string>
+    <string name="perfil_resumen_error_generic">Non è stato possibile caricare il riepilogo. Riprova.</string>
 </resources>

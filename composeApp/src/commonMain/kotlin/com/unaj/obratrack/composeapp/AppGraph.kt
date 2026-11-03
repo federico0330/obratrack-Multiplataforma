@@ -14,6 +14,7 @@ import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.RegistrarUsuario
 import com.unaj.obratrack.features.auth.AuthViewModel
+import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.obras.ObrasViewModel
 
@@ -29,6 +30,11 @@ class AppGraph {
     )
 
     fun crearRegistroViewModel() = RegistroViewModel(RegistrarUsuario(authRepository))
+
+    fun crearPerfilViewModel() = PerfilViewModel(
+        ObservarSesion(authRepository),
+        ObservarObras(obrasRepository),
+    )
 
     fun crearObrasViewModel() = ObrasViewModel(
         ObservarSesion(authRepository),

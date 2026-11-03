@@ -25,6 +25,7 @@ import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.LoginScreen
 import com.unaj.obratrack.features.auth.PerfilScreen
+import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
@@ -44,6 +45,7 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
+    val perfilViewModel: PerfilViewModel = viewModel { graph.crearPerfilViewModel() }
     val authState by authViewModel.state.collectAsState()
     val registroState by registroViewModel.state.collectAsState()
     val obrasState by obrasViewModel.state.collectAsState()
@@ -93,11 +95,17 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
                                 )
-                                PestanaPrincipal.PERFIL -> PerfilScreen(
-                                    user = authState.user!!,
-                                    errorMessage = authState.error?.message(),
-                                    onSignOut = authViewModel::signOut,
-                                )
+                                PestanaPrincipal.PERFIL -> {
+                                    // Se recolecta solo aquí: la consulta de obras corre mientras Perfil está visible.
+                                    val resumen by perfilViewModel.state.collectAsState()
+                                    PerfilScreen(
+                                        user = authState.user!!,
+                                        resumen = resumen,
+                                        errorMessage = authState.error?.message(),
+                                        onRetry = perfilViewModel::reintentar,
+                                        onSignOut = authViewModel::signOut,
+                                    )
+                                }
                             }
                         }
                     }
