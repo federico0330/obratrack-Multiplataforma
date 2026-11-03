@@ -76,7 +76,6 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                 PestanaPrincipal.OBRAS -> MisObrasScreen(
                                     user = authState.user!!,
                                     state = obrasState,
-                                    authErrorMessage = authState.error?.message(),
                                     onCreate = obrasViewModel::abrirFormulario,
                                     onRetry = obrasViewModel::reintentar,
                                     onSelectObra = obrasViewModel::abrirDetalle,

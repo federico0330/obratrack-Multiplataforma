@@ -29,7 +29,6 @@ import org.jetbrains.compose.resources.stringResource
 fun MisObrasScreen(
     user: Usuario,
     state: ObrasUiState,
-    authErrorMessage: String? = null,
     onCreate: () -> Unit,
     onRetry: () -> Unit,
     onSelectObra: (Obra) -> Unit,
@@ -126,7 +125,6 @@ fun MisObrasScreen(
             else -> ListaObrasContent(
                 user = user,
                 lista = state.lista,
-                authErrorMessage = authErrorMessage,
                 onRetry = onRetry,
                 onSelectObra = onSelectObra,
                 padding = padding,
