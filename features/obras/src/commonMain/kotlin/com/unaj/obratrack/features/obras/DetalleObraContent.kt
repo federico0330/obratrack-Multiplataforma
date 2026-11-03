@@ -36,6 +36,7 @@ internal fun DetalleObraContent(
     onChangeStatus: (EstadoObra) -> Unit,
     onRequestDelete: () -> Unit,
     padding: PaddingValues,
+    detailExtra: @Composable () -> Unit = {},
 ) {
     val ocupado = state.actualizando || state.eliminando
     Column(
@@ -76,6 +77,7 @@ internal fun DetalleObraContent(
         if (obra.estado != EstadoObra.FINALIZADA) {
             AccionEstado(Res.string.obras_finish, !ocupado) { onChangeStatus(EstadoObra.FINALIZADA) }
         }
+        detailExtra()
         HorizontalDivider()
         OutlinedButton(
             onClick = onRequestDelete,

@@ -45,6 +45,7 @@ fun MisObrasScreen(
     onDateChange: (String) -> Unit,
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
+    detailExtra: @Composable () -> Unit = {},
 ) {
     val obra = state.obraSeleccionada
     val enFormulario = state.formularioVisible
@@ -121,6 +122,7 @@ fun MisObrasScreen(
                 onChangeStatus = onChangeStatus,
                 onRequestDelete = onRequestDelete,
                 padding = padding,
+                detailExtra = detailExtra,
             )
             else -> ListaObrasContent(
                 user = user,

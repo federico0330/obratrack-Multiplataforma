@@ -32,9 +32,14 @@
 - En emulador se revisaron el detalle y el diálogo de confirmación; se canceló la baja y no se modificaron datos de Firebase.
 - Corregido (`fix/baja-obra-trabada`): la lista en vivo quitaba la obra seleccionada antes de que la baja confirmara y la barra de progreso quedaba trabada, bloqueando editar y eliminar hasta reiniciar; ahora la baja se cierra por sesión y el error de una baja que falla se muestra en la lista.
 
+## Tareas de obra (rama `feat/tareas`)
+- Dominio, puerto Firestore (`obras/{id}/tareas`, fechas ISO, enums por nombre), repositorio y pantalla integrada al detalle de la obra: listado con resumen y atrasadas, alta, edición, cambio de estado y baja eligiendo si los relevamientos vinculados se desvinculan o se eliminan. Textos en es/en/it (el italiano requiere revisión).
+- Pasan los tests de domain, data, firebase y `features:obras`; `:androidApp:assembleDebug` pasa. Falta probar con Firebase real en el teléfono y el aislamiento con dos cuentas; iOS solo compila en el CI.
+- Las escrituras de obras y tareas esperan al servidor; hay que revisarlas para el requisito offline.
+
 ## Próximo
 1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
-2. Registrar la app iOS en Firebase y probar login y lectura de obras reales en el simulador.
+2. Probar login y lectura de obras reales en el simulador de iOS (la app ya está registrada en Firebase; falta una Mac o el CI con el plist como secreto).
 3. Después seguir con relevamientos y tareas; dejar offline para el final.
 
 ## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
@@ -44,7 +49,7 @@
 - Pasan `assembleDebug` y las pruebas de `core:domain`, `core:data`, `core:firebase`, `features:auth` y `features:obras` desde una ruta de trabajo sin espacios.
 - El APK abre en el emulador Android, recupera la sesión y muestra las obras de Firebase sin hacer escrituras.
 - El build y la prueba de navegación pasan en iOS Simulator mediante GitHub Actions con runner macOS; no hace falta un dispositivo físico.
-- El flujo real de Firebase en iOS requiere registrar `com.unaj.appmoviles.obratrack.ios` en el proyecto compartido y agregar su `GoogleService-Info.plist` (ignorado por Git). El plist de ejemplo sirve solo para la prueba visual; no autentica ni escribe datos.
+- La app iOS `com.unaj.appmoviles.obratrack.ios` ya está registrada en el proyecto compartido de Firebase y su `GoogleService-Info.plist` está en `iosApp/` en la máquina de quien lo descargó (ignorado por Git, se pasa por canal privado). El plist de ejemplo que usa el CI sirve solo para la prueba visual; no autentica ni escribe datos. El flujo real de Firebase en iOS todavía no se probó.
 - Estado de la verificación en iOS: compila y recorre login/registro en el simulador del CI con el plist de ejemplo. El login real con Firebase solo está probado en Android; no hay dispositivo ni Mac propia. Si hace falta, se puede probar en el CI cargando el plist como secreto del repo y sumando una prueba de UI de solo lectura.
 - Los `*.podspec` son generados (`.\gradlew :composeApp:podspec`) y están ignorados por Git; el plist real va en `iosApp/` y tampoco se versiona.
 - El `compileSdk` de Android pasó a 37, requerido por Compose Multiplatform 1.12.2; el `targetSdk` se mantiene en 36.

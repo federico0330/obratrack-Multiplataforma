@@ -31,6 +31,9 @@ import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
 import com.unaj.obratrack.features.obras.MisObrasScreen
 import com.unaj.obratrack.features.obras.ObrasViewModel
+import com.unaj.obratrack.features.obras.TareasAcciones
+import com.unaj.obratrack.features.obras.TareasSection
+import com.unaj.obratrack.features.obras.TareasViewModel
 
 /** Punto de entrada común para Android y SwiftUI. */
 @OptIn(ExperimentalComposeUiApi::class)
@@ -45,14 +48,22 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
+    val tareasViewModel: TareasViewModel = viewModel { graph.crearTareasViewModel() }
     val perfilViewModel: PerfilViewModel = viewModel { graph.crearPerfilViewModel() }
     val authState by authViewModel.state.collectAsState()
     val registroState by registroViewModel.state.collectAsState()
     val obrasState by obrasViewModel.state.collectAsState()
+    val tareasState by tareasViewModel.state.collectAsState()
     var enRegistro by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(authState.user) {
         if (authState.user != null) enRegistro = false
+    }
+
+    // Las tareas siguen a la obra abierta en el detalle.
+    val obraAbiertaId = obrasState.obraSeleccionada?.id
+    LaunchedEffect(obraAbiertaId) {
+        if (obraAbiertaId != null) tareasViewModel.abrirObra(obraAbiertaId) else tareasViewModel.cerrarObra()
     }
 
     ObraTrackTheme {
@@ -94,6 +105,28 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                     onDateChange = obrasViewModel::fechaCambiada,
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
+                                    detailExtra = {
+                                        TareasSection(
+                                            state = tareasState,
+                                            acciones = TareasAcciones(
+                                                onCreate = tareasViewModel::abrirFormulario,
+                                                onRetry = tareasViewModel::reintentar,
+                                                onEdit = tareasViewModel::editar,
+                                                onChangeState = tareasViewModel::cambiarEstado,
+                                                onRequestDelete = tareasViewModel::solicitarEliminacion,
+                                                onCancelDelete = tareasViewModel::cancelarEliminacion,
+                                                onConfirmDelete = tareasViewModel::confirmarEliminacion,
+                                                onLinkedChange = tareasViewModel::vinculadosCambiados,
+                                                onCloseForm = tareasViewModel::cerrarFormulario,
+                                                onTitleChange = tareasViewModel::tituloCambiado,
+                                                onDescriptionChange = tareasViewModel::descripcionCambiada,
+                                                onCategoryChange = tareasViewModel::categoriaCambiada,
+                                                onStartChange = tareasViewModel::fechaInicioCambiada,
+                                                onEndChange = tareasViewModel::fechaFinCambiada,
+                                                onSave = tareasViewModel::guardar,
+                                            ),
+                                        )
+                                    },
                                 )
                                 PestanaPrincipal.PERFIL -> {
                                     // Se recolecta solo aquí: la consulta de obras corre mientras Perfil está visible.
