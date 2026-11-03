@@ -10,14 +10,15 @@ import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -33,20 +34,38 @@ class PerfilViewModel(
 ) : ViewModel() {
     private val reintentos = MutableStateFlow(0)
 
+    // Último valor emitido y de quién era. Permite saber, al reiniciar la consulta, si hay un
+    // valor conocido del mismo usuario que se pueda seguir mostrando mientras se actualiza.
+    private var ultimoValor: ResumenPerfilUiState = ResumenPerfilUiState.Cargando
+    private var ultimoUsuarioId: String? = null
+
     val state: StateFlow<ResumenPerfilUiState> = reintentos
         .flatMapLatest {
             observarSesion()
+                .distinctUntilChanged { anterior, nuevo -> anterior?.id == nuevo?.id }
                 .flatMapLatest { usuario ->
                     if (usuario == null) {
-                        flowOf<ResumenPerfilUiState>(ResumenPerfilUiState.Error(ErrorResumenUi.SESION))
+                        // Sin sesión (p. ej. al cerrarla) no es un error: se descarta lo guardado para
+                        // que otra cuenta nunca vea el resumen de la anterior.
+                        ultimoValor = ResumenPerfilUiState.Cargando
+                        ultimoUsuarioId = null
+                        flowOf<ResumenPerfilUiState>(ResumenPerfilUiState.Cargando)
                     } else {
                         // El catch va dentro: si falla la lectura, "Reintentar" todavía puede reiniciar la consulta.
                         observarObras(usuario.id)
                             .map { it.aUi() }
-                            .onStart { emit(ResumenPerfilUiState.Cargando) }
+                            .onStart {
+                                val hayValorConocido = ultimoUsuarioId == usuario.id &&
+                                    ultimoValor is ResumenPerfilUiState.Contenido
+                                if (!hayValorConocido) emit(ResumenPerfilUiState.Cargando)
+                            }
                             .catch { error ->
                                 if (error is CancellationException) throw error
                                 emit(ResumenPerfilUiState.Error(ErrorResumenUi.DESCONOCIDO))
+                            }
+                            .onEach {
+                                ultimoValor = it
+                                ultimoUsuarioId = usuario.id
                             }
                     }
                 }
