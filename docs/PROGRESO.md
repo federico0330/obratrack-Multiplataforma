@@ -38,9 +38,9 @@
 - Las escrituras de obras y tareas esperan al servidor; hay que revisarlas para el requisito offline.
 
 ## Próximo
-1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
-2. Probar login y lectura de obras reales en el simulador de iOS (la app ya está registrada en Firebase; falta una Mac o el CI con el plist como secreto).
-3. Después seguir con relevamientos y tareas; dejar offline para el final.
+1. Cerrar consistencia de tareas: resultados de operaciones tras cambiar obra/sesión y actualización de `ultimaVisita` al borrar relevamientos vinculados.
+2. Verificar el flujo integrado en Android y el aislamiento con dos cuentas reales. Registrar por separado las comprobaciones disponibles de iOS.
+3. Continuar con alta y listado de relevamientos, con vínculo opcional a tarea; fotos y permisos en un corte posterior.
 
 ## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
 - Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
@@ -91,3 +91,11 @@
 - “Hoy” se calcula con la zona local; `fechaInicio` se guarda desde medianoche UTC. La hora de visita son minutos desde medianoche.
 - Sin fotos en Firebase Storage; se acordó Cloudinary. Sin FCM para avisos locales.
 - Errores tipados; cancellation se relanza; no convertir escrituras fallidas en éxito.
+
+
+## Revisión de alcance — 04/11/2026
+- Base: `1dd21d2`. Tareas ya está integrado en main (PR #7), junto con íconos, calendario de tareas, reactivación de obras finalizadas (PR #8) y el módulo compartido `core:ui` (PR #9).
+- Se revisaron dominio, repositorio, adaptador Firebase, ViewModel, conexión de pantallas y componentes compartidos. Se mantiene la inyección por constructor desde `AppGraph`; `core:ui` no depende de las features.
+- Hallazgo de lectura: las operaciones suspendidas de `TareasViewModel` actualizan el estado al terminar sin comprobar que siga siendo la misma obra/sesión. Se planificó reproducirlo con operaciones demoradas y proteger el contexto completo.
+- Diferencia con el nativo: la baja KMP de tarea puede borrar relevamientos sin recalcular `ultimaVisita`. Además divide en lotes lo que el nativo limita a un batch atómico. Se prioriza resolver consistencia y política de límites antes de ampliar relevamientos.
+- Esta intervención actualiza planificación y seguimiento. No se ejecutaron pruebas, compilaciones ni escrituras en Firebase; los resultados de pruebas anteriores siguen siendo los registrados en cada sección.
