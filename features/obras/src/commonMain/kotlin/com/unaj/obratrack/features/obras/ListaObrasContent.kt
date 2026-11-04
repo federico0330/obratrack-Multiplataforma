@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.features.obras.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -63,7 +66,10 @@ internal fun ListaObrasContent(
             is ListaObrasUiState.Error -> item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     ErrorBlock(errorMessage(lista.motivo))
-                    TextButton(onClick = onRetry) { Text(stringResource(Res.string.obras_retry)) }
+                    TextButton(onClick = onRetry) {
+                        IconoBoton(Res.drawable.ic_refresh)
+                        Text(stringResource(Res.string.obras_retry))
+                    }
                 }
             }
         }
@@ -77,6 +83,12 @@ private fun EstadoVacio() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_obras),
+            contentDescription = null,
+            modifier = Modifier.size(48.dp),
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
         Text(stringResource(Res.string.obras_empty_title), style = MaterialTheme.typography.titleMedium)
         Text(
             stringResource(Res.string.obras_empty_hint),

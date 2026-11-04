@@ -13,6 +13,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +38,7 @@ import com.unaj.obratrack.domain.model.EstadoTarea
 import com.unaj.obratrack.domain.model.RelevamientosVinculados
 import com.unaj.obratrack.domain.model.Tarea
 import com.unaj.obratrack.features.obras.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Acciones de la sección de tareas; la pantalla no conoce al ViewModel. */
@@ -78,7 +82,10 @@ private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
         )
         is ListaTareasUiState.Error -> {
             ErrorBlock(mensajeError(lista.motivo))
-            TextButton(onClick = acciones.onRetry) { Text(stringResource(Res.string.tareas_retry)) }
+            TextButton(onClick = acciones.onRetry) {
+                IconoBoton(Res.drawable.ic_refresh)
+                Text(stringResource(Res.string.tareas_retry))
+            }
         }
         is ListaTareasUiState.Contenido -> {
             Text(
@@ -97,6 +104,7 @@ private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
     state.errorOperacion?.let { ErrorBlock(mensajeError(it)) }
     if (state.eliminando) LinearProgressIndicator(Modifier.fillMaxWidth())
     Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth()) {
+        IconoBoton(Res.drawable.ic_add)
         Text(stringResource(Res.string.tareas_create))
     }
 }
@@ -110,7 +118,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(tarea.titulo, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                EtiquetaTarea(nombreEstado(tarea.estado))
+                EtiquetaTarea(tarea.estado)
             }
             Text(nombreCategoria(tarea.categoria), style = MaterialTheme.typography.bodyMedium, color = secundario)
             if (tarea.fechaInicio != null && tarea.fechaFin != null) {
@@ -121,11 +129,19 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                 )
             }
             if (item.atrasada) {
-                Text(
-                    stringResource(Res.string.tareas_overdue),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.error,
-                )
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_warning),
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                    Text(
+                        stringResource(Res.string.tareas_overdue),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
             }
             if (tarea.descripcion.isNotBlank()) Text(tarea.descripcion, style = MaterialTheme.typography.bodyMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
@@ -147,14 +163,22 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                 }
             }
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = { acciones.onEdit(tarea) }, enabled = !ocupada) {
-                    Text(stringResource(Res.string.tareas_edit))
+                IconButton(onClick = { acciones.onEdit(tarea) }, enabled = !ocupada) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_edit),
+                        contentDescription = stringResource(Res.string.tareas_edit),
+                    )
                 }
-                TextButton(
+                IconButton(
                     onClick = { acciones.onRequestDelete(tarea) },
                     enabled = !ocupada,
-                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
-                ) { Text(stringResource(Res.string.tareas_delete)) }
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_delete),
+                        contentDescription = stringResource(Res.string.tareas_delete),
+                    )
+                }
             }
         }
     }
@@ -172,18 +196,18 @@ private fun AccionTarea(
 
 /** Etiqueta con el estado de la tarea, con el mismo aspecto que la de la obra. */
 @Composable
-private fun EtiquetaTarea(texto: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        shape = MaterialTheme.shapes.small,
-    ) {
-        Text(
-            texto,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-        )
+private fun EtiquetaTarea(estado: EstadoTarea) {
+    val icono = when (estado) {
+        EstadoTarea.PENDIENTE -> Res.drawable.ic_circle_outline
+        EstadoTarea.EN_CURSO -> Res.drawable.ic_play_circle
+        EstadoTarea.COMPLETADA -> Res.drawable.ic_check_circle
     }
+    Etiqueta(
+        texto = nombreEstado(estado),
+        icono = icono,
+        container = MaterialTheme.colorScheme.secondaryContainer,
+        content = MaterialTheme.colorScheme.onSecondaryContainer,
+    )
 }
 
 @Composable
@@ -203,17 +227,17 @@ private fun FormularioTarea(form: FormularioTareaUiState, acciones: TareasAccion
         modifier = Modifier.fillMaxWidth(),
     )
     SelectorCategoria(form.categoria, acciones.onCategoryChange)
-    OutlinedTextField(
-        form.fechaInicio, acciones.onStartChange,
-        label = { Text(stringResource(Res.string.tareas_field_start)) },
-        supportingText = { Text(stringResource(Res.string.tareas_date_hint)) },
-        modifier = Modifier.fillMaxWidth(), singleLine = true,
+    CampoFecha(
+        fechaIso = form.fechaInicio,
+        label = stringResource(Res.string.tareas_field_start),
+        onDateChange = acciones.onStartChange,
+        onClear = { acciones.onStartChange("") },
     )
-    OutlinedTextField(
-        form.fechaFin, acciones.onEndChange,
-        label = { Text(stringResource(Res.string.tareas_field_end)) },
-        supportingText = { Text(stringResource(Res.string.tareas_date_hint)) },
-        modifier = Modifier.fillMaxWidth(), singleLine = true,
+    CampoFecha(
+        fechaIso = form.fechaFin,
+        label = stringResource(Res.string.tareas_field_end),
+        onDateChange = acciones.onEndChange,
+        onClear = { acciones.onEndChange("") },
     )
     form.error?.let { ErrorBlock(mensajeError(it)) }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {

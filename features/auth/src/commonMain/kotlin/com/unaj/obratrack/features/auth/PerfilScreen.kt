@@ -4,16 +4,19 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
@@ -31,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.features.auth.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -88,7 +92,15 @@ fun PerfilScreen(
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
                 modifier = Modifier.fillMaxWidth(),
-            ) { Text(stringResource(Res.string.perfil_sign_out)) }
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_logout),
+                    contentDescription = null,
+                    modifier = Modifier.size(ButtonDefaults.IconSize),
+                )
+                Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                Text(stringResource(Res.string.perfil_sign_out))
+            }
         }
     }
 }
@@ -115,7 +127,15 @@ private fun ResumenObrasSeccion(resumen: ResumenPerfilUiState, onRetry: () -> Un
             }
             is ResumenPerfilUiState.Error -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 AuthErrorMessage(mensajeResumen(resumen.motivo))
-                TextButton(onClick = onRetry) { Text(stringResource(Res.string.perfil_resumen_retry)) }
+                TextButton(onClick = onRetry) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_refresh),
+                        contentDescription = null,
+                        modifier = Modifier.size(ButtonDefaults.IconSize),
+                    )
+                    Spacer(Modifier.width(ButtonDefaults.IconSpacing))
+                    Text(stringResource(Res.string.perfil_resumen_retry))
+                }
             }
         }
     }

@@ -67,12 +67,13 @@ internal fun DetalleObraContent(
         }
         state.errorOperacion?.let { ErrorBlock(errorMessage(it)) }
         Button(onClick = onEditObra, enabled = !ocupado, modifier = Modifier.fillMaxWidth()) {
+            IconoBoton(Res.drawable.ic_edit)
             Text(stringResource(Res.string.obras_edit))
         }
         when (obra.estado) {
             EstadoObra.ACTIVA -> AccionEstado(Res.string.obras_pause, !ocupado) { onChangeStatus(EstadoObra.PAUSADA) }
-            EstadoObra.PAUSADA -> AccionEstado(Res.string.obras_reactivate, !ocupado) { onChangeStatus(EstadoObra.ACTIVA) }
-            EstadoObra.FINALIZADA -> Unit
+            EstadoObra.PAUSADA, EstadoObra.FINALIZADA ->
+                AccionEstado(Res.string.obras_reactivate, !ocupado) { onChangeStatus(EstadoObra.ACTIVA) }
         }
         if (obra.estado != EstadoObra.FINALIZADA) {
             AccionEstado(Res.string.obras_finish, !ocupado) { onChangeStatus(EstadoObra.FINALIZADA) }
@@ -85,7 +86,10 @@ internal fun DetalleObraContent(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
             modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(Res.string.obras_delete)) }
+        ) {
+            IconoBoton(Res.drawable.ic_delete)
+            Text(stringResource(Res.string.obras_delete))
+        }
     }
 }
 
