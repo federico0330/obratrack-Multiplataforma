@@ -91,7 +91,4 @@
     <string name="tareas_cat_other">Altro</string>
     <string name="obras_start_date_value">Data di inizio: %1$s</string>
     <string name="obras_visibility">Visibilità</string>
-    <string name="obras_pick_date">Scegli la data</string>
-    <string name="obras_accept">Conferma</string>
-    <string name="obras_clear_date">Rimuovi data</string>
 </resources>

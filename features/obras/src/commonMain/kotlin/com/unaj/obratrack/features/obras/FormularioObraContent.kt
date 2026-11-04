@@ -1,5 +1,7 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.CampoFecha
+import com.unaj.obratrack.core.ui.ErrorBlock
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues

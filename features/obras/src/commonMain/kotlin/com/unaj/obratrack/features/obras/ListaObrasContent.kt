@@ -1,5 +1,8 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.ErrorBlock
+import com.unaj.obratrack.core.ui.IconoBoton
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,7 +70,7 @@ internal fun ListaObrasContent(
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     ErrorBlock(errorMessage(lista.motivo))
                     TextButton(onClick = onRetry) {
-                        IconoBoton(Res.drawable.ic_refresh)
+                        IconoBoton(Iconos.Refresh)
                         Text(stringResource(Res.string.obras_retry))
                     }
                 }
@@ -84,7 +87,7 @@ private fun EstadoVacio() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Icon(
-            painter = painterResource(Res.drawable.ic_obras),
+            painter = painterResource(Iconos.Obras),
             contentDescription = null,
             modifier = Modifier.size(48.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,

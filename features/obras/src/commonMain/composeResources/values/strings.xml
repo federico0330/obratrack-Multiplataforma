@@ -91,7 +91,4 @@
     <string name="tareas_cat_other">Otros</string>
     <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
     <string name="obras_visibility">Visibilidad</string>
-    <string name="obras_pick_date">Elegir fecha</string>
-    <string name="obras_accept">Aceptar</string>
-    <string name="obras_clear_date">Quitar fecha</string>
 </resources>

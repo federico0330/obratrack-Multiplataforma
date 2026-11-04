@@ -1,5 +1,8 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.ErrorBlock
+import com.unaj.obratrack.core.ui.IconoBoton
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -67,7 +70,7 @@ internal fun DetalleObraContent(
         }
         state.errorOperacion?.let { ErrorBlock(errorMessage(it)) }
         Button(onClick = onEditObra, enabled = !ocupado, modifier = Modifier.fillMaxWidth()) {
-            IconoBoton(Res.drawable.ic_edit)
+            IconoBoton(Iconos.Edit)
             Text(stringResource(Res.string.obras_edit))
         }
         when (obra.estado) {
@@ -87,7 +90,7 @@ internal fun DetalleObraContent(
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.error),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            IconoBoton(Res.drawable.ic_delete)
+            IconoBoton(Iconos.Delete)
             Text(stringResource(Res.string.obras_delete))
         }
     }

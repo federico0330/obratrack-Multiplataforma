@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.auth
 
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -89,7 +89,7 @@ internal fun AuthTextField(
                 IconButton(onClick = onTogglePasswordVisibility) {
                     Icon(
                         painter = painterResource(
-                            if (passwordVisible) Res.drawable.ic_visibility_off else Res.drawable.ic_visibility,
+                            if (passwordVisible) Iconos.VisibilityOff else Iconos.Visibility,
                         ),
                         contentDescription = stringResource(
                             if (passwordVisible) Res.string.auth_hide_password else Res.string.auth_show_password,
@@ -105,19 +105,6 @@ internal fun AuthTextField(
         singleLine = true,
         modifier = modifier.fillMaxWidth(),
     )
-}
-
-/** Mensaje de error visible como bloque, no solo como texto rojo suelto. */
-@Composable
-internal fun AuthErrorMessage(message: String) {
-    Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Text(message, modifier = Modifier.padding(12.dp), style = MaterialTheme.typography.bodyMedium)
-    }
 }
 
 @Composable
