@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.Text
@@ -21,8 +23,12 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.composeapp.generated.resources.Res
+import com.unaj.obratrack.composeapp.generated.resources.ic_nav_obras
+import com.unaj.obratrack.composeapp.generated.resources.ic_nav_perfil
 import com.unaj.obratrack.composeapp.generated.resources.nav_obras
 import com.unaj.obratrack.composeapp.generated.resources.nav_perfil
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 private val AlturaItem = 80.dp
@@ -36,8 +42,8 @@ val PestanaPrincipalSaver: Saver<PestanaPrincipal, String> = Saver(
 )
 
 /**
- * Barra inferior sin estado: recibe la pestaña activa y emite la elegida. Solo texto, porque
- * los íconos de Material requieren `materialIconsExtended`, que no se suma a este módulo.
+ * Barra inferior sin estado: recibe la pestaña activa y emite la elegida. Los íconos son
+ * vector drawables de `composeResources`, para no sumar `materialIconsExtended`.
  */
 @Composable
 fun BarraInferior(
@@ -45,12 +51,14 @@ fun BarraInferior(
     onSeleccionar: (PestanaPrincipal) -> Unit,
 ) {
     NavigationBar {
-        ItemTexto(
+        ItemNavegacion(
+            icono = Res.drawable.ic_nav_obras,
             texto = stringResource(Res.string.nav_obras),
             seleccionado = seleccionada == PestanaPrincipal.OBRAS,
             onClick = { onSeleccionar(PestanaPrincipal.OBRAS) },
         )
-        ItemTexto(
+        ItemNavegacion(
+            icono = Res.drawable.ic_nav_perfil,
             texto = stringResource(Res.string.nav_perfil),
             seleccionado = seleccionada == PestanaPrincipal.PERFIL,
             onClick = { onSeleccionar(PestanaPrincipal.PERFIL) },
@@ -59,7 +67,12 @@ fun BarraInferior(
 }
 
 @Composable
-private fun RowScope.ItemTexto(texto: String, seleccionado: Boolean, onClick: () -> Unit) {
+private fun RowScope.ItemNavegacion(
+    icono: DrawableResource,
+    texto: String,
+    seleccionado: Boolean,
+    onClick: () -> Unit,
+) {
     val colores = MaterialTheme.colorScheme
     Column(
         // Altura fija: NavigationBar solo define un mínimo, y con fillMaxHeight() cada ítem ocuparía toda la pantalla.
@@ -80,11 +93,19 @@ private fun RowScope.ItemTexto(texto: String, seleccionado: Boolean, onClick: ()
                 ),
         )
         Spacer(Modifier.height(6.dp))
+        val color = if (seleccionado) colores.primary else colores.onSurfaceVariant
+        // Decorativo: el texto de abajo ya nombra la pestaña, así que no lleva contentDescription.
+        Icon(
+            painter = painterResource(icono),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp),
+            tint = color,
+        )
         Text(
             text = texto,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = if (seleccionado) FontWeight.Bold else FontWeight.Medium,
-            color = if (seleccionado) colores.primary else colores.onSurfaceVariant,
+            color = color,
         )
     }
 }

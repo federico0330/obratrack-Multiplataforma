@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -18,6 +20,7 @@ import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.features.obras.generated.resources.*
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -83,10 +86,15 @@ fun MisObrasScreen(
                     },
                     navigationIcon = {
                         if (enFormulario || enDetalle) {
-                            TextButton(
+                            IconButton(
                                 onClick = if (enFormulario) onCloseForm else onBackToList,
                                 enabled = !state.formulario.guardando && !state.eliminando,
-                            ) { Text(stringResource(Res.string.obras_back)) }
+                            ) {
+                                Icon(
+                                    painter = painterResource(Res.drawable.ic_arrow_back),
+                                    contentDescription = stringResource(Res.string.obras_back),
+                                )
+                            }
                         }
                     },
                 )
@@ -97,9 +105,11 @@ fun MisObrasScreen(
         },
         floatingActionButton = {
             if (!enFormulario && !enDetalle) {
-                ExtendedFloatingActionButton(onClick = onCreate) {
-                    Text(stringResource(Res.string.obras_create))
-                }
+                ExtendedFloatingActionButton(
+                    onClick = onCreate,
+                    icon = { Icon(painterResource(Res.drawable.ic_add), contentDescription = null) },
+                    text = { Text(stringResource(Res.string.obras_create)) },
+                )
             }
         },
     ) { padding ->

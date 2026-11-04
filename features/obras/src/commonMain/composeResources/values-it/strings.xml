@@ -48,7 +48,6 @@
     <string name="tareas_field_category">Categoria</string>
     <string name="tareas_field_start">Data di inizio (facoltativa)</string>
     <string name="tareas_field_end">Data di fine (facoltativa)</string>
-    <string name="tareas_date_hint">Formato AAAA-MM-GG</string>
     <string name="tareas_save">Salva</string>
     <string name="tareas_cancel">Annulla</string>
     <string name="tareas_retry">Riprova</string>
@@ -94,4 +93,5 @@
     <string name="obras_visibility">Visibilità</string>
     <string name="obras_pick_date">Scegli la data</string>
     <string name="obras_accept">Conferma</string>
+    <string name="obras_clear_date">Rimuovi data</string>
 </resources>
