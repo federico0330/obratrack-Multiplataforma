@@ -1,5 +1,10 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.CampoFecha
+import com.unaj.obratrack.core.ui.Etiqueta
+import com.unaj.obratrack.core.ui.ErrorBlock
+import com.unaj.obratrack.core.ui.IconoBoton
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
@@ -9,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -22,7 +26,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -83,7 +86,7 @@ private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
         is ListaTareasUiState.Error -> {
             ErrorBlock(mensajeError(lista.motivo))
             TextButton(onClick = acciones.onRetry) {
-                IconoBoton(Res.drawable.ic_refresh)
+                IconoBoton(Iconos.Refresh)
                 Text(stringResource(Res.string.tareas_retry))
             }
         }
@@ -104,7 +107,7 @@ private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
     state.errorOperacion?.let { ErrorBlock(mensajeError(it)) }
     if (state.eliminando) LinearProgressIndicator(Modifier.fillMaxWidth())
     Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth()) {
-        IconoBoton(Res.drawable.ic_add)
+        IconoBoton(Iconos.Add)
         Text(stringResource(Res.string.tareas_create))
     }
 }
@@ -131,7 +134,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
             if (item.atrasada) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_warning),
+                        painter = painterResource(Iconos.Warning),
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.error,
@@ -165,7 +168,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
             Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = { acciones.onEdit(tarea) }, enabled = !ocupada) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_edit),
+                        painter = painterResource(Iconos.Edit),
                         contentDescription = stringResource(Res.string.tareas_edit),
                     )
                 }
@@ -175,7 +178,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                     colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.error),
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.ic_delete),
+                        painter = painterResource(Iconos.Delete),
                         contentDescription = stringResource(Res.string.tareas_delete),
                     )
                 }
@@ -198,9 +201,9 @@ private fun AccionTarea(
 @Composable
 private fun EtiquetaTarea(estado: EstadoTarea) {
     val icono = when (estado) {
-        EstadoTarea.PENDIENTE -> Res.drawable.ic_circle_outline
-        EstadoTarea.EN_CURSO -> Res.drawable.ic_play_circle
-        EstadoTarea.COMPLETADA -> Res.drawable.ic_check_circle
+        EstadoTarea.PENDIENTE -> Iconos.CircleOutline
+        EstadoTarea.EN_CURSO -> Iconos.PlayCircle
+        EstadoTarea.COMPLETADA -> Iconos.CheckCircle
     }
     Etiqueta(
         texto = nombreEstado(estado),

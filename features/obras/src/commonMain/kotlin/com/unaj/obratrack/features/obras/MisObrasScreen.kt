@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
@@ -91,7 +92,7 @@ fun MisObrasScreen(
                                 enabled = !state.formulario.guardando && !state.eliminando,
                             ) {
                                 Icon(
-                                    painter = painterResource(Res.drawable.ic_arrow_back),
+                                    painter = painterResource(Iconos.ArrowBack),
                                     contentDescription = stringResource(Res.string.obras_back),
                                 )
                             }
@@ -107,7 +108,7 @@ fun MisObrasScreen(
             if (!enFormulario && !enDetalle) {
                 ExtendedFloatingActionButton(
                     onClick = onCreate,
-                    icon = { Icon(painterResource(Res.drawable.ic_add), contentDescription = null) },
+                    icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
                     text = { Text(stringResource(Res.string.obras_create)) },
                 )
             }

@@ -1,26 +1,22 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.Etiqueta
+import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.features.obras.generated.resources.*
-import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /** Etiqueta con el estado de la obra, coloreada según el estado. */
@@ -33,52 +29,11 @@ internal fun EstadoChip(estado: EstadoObra, modifier: Modifier = Modifier) {
         EstadoObra.FINALIZADA -> colors.surfaceVariant to colors.onSurfaceVariant
     }
     val icono = when (estado) {
-        EstadoObra.ACTIVA -> Res.drawable.ic_play_circle
-        EstadoObra.PAUSADA -> Res.drawable.ic_pause_circle
-        EstadoObra.FINALIZADA -> Res.drawable.ic_check_circle
+        EstadoObra.ACTIVA -> Iconos.PlayCircle
+        EstadoObra.PAUSADA -> Iconos.PauseCircle
+        EstadoObra.FINALIZADA -> Iconos.CheckCircle
     }
     Etiqueta(estadoNombre(estado), icono, container, content, modifier)
-}
-
-/** Etiqueta con ícono y texto. El ícono es decorativo: el texto ya dice el estado. */
-@Composable
-internal fun Etiqueta(
-    texto: String,
-    icono: DrawableResource,
-    container: Color,
-    content: Color,
-    modifier: Modifier = Modifier,
-) {
-    Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.small, modifier = modifier) {
-        Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            Icon(painterResource(icono), contentDescription = null, modifier = Modifier.size(14.dp))
-            Text(texto, style = MaterialTheme.typography.labelMedium)
-        }
-    }
-}
-
-/** Mensaje de error como bloque, no como texto rojo suelto. */
-@Composable
-internal fun ErrorBlock(message: String, modifier: Modifier = Modifier) {
-    Surface(
-        color = MaterialTheme.colorScheme.errorContainer,
-        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-        shape = MaterialTheme.shapes.small,
-        modifier = modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Icon(painterResource(Res.drawable.ic_error), contentDescription = null, modifier = Modifier.size(20.dp))
-            Text(message, style = MaterialTheme.typography.bodyMedium)
-        }
-    }
 }
 
 @Composable

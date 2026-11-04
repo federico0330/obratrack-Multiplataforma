@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.auth
 
+import com.unaj.obratrack.core.ui.ErrorBlock
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -63,7 +64,7 @@ fun RegistroScreen(
             passwordVisible = passwordVisible,
             onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
         )
-        state.error?.let { AuthErrorMessage(it.message()) }
+        state.error?.let { ErrorBlock(it.message()) }
         AuthSubmitButton(
             text = stringResource(Res.string.auth_create_account),
             enabled = state.canSubmit,

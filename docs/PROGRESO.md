@@ -72,6 +72,11 @@
 - Las fechas de inicio y fin de la tarea usan el `DatePicker` de Material 3 mediante `CampoFecha` (extraído a su propio archivo y compartido con la obra). Como son opcionales, el diálogo ofrece "Quitar fecha". El estado del formulario sigue siendo texto ISO (vacío = sin fecha), así que ViewModel y dominio no cambiaron; se quitó el texto de ayuda de formato. Pasan `features:obras:testAndroidHostTest` y `:androidApp:assembleDebug`; falta la revisión visual.
 - Corregido: una obra finalizada no ofrecía ninguna acción de estado en el detalle. Ahora muestra "Reactivar obra" (vuelve a activa), igual que una pausada. Era solo la UI: dominio, repositorio y ViewModel ya aceptaban la transición.
 
+## Módulo de UI compartido (rama `feat/core-ui`, sobre `feat/ui-iconos`)
+- Nuevo `:core:ui` (`core/ui`, paquete `com.unaj.obratrack.core.ui`): todos los drawables de íconos (ya sin duplicados entre features), expuestos como `Iconos.*` porque su `Res` es interna y chocaría con la de cada feature, y los componentes comunes `IconoBoton`, `Etiqueta`, `ErrorBlock` y `CampoFecha`, con sus textos en es/en/it (`ui_*`). Las features dependen de él; `:core:ui` no depende de ninguna.
+- `features:auth` reemplaza `AuthErrorMessage` por `ErrorBlock` (ahora los errores de login, registro y perfil llevan el ícono de error). Quedan fuera del módulo el tema (sigue en `composeApp`) y los íconos de la barra inferior.
+- Pasan `testAndroidHostTest` de `features:auth` y `features:obras`, `:androidApp:assembleDebug` y la compilación de iOS Simulator de `core:ui`, `features:auth` y `features:obras`. Falta la revisión visual y el CI de iOS.
+
 ## Perfil con resumen de obras (rama `feat/perfil-datos`)
 - `resumenObras` (función pura en `core:domain`) cuenta total, activas, pausadas y finalizadas. `PerfilViewModel` y `PerfilScreen` están en `features:auth` y reutilizan `ObservarObras`; no dependen de `features:obras` ni modifican `ObrasViewModel`. Los datos de la cuenta se ven siempre; el resumen tiene su propio estado de carga y error con "Reintentar", y distingue 0 obras de "no se pudo cargar".
 - La consulta corre solo mientras la pestaña Perfil está visible (5 s de gracia). Al volver se muestra el último valor mientras actualiza; cerrar sesión no muestra error y descarta el valor, para que otra cuenta nunca vea el resumen de la anterior.

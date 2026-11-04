@@ -18,6 +18,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ObraTrackMultiplataforma"
-include(":core:domain", ":core:data", ":core:firebase", ":features:auth", ":features:home", ":features:obras")
+include(":core:domain", ":core:data", ":core:firebase", ":core:ui", ":features:auth", ":features:home", ":features:obras")
 include(":composeApp")
 include(":androidApp")

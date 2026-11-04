@@ -1,4 +1,4 @@
-package com.unaj.obratrack.features.obras
+package com.unaj.obratrack.core.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,7 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.unaj.obratrack.features.obras.generated.resources.*
+import com.unaj.obratrack.core.ui.generated.resources.*
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -35,7 +35,7 @@ import kotlin.time.Instant
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun CampoFecha(
+fun CampoFecha(
     fechaIso: String,
     label: String,
     onDateChange: (String) -> Unit,
@@ -51,8 +51,8 @@ internal fun CampoFecha(
             label = { Text(label) },
             trailingIcon = {
                 Icon(
-                    painter = painterResource(Res.drawable.ic_calendar),
-                    contentDescription = stringResource(Res.string.obras_pick_date),
+                    painter = painterResource(Iconos.Calendar),
+                    contentDescription = stringResource(Res.string.ui_pick_date),
                 )
             },
             singleLine = true,
@@ -76,7 +76,7 @@ internal fun CampoFecha(
                         }
                         abierto = false
                     },
-                ) { Text(stringResource(Res.string.obras_accept)) }
+                ) { Text(stringResource(Res.string.ui_accept)) }
             },
             dismissButton = {
                 Row {
@@ -86,9 +86,9 @@ internal fun CampoFecha(
                                 onClear()
                                 abierto = false
                             },
-                        ) { Text(stringResource(Res.string.obras_clear_date)) }
+                        ) { Text(stringResource(Res.string.ui_clear_date)) }
                     }
-                    TextButton(onClick = { abierto = false }) { Text(stringResource(Res.string.obras_cancel)) }
+                    TextButton(onClick = { abierto = false }) { Text(stringResource(Res.string.ui_cancel)) }
                 }
             },
         ) {
