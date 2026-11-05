@@ -91,4 +91,5 @@
     <string name="tareas_cat_other">Otros</string>
     <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
     <string name="obras_visibility">Visibilidad</string>
+    <string name="tareas_error_delete_limit">La tarea tiene demasiados relevamientos vinculados para eliminarla de forma segura. No se modificó ningún dato.</string>
 </resources>

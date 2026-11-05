@@ -30,6 +30,7 @@ data class TareaUpdateFields(
 sealed interface FirebaseTareaFailure {
     data object PermissionDenied : FirebaseTareaFailure
     data object Network : FirebaseTareaFailure
+    data object TooManyLinked : FirebaseTareaFailure
     data object Partial : FirebaseTareaFailure
     data object Unexpected : FirebaseTareaFailure
 }

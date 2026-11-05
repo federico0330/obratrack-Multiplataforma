@@ -25,6 +25,7 @@ enum class ErrorTareasUi {
     RED,
     PERMISOS,
     BAJA_PARCIAL,
+    DEMASIADOS_VINCULADOS,
     DESCONOCIDO,
 }
 

@@ -138,6 +138,12 @@ class RepositorioTareasImplTest {
             repositorio.eliminar("uid", "obra", "t", RelevamientosVinculados.ELIMINAR),
         )
 
+        remote.unit = FirebaseTareaResult.Failure(FirebaseTareaFailure.TooManyLinked)
+        assertEquals(
+            ResultadoTarea.Fallo(ErrorTarea.DEMASIADOS_VINCULADOS),
+            repositorio.eliminar("uid", "obra", "t", RelevamientosVinculados.ELIMINAR),
+        )
+
         remote.lista = FirebaseTareaResult.Failure(FirebaseTareaFailure.Network)
         assertEquals(ResultadoTarea.Fallo(ErrorTarea.RED), repositorio.observarDeObra("uid", "obra").first())
     }

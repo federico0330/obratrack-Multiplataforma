@@ -12,6 +12,7 @@ enum class ErrorTarea {
     FECHA_FIN_ANTERIOR,
     NO_AUTORIZADA,
     FALLO_PARCIAL,
+    DEMASIADOS_VINCULADOS,
     RED,
     DESCONOCIDO,
 }

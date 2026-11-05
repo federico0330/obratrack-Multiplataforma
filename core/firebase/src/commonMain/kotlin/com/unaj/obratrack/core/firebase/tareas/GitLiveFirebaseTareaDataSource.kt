@@ -4,6 +4,7 @@ import com.unaj.obratrack.core.firebase.obras.FirebaseObraFailure
 import com.unaj.obratrack.core.firebase.obras.classifyFirestoreFailure
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.FirebaseNetworkException
+import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.DocumentSnapshot
 import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
@@ -11,6 +12,8 @@ import dev.gitlive.firebase.firestore.FirebaseFirestoreException
 import dev.gitlive.firebase.firestore.Source
 import dev.gitlive.firebase.firestore.code
 import dev.gitlive.firebase.firestore.firestore
+import dev.gitlive.firebase.firestore.fromMilliseconds
+import dev.gitlive.firebase.firestore.toMilliseconds
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -75,38 +78,39 @@ class GitLiveFirebaseTareaDataSource(
         obraId: String,
         tareaId: String,
         eliminarRelevamientos: Boolean,
-    ): FirebaseTareaResult<Unit> {
-        var huboEscritura = false
-        return try {
-            val tarea = tareas(obraId).document(tareaId)
-            val vinculados = firestore.collection(COLLECTION_OBRAS).document(obraId)
-                .collection(SUBCOLLECTION_RELEVAMIENTOS)
+    ): FirebaseTareaResult<Unit> = writeResult {
+        val obra = firestore.collection(COLLECTION_OBRAS).document(obraId)
+        val relevamientos = obra.collection(SUBCOLLECTION_RELEVAMIENTOS)
+        ejecutarBajaTarea(object : AlmacenBajaTarea {
+            override suspend fun leerVinculados(): List<String> = relevamientos
                 .where { FIELD_TAREA_ID equalTo tareaId }
-                .get(Source.SERVER)
-                .documents
-            // La tarea se borra en el último lote, así un fallo intermedio no la deja sin relevamientos.
-            val grupos = vinculados.chunked(BATCH_SIZE - 1).ifEmpty { listOf(emptyList()) }
-            grupos.forEachIndexed { indice, grupo ->
+                .get(Source.SERVER).documents.map { it.id }
+
+            override suspend fun leerFechas(): Map<String, Long> = relevamientos
+                .get(Source.SERVER).documents.mapNotNull { doc ->
+                    if (!doc.contains(FIELD_FECHA)) return@mapNotNull null
+                    doc.get<Timestamp?>(FIELD_FECHA)?.let { doc.id to it.toMilliseconds().toLong() }
+                }.toMap()
+
+            override suspend fun aplicar(plan: PlanBajaTarea) {
                 val batch = firestore.batch()
-                grupo.forEach { relevamiento ->
-                    if (eliminarRelevamientos) {
-                        batch.delete(relevamiento.reference)
-                    } else {
-                        batch.update(relevamiento.reference, FIELD_TAREA_ID to FieldValue.delete)
-                    }
+                plan.relevamientos.forEach { id ->
+                    val ref = relevamientos.document(id)
+                    if (plan.eliminarRelevamientos) batch.delete(ref)
+                    else batch.update(ref, FIELD_TAREA_ID to FieldValue.delete)
                 }
-                if (indice == grupos.lastIndex) batch.delete(tarea)
+                batch.delete(tareas(obraId).document(tareaId))
+                if (plan.actualizarUltimaVisita) {
+                    batch.update(
+                        obra,
+                        FIELD_ULTIMA_VISITA to (plan.ultimaVisitaMillis?.let {
+                            Timestamp.fromMilliseconds(it.toDouble())
+                        } ?: FieldValue.delete),
+                    )
+                }
                 batch.commit()
-                huboEscritura = true
             }
-            FirebaseTareaResult.Success(Unit)
-        } catch (cancelled: CancellationException) {
-            throw cancelled
-        } catch (error: Exception) {
-            FirebaseTareaResult.Failure(
-                if (huboEscritura) FirebaseTareaFailure.Partial else error.toFailure(),
-            )
-        }
+        }, eliminarRelevamientos)
     }
 
     private fun tareas(obraId: String) =
@@ -144,6 +148,7 @@ class GitLiveFirebaseTareaDataSource(
     }
 
     private fun Throwable.toFailure(): FirebaseTareaFailure = when (this) {
+        is DemasiadosVinculadosException -> FirebaseTareaFailure.TooManyLinked
         is FirebaseNetworkException -> FirebaseTareaFailure.Network
         is FirebaseFirestoreException -> classifyFirestoreFailure(code.name).toTarea()
         else -> FirebaseTareaFailure.Unexpected
@@ -168,6 +173,7 @@ class GitLiveFirebaseTareaDataSource(
         const val FIELD_FECHA_INICIO = "fechaInicio"
         const val FIELD_FECHA_FIN = "fechaFin"
         const val FIELD_TAREA_ID = "tareaId"
-        const val BATCH_SIZE = 500
+        const val FIELD_FECHA = "fecha"
+        const val FIELD_ULTIMA_VISITA = "ultimaVisita"
     }
 }

@@ -19,6 +19,10 @@ import com.unaj.obratrack.domain.usecase.CrearTarea
 import com.unaj.obratrack.domain.usecase.EliminarTarea
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.ObservarTareas
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -206,6 +210,153 @@ class TareasViewModelTest {
     }
 
     @Test
+    fun guardarDemoradoNoCierraElFormularioDeOtraObra() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        val espera = CompletableDeferred<Unit>()
+        repo.antesDeEscribir = { esperarSinCancelar(espera) }
+        vm.abrirFormulario()
+        vm.tituloCambiado("Primera")
+        vm.guardar()
+        advanceUntilIdle()
+        vm.abrirObra("obra-2")
+        advanceUntilIdle()
+        vm.abrirFormulario()
+        vm.tituloCambiado("Segunda")
+        val nuevo = vm.state.value
+        espera.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(nuevo, vm.state.value)
+    }
+
+    @Test
+    fun errorDeEdicionNoApareceAlCerrarYReabrirLaMismaObra() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        val espera = CompletableDeferred<Unit>()
+        repo.antesDeEscribir = { esperarSinCancelar(espera) }
+        repo.resultadoUnit = ResultadoTarea.Fallo(ErrorTarea.RED)
+        vm.editar(tarea("1", "Anterior"))
+        vm.guardar()
+        advanceUntilIdle()
+        vm.cerrarObra()
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        vm.abrirFormulario()
+        vm.tituloCambiado("Nuevo")
+        val nuevo = vm.state.value
+        espera.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(nuevo, vm.state.value)
+    }
+
+    @Test
+    fun estadoAnteriorNoApagaLaOperacionDeLaNuevaObra() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        val anterior = CompletableDeferred<Unit>()
+        val nueva = CompletableDeferred<Unit>()
+        repo.antesDeEscribir = { esperarSinCancelar(anterior) }
+        vm.cambiarEstado(tarea("1", "Anterior"), EstadoTarea.COMPLETADA)
+        advanceUntilIdle()
+        vm.abrirObra("obra-2")
+        advanceUntilIdle()
+        repo.antesDeEscribir = { esperarSinCancelar(nueva) }
+        vm.cambiarEstado(tarea("2", "Nueva").copy(obraId = "obra-2"), EstadoTarea.COMPLETADA)
+        advanceUntilIdle()
+        val actual = vm.state.value
+        anterior.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(actual, vm.state.value)
+        nueva.complete(Unit)
+        advanceUntilIdle()
+        assertNull(vm.state.value.actualizandoId)
+    }
+
+    @Test
+    fun bajaAnteriorNoContaminaLaSesionNueva() {
+        val sesion = SesionFalsa()
+        conViewModel(sesion = sesion) { vm, repo ->
+            vm.abrirObra("obra-1")
+            advanceUntilIdle()
+            val espera = CompletableDeferred<Unit>()
+            repo.antesDeEscribir = { esperarSinCancelar(espera) }
+            repo.resultadoUnit = ResultadoTarea.Fallo(ErrorTarea.RED)
+            vm.solicitarEliminacion(tarea("1", "Anterior"))
+            vm.confirmarEliminacion()
+            advanceUntilIdle()
+            sesion.usuarioActual.value = null
+            advanceUntilIdle()
+            sesion.usuarioActual.value = Usuario("uid-2", "otra@example.com", null)
+            advanceUntilIdle()
+            val actual = vm.state.value
+            espera.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(actual, vm.state.value)
+        }
+    }
+
+    @Test
+    fun guardarAnteriorNoCierraOtroFormularioEnLaMismaObra() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        val espera = CompletableDeferred<Unit>()
+        repo.antesDeEscribir = { esperarSinCancelar(espera) }
+        vm.abrirFormulario()
+        vm.tituloCambiado("Anterior")
+        vm.guardar()
+        advanceUntilIdle()
+        vm.cerrarFormulario()
+        vm.abrirFormulario()
+        vm.tituloCambiado("Nuevo")
+        val nuevo = vm.state.value
+        espera.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(nuevo, vm.state.value)
+    }
+
+    @Test
+    fun excepcionDeBajaAntiguaNoApagaLaBajaActual() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        val anterior = CompletableDeferred<Unit>()
+        val actual = CompletableDeferred<Unit>()
+        repo.antesDeEscribir = {
+            esperarSinCancelar(anterior)
+            throw IllegalStateException("fallo anterior")
+        }
+        vm.solicitarEliminacion(tarea("1", "Anterior"))
+        vm.confirmarEliminacion()
+        advanceUntilIdle()
+        vm.cerrarObra()
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        repo.antesDeEscribir = { esperarSinCancelar(actual) }
+        vm.solicitarEliminacion(tarea("2", "Actual"))
+        vm.confirmarEliminacion()
+        advanceUntilIdle()
+        val nuevo = vm.state.value
+        anterior.complete(Unit)
+        advanceUntilIdle()
+        assertEquals(nuevo, vm.state.value)
+        actual.complete(Unit)
+        advanceUntilIdle()
+        assertFalse(vm.state.value.eliminando)
+    }
+
+    @Test
+    fun limiteDeBajaSeInformaSinDejarLaPantallaCargando() = conViewModel { vm, repo ->
+        vm.abrirObra("obra-1")
+        advanceUntilIdle()
+        repo.resultadoUnit = ResultadoTarea.Fallo(ErrorTarea.DEMASIADOS_VINCULADOS)
+        vm.solicitarEliminacion(tarea("1", "Tarea"))
+        vm.confirmarEliminacion()
+        advanceUntilIdle()
+        assertEquals(ErrorTareasUi.DEMASIADOS_VINCULADOS, vm.state.value.errorOperacion)
+        assertFalse(vm.state.value.eliminando)
+    }
+
+    @Test
     fun sinSesionNoConsultaYMuestraErrorDeSesion() = conViewModel(sesion = SesionFalsa(null)) { viewModel, repo ->
         viewModel.abrirObra("obra-1")
         advanceUntilIdle()
@@ -242,6 +393,7 @@ private class SesionFalsa(usuario: Usuario? = Usuario("uid-1", "fede@example.com
 }
 
 private class TareasRepoFalso : RepositorioTareas {
+    var antesDeEscribir: suspend () -> Unit = {}
     var tareas: List<Tarea> = emptyList()
     var resultadoUnit: ResultadoTarea<Unit> = ResultadoTarea.Exito(Unit)
     val consultas = mutableListOf<Pair<String, String>>()
@@ -258,6 +410,7 @@ private class TareasRepoFalso : RepositorioTareas {
     }
 
     override suspend fun crear(userId: String, obraId: String, draft: TareaDraft): ResultadoTarea<Tarea> {
+        antesDeEscribir()
         creada = draft
         return ResultadoTarea.Exito(tarea("nueva", draft.titulo))
     }
@@ -268,6 +421,7 @@ private class TareasRepoFalso : RepositorioTareas {
         tareaId: String,
         draft: TareaDraft,
     ): ResultadoTarea<Unit> {
+        antesDeEscribir()
         actualizadaId = tareaId
         actualizadaDraft = draft
         return resultadoUnit
@@ -279,6 +433,7 @@ private class TareasRepoFalso : RepositorioTareas {
         tareaId: String,
         estado: EstadoTarea,
     ): ResultadoTarea<Unit> {
+        antesDeEscribir()
         estadoEnviado = estado
         return resultadoUnit
     }
@@ -289,8 +444,18 @@ private class TareasRepoFalso : RepositorioTareas {
         tareaId: String,
         vinculados: RelevamientosVinculados,
     ): ResultadoTarea<Unit> {
+        antesDeEscribir()
         eliminadaId = tareaId
         vinculadosEnviados = vinculados
         return resultadoUnit
+    }
+}
+
+/** Simula un servicio que entrega su respuesta aunque se haya cancelado la espera. */
+private suspend fun esperarSinCancelar(espera: CompletableDeferred<Unit>) {
+    try {
+        withContext(NonCancellable) { espera.await() }
+    } catch (_: CancellationException) {
+        // El resultado externo ya llegó; el ViewModel debe comprobar a qué pantalla pertenece.
     }
 }

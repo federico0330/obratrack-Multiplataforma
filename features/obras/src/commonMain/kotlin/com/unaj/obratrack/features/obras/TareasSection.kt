@@ -353,6 +353,7 @@ private fun mensajeError(error: ErrorTareasUi): String = stringResource(
         ErrorTareasUi.FECHA_FIN_ANTERIOR -> Res.string.tareas_error_dates_order
         ErrorTareasUi.FECHA_FORMATO -> Res.string.tareas_error_date_format
         ErrorTareasUi.RED -> Res.string.tareas_error_network
+        ErrorTareasUi.DEMASIADOS_VINCULADOS -> Res.string.tareas_error_delete_limit
         ErrorTareasUi.BAJA_PARCIAL -> Res.string.tareas_error_partial_delete
         ErrorTareasUi.DESCONOCIDO -> Res.string.tareas_error_generic
     },

@@ -17,6 +17,7 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -32,6 +33,11 @@ kotlin {
 }
 
 dependencies {
+    androidTestImplementation(project(":core:firebase"))
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("dev.gitlive:firebase-auth:2.7.0")
+    androidTestImplementation("dev.gitlive:firebase-firestore:2.7.0")
+    androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation(project(":composeApp"))
     implementation(platform("androidx.compose:compose-bom:2025.08.01"))
     implementation("androidx.activity:activity-compose:1.10.1")

@@ -38,9 +38,9 @@
 - Las escrituras de obras y tareas esperan al servidor; hay que revisarlas para el requisito offline.
 
 ## Próximo
-1. Verificar manualmente el aislamiento con dos cuentas y las reglas publicadas, sin modificarlas.
-2. Probar login y lectura de obras reales en el simulador de iOS (la app ya está registrada en Firebase; falta una Mac o el CI con el plist como secreto).
-3. Después seguir con relevamientos y tareas; dejar offline para el final.
+1. Verificar el aislamiento de datos con dos cuentas reales y las reglas publicadas, sin modificarlas.
+2. Completar la comprobación real de Firebase en iOS cuando haya una Mac o CI disponible. El workflow figura deshabilitado manualmente.
+3. Continuar con alta y listado de relevamientos, con vínculo opcional a tarea; fotos y permisos en un corte posterior.
 
 ## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
 - Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
@@ -91,3 +91,25 @@
 - “Hoy” se calcula con la zona local; `fechaInicio` se guarda desde medianoche UTC. La hora de visita son minutos desde medianoche.
 - Sin fotos en Firebase Storage; se acordó Cloudinary. Sin FCM para avisos locales.
 - Errores tipados; cancellation se relanza; no convertir escrituras fallidas en éxito.
+
+
+## Revisión de alcance — 04/11/2026
+- Base: `1dd21d2`. Tareas ya está integrado en main (PR #7), junto con íconos, calendario de tareas, reactivación de obras finalizadas (PR #8) y el módulo compartido `core:ui` (PR #9).
+- Se revisaron dominio, repositorio, adaptador Firebase, ViewModel, conexión de pantallas y componentes compartidos. Se mantiene la inyección por constructor desde `AppGraph`; `core:ui` no depende de las features.
+- Hallazgo de lectura: las operaciones suspendidas de `TareasViewModel` actualizan el estado al terminar sin comprobar que siga siendo la misma obra/sesión. Se planificó reproducirlo con operaciones demoradas y proteger el contexto completo.
+- Diferencia con el nativo: la baja KMP de tarea puede borrar relevamientos sin recalcular `ultimaVisita`. Además divide en lotes lo que el nativo limita a un batch atómico. Se prioriza resolver consistencia y política de límites antes de ampliar relevamientos.
+- Esta intervención actualiza planificación y seguimiento. No se ejecutaron pruebas, compilaciones ni escrituras en Firebase; los resultados de pruebas anteriores siguen siendo los registrados en cada sección.
+
+
+## Consistencia de tareas (rama `codex/tareas-consistencia`)
+- Al guardar una tarea y cambiar de obra antes de recibir la respuesta, el guardado anterior podía cerrar el formulario nuevo. Una edición fallida podía mostrar su error al reabrir la misma obra; una operación de estado o baja anterior podía apagar la carga de otra operación o mostrar errores en otra sesión.
+- `TareasViewModel` cancela los trabajos al cambiar el contexto y comprueba una revisión de la apertura antes de aplicar resultados, errores o limpieza final. El formulario tiene su propia revisión para distinguir cerrar y volver a abrirlo en la misma obra. Cancelar la espera no revierte una escritura ya enviada a Firebase.
+- Al eliminar una tarea con relevamientos se recalcula `ultimaVisita` con la fecha máxima de los que quedan; si no queda ninguno con fecha, se quita el campo. Desvincular conserva los relevamientos y no modifica esa fecha.
+- La tarea, sus relevamientos y la actualización de la obra se escriben en un único batch, igual que en el nativo. Se eliminó el fraccionamiento de esta baja: si requiere más de 500 escrituras, se rechaza antes de escribir, con un error tipado y un mensaje en es/en/it. El límite permite 498 vinculados al eliminar y actualizar la obra, o 499 al desvincular.
+- El adaptador conserva los detalles de Firestore; `BajaTarea.kt` separa la coordinación de lecturas y plan de escritura para probarla con un almacén falso. No se modificaron reglas, esquema ni dependencias de producción.
+- Regresión: cuatro casos nuevos fallaron con el código anterior. Con las correcciones pasan 217 pruebas de domain (66), data (30), firebase (37), auth (57) y obras (27), además de `:androidApp:assembleDebug`. Se agregaron siete casos de ViewModel y nueve de baja, más cobertura del mapeo del límite de escritura.
+- Integración real: `BajaTareaFirebaseTest` pasó en el teléfono Android T613P con la sesión existente. Creó una obra aislada, comprobó mediante `Source.SERVER` la baja del relevamiento más reciente, la desvinculación sin perder la fecha y la eliminación del último con limpieza de `ultimaVisita`; eliminó sus registros al finalizar. La prueba tarda unos 10 segundos y requiere habilitar explícitamente `firebaseIntegration=true`.
+- Para repetir la integración desde Gradle, conectar un único Android con sesión abierta y ejecutar `:androidApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.firebaseIntegration=true -Pandroid.testInstrumentationRunnerArguments.class=com.unaj.appmoviles.obratrack.BajaTareaFirebaseTest`. Sin el argumento, la prueba se omite para evitar escrituras involuntarias en ejecuciones generales.
+- Recorrido manual en el teléfono: alta de `PRUEBA_QA_TAREAS_20261105` en la obra de QA existente, edición de título y fechas con calendario, persistencia tras reiniciar, cambio a completada con actualización del resumen y cancelación/confirmación de baja. Se eliminó únicamente la tarea creada para esta prueba; la obra de QA anterior se conserva. Se revisó visualmente el formulario en modo oscuro.
+- Entorno de verificación: copia de trabajo temporal fuera del repo, con ruta sin espacios, JBR de Android Studio y compilador Kotlin en el proceso de Gradle. No se incorporaron scripts de entorno al proyecto.
+- iOS no se volvió a ejecutar: el workflow `iOS Simulator` figura `disabled_manually`. Esta verificación es Android; no acredita el flujo real de Firebase en iOS ni aislamiento entre dos cuentas.

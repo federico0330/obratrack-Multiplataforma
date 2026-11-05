@@ -91,6 +91,7 @@ class RepositorioTareasImpl(
     private fun FirebaseTareaFailure.toDomain(): ErrorTarea = when (this) {
         FirebaseTareaFailure.PermissionDenied -> ErrorTarea.NO_AUTORIZADA
         FirebaseTareaFailure.Network -> ErrorTarea.RED
+        FirebaseTareaFailure.TooManyLinked -> ErrorTarea.DEMASIADOS_VINCULADOS
         FirebaseTareaFailure.Partial -> ErrorTarea.FALLO_PARCIAL
         FirebaseTareaFailure.Unexpected -> ErrorTarea.DESCONOCIDO
     }
