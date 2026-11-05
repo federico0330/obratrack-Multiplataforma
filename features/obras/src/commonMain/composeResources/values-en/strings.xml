@@ -114,4 +114,18 @@
     <string name="relevamientos_error_network">Could not connect. Check your connection and try again.</string>
     <string name="relevamientos_error_generic">Could not complete the operation. Try again.</string>
     <string name="obras_last_visit_value">Latest survey: %1$s</string>
+    <string name="relevamientos_delete">Delete survey</string>
+    <string name="relevamientos_delete_confirmation">This survey will be deleted. The linked task and other surveys will be kept.</string>
+    <string name="relevamientos_confirm_delete">Confirm deletion</string>
+    <string name="relevamientos_edit">Edit survey</string>
+    <string name="relevamientos_detail">Survey details</string>
+    <string name="relevamientos_back">Back to surveys</string>
+    <string name="relevamientos_error_not_found">This survey is no longer available. Refresh the list.</string>
+    <string name="relevamientos_filter_all">All surveys</string>
+    <string name="relevamientos_filter">Show: %1$s</string>
+    <string name="relevamientos_filter_empty">No surveys match this filter.</string>
+    <string name="relevamientos_location">Location: %1$s, %2$s</string>
+    <string name="relevamientos_next_visit">Next visit: %1$s</string>
+    <string name="relevamientos_view_photo">View attached photo</string>
+    <string name="relevamientos_photo_error">Could not open the photo.</string>
 </resources>

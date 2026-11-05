@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.Tarea
 
@@ -10,9 +11,10 @@ sealed interface ListaRelevamientosUiState {
     data class Error(val motivo: ErrorRelevamientosUi) : ListaRelevamientosUiState
 }
 
-enum class ErrorRelevamientosUi { NOTA, FECHA, SESION, TAREA, RED, DESCONOCIDO }
+enum class ErrorRelevamientosUi { NOTA, FECHA, SESION, TAREA, INEXISTENTE, RED, DESCONOCIDO }
 
 data class FormularioRelevamientoUiState(
+    val id: String? = null,
     val nota: String = "",
     val fechaIso: String = "",
     val tareaId: String? = null,
@@ -31,4 +33,9 @@ data class RelevamientosUiState(
     val formularioVisible: Boolean = false,
     val formulario: FormularioRelevamientoUiState = FormularioRelevamientoUiState(),
     val tareas: OpcionesTareasUiState = OpcionesTareasUiState(),
+    val seleccionado: Relevamiento? = null,
+    val aEliminar: Relevamiento? = null,
+    val eliminando: Boolean = false,
+    val errorOperacion: ErrorRelevamientosUi? = null,
+    val filtro: FiltroRelevamientos = FiltroRelevamientos.Todos,
 )

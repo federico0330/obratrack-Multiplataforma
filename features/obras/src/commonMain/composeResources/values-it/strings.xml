@@ -114,4 +114,18 @@
     <string name="relevamientos_error_network">Connessione non riuscita. Controlla la connessione e riprova.</string>
     <string name="relevamientos_error_generic">Impossibile completare l’operazione. Riprova.</string>
     <string name="obras_last_visit_value">Ultimo rilievo: %1$s</string>
+    <string name="relevamientos_delete">Elimina rilievo</string>
+    <string name="relevamientos_delete_confirmation">Questo rilievo verrà eliminato. L’attività collegata e gli altri rilievi verranno conservati.</string>
+    <string name="relevamientos_confirm_delete">Conferma eliminazione</string>
+    <string name="relevamientos_edit">Modifica rilievo</string>
+    <string name="relevamientos_detail">Dettaglio del rilievo</string>
+    <string name="relevamientos_back">Torna all’elenco</string>
+    <string name="relevamientos_error_not_found">Questo rilievo non è più disponibile. Aggiorna l’elenco.</string>
+    <string name="relevamientos_filter_all">Tutti i rilievi</string>
+    <string name="relevamientos_filter">Mostra: %1$s</string>
+    <string name="relevamientos_filter_empty">Nessun rilievo corrisponde a questo filtro.</string>
+    <string name="relevamientos_location">Posizione: %1$s, %2$s</string>
+    <string name="relevamientos_next_visit">Prossima visita: %1$s</string>
+    <string name="relevamientos_view_photo">Visualizza foto allegata</string>
+    <string name="relevamientos_photo_error">Impossibile aprire la foto.</string>
 </resources>

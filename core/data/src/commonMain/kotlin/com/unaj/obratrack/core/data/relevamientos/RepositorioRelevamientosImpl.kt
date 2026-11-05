@@ -1,5 +1,6 @@
 package com.unaj.obratrack.core.data.relevamientos
 
+import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoUpdateFields
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoDataSource
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoFailure
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
@@ -37,7 +38,25 @@ class RepositorioRelevamientosImpl(private val remote: FirebaseRelevamientoDataS
         ResultadoRelevamiento.Fallo(ErrorRelevamiento.DESCONOCIDO)
     }
 
+    override suspend fun actualizar(userId: String, obraId: String, id: String, draft: RelevamientoDraft): ResultadoRelevamiento<Unit> =
+        escribir { remote.actualizar(userId, obraId, id, RelevamientoUpdateFields(draft.fecha.toEpochMilliseconds(), draft.nota, draft.tareaId)) }
+
+    override suspend fun eliminar(userId: String, obraId: String, id: String): ResultadoRelevamiento<Unit> =
+        escribir { remote.eliminar(userId, obraId, id) }
+
+    private suspend inline fun escribir(block: () -> FirebaseRelevamientoResult<Unit>): ResultadoRelevamiento<Unit> = try {
+        when (val result = block()) {
+            is FirebaseRelevamientoResult.Success -> ResultadoRelevamiento.Exito(Unit)
+            is FirebaseRelevamientoResult.Failure -> ResultadoRelevamiento.Fallo(result.error.toDomain())
+        }
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ResultadoRelevamiento.Fallo(ErrorRelevamiento.DESCONOCIDO)
+    }
+
     private fun FirebaseRelevamientoFailure.toDomain() = when (this) {
+        FirebaseRelevamientoFailure.NotFound -> ErrorRelevamiento.NO_ENCONTRADO
         FirebaseRelevamientoFailure.PermissionDenied -> ErrorRelevamiento.NO_AUTORIZADA
         FirebaseRelevamientoFailure.TaskUnavailable -> ErrorRelevamiento.TAREA_NO_DISPONIBLE
         FirebaseRelevamientoFailure.Network -> ErrorRelevamiento.RED

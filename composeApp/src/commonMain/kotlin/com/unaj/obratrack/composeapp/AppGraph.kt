@@ -2,6 +2,8 @@ package com.unaj.obratrack.composeapp
 
 import com.unaj.obratrack.core.data.relevamientos.RepositorioRelevamientosImpl
 import com.unaj.obratrack.core.firebase.relevamientos.GitLiveFirebaseRelevamientoDataSource
+import com.unaj.obratrack.domain.usecase.ActualizarRelevamiento
+import com.unaj.obratrack.domain.usecase.EliminarRelevamiento
 import com.unaj.obratrack.domain.usecase.CrearRelevamiento
 import com.unaj.obratrack.domain.usecase.ObservarRelevamientos
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
@@ -42,6 +44,7 @@ class AppGraph {
     fun crearRelevamientosViewModel() = RelevamientosViewModel(
         ObservarSesion(authRepository), ObservarRelevamientos(relevamientosRepository),
         CrearRelevamiento(relevamientosRepository), ObservarTareas(tareasRepository),
+        ActualizarRelevamiento(relevamientosRepository), EliminarRelevamiento(relevamientosRepository),
     )
 
     fun crearAuthViewModel() = AuthViewModel(

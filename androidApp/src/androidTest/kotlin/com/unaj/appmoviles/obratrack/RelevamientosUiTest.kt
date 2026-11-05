@@ -86,7 +86,7 @@ class RelevamientosUiTest {
             }
             encontrar(By.res("relevamientos_save")).click()
             encontrar(By.res("relevamientos_create"))
-            assertTrue(encontrar(By.text(nota)).text == nota)
+            assertTrue(encontrar(By.textContains(nota)).text.contains(nota))
         }
         withTimeout(120_000) {
             try {
@@ -105,8 +105,8 @@ class RelevamientosUiTest {
                 assertTrue(docs.any { it.get<String>("nota") == "PRUEBA_QA_CON_TAREA" && it.get<String>("tareaId") == tarea.id })
                 abrirApp()
                 encontrar(By.text(nombre)).click()
-                assertEquals("PRUEBA_QA_CON_TAREA", encontrar(By.text("PRUEBA_QA_CON_TAREA")).text)
-                assertEquals("PRUEBA_QA_SIN_TAREA", encontrar(By.text("PRUEBA_QA_SIN_TAREA")).text)
+                assertTrue(encontrar(By.textContains("PRUEBA_QA_CON_TAREA")).text.contains("PRUEBA_QA_CON_TAREA"))
+                assertTrue(encontrar(By.textContains("PRUEBA_QA_SIN_TAREA")).text.contains("PRUEBA_QA_SIN_TAREA"))
             } catch (error: Throwable) {
                 val cache = instrumentation.targetContext.cacheDir
                 device.takeScreenshot(File(cache, "relevamientos-ui-fallo.png"))

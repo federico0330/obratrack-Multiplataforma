@@ -103,7 +103,13 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                     onCreate = obrasViewModel::abrirFormulario,
                                     onRetry = obrasViewModel::reintentar,
                                     onSelectObra = obrasViewModel::abrirDetalle,
-                                    onBackToList = obrasViewModel::cerrarDetalle,
+                                    onBackToList = {
+                                        when {
+                                            relevamientosState.formularioVisible -> relevamientosViewModel.cerrarFormulario()
+                                            relevamientosState.seleccionado != null -> relevamientosViewModel.cerrarDetalle()
+                                            else -> obrasViewModel.cerrarDetalle()
+                                        }
+                                    },
                                     onEditObra = obrasViewModel::editarSeleccionada,
                                     onChangeStatus = obrasViewModel::cambiarEstado,
                                     onRequestDelete = obrasViewModel::solicitarEliminacion,
@@ -148,6 +154,13 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                                 onDateChange = relevamientosViewModel::fechaCambiada,
                                                 onTaskChange = relevamientosViewModel::tareaCambiada,
                                                 onSave = relevamientosViewModel::guardar,
+                                                onSelect = relevamientosViewModel::abrirDetalle,
+                                                onEdit = relevamientosViewModel::editarSeleccionado,
+                                                onBack = relevamientosViewModel::cerrarDetalle,
+                                                onRequestDelete = relevamientosViewModel::solicitarEliminacion,
+                                                onCancelDelete = relevamientosViewModel::cancelarEliminacion,
+                                                onConfirmDelete = relevamientosViewModel::confirmarEliminacion,
+                                                onFilterChange = relevamientosViewModel::filtroCambiado,
                                             ),
                                         )
                                     },

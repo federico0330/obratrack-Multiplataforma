@@ -3,6 +3,11 @@ package com.unaj.obratrack.features.obras
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.unaj.obratrack.domain.model.RelevamientoDraft
+import com.unaj.obratrack.domain.model.Relevamiento
+import com.unaj.obratrack.domain.model.FiltroRelevamientos
+import com.unaj.obratrack.domain.model.filtrar
+import com.unaj.obratrack.domain.usecase.ActualizarRelevamiento
+import com.unaj.obratrack.domain.usecase.EliminarRelevamiento
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
 import com.unaj.obratrack.domain.repository.ResultadoRelevamiento
 import com.unaj.obratrack.domain.repository.ResultadoTarea
@@ -21,6 +26,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.todayIn
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
 
 class RelevamientosViewModel(
@@ -28,6 +34,8 @@ class RelevamientosViewModel(
     private val observarRelevamientos: ObservarRelevamientos,
     private val crearRelevamiento: CrearRelevamiento,
     private val observarTareas: ObservarTareas,
+    private val actualizarRelevamiento: ActualizarRelevamiento,
+    private val eliminarRelevamiento: EliminarRelevamiento,
     private val clock: Clock = Clock.System,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RelevamientosUiState())
@@ -38,6 +46,7 @@ class RelevamientosViewModel(
     private var formularioVersion = 0L
     private var contextoJob = Job(viewModelScope.coroutineContext[Job])
     private var tareasJob: Job? = null
+    private var listaCompleta: List<Relevamiento> = emptyList()
 
     init {
         viewModelScope.launch {
@@ -70,6 +79,7 @@ class RelevamientosViewModel(
 
     private fun renovarContexto() {
         contexto++
+        listaCompleta = emptyList()
         contextoJob.cancel()
         contextoJob = Job(viewModelScope.coroutineContext[Job])
     }
@@ -89,15 +99,70 @@ class RelevamientosViewModel(
                 if (error is CancellationException) throw error
                 actualizar(revision) { it.copy(lista = ListaRelevamientosUiState.Error(ErrorRelevamientosUi.DESCONOCIDO)) }
             }.collect { result ->
-                val lista = when (result) {
-                    is ResultadoRelevamiento.Fallo -> ListaRelevamientosUiState.Error(result.error.toUi())
-                    is ResultadoRelevamiento.Exito -> if (result.dato.isEmpty()) ListaRelevamientosUiState.Vacia
-                        else ListaRelevamientosUiState.Contenido(result.dato)
-                }
-                actualizar(revision) { it.copy(lista = lista) }
+                if (revision == contexto) recibirLista(result)
             }
         }
         reintentarTareas()
+    }
+
+    private fun recibirLista(result: ResultadoRelevamiento<List<Relevamiento>>) {
+        when (result) {
+            is ResultadoRelevamiento.Fallo -> _state.update {
+                it.copy(lista = ListaRelevamientosUiState.Error(result.error.toUi()))
+            }
+            is ResultadoRelevamiento.Exito -> {
+                listaCompleta = result.dato
+                val anterior = _state.value.seleccionado
+                if (anterior != null && listaCompleta.none { it.id == anterior.id }) formularioVersion++
+                _state.update { actual ->
+                    val seleccionado = actual.seleccionado?.let { previo -> listaCompleta.find { it.id == previo.id } }
+                    val desaparecio = actual.seleccionado != null && seleccionado == null
+                    actual.copy(
+                        lista = listaFiltrada(actual.filtro), seleccionado = seleccionado,
+                        formularioVisible = if (desaparecio) false else actual.formularioVisible,
+                        formulario = if (desaparecio) FormularioRelevamientoUiState() else actual.formulario,
+                        aEliminar = if (desaparecio) null else actual.aEliminar,
+                        errorOperacion = if (desaparecio && !actual.eliminando) ErrorRelevamientosUi.INEXISTENTE else actual.errorOperacion,
+                    )
+                }
+            }
+        }
+    }
+
+    private fun listaFiltrada(filtro: FiltroRelevamientos): ListaRelevamientosUiState {
+        val items = listaCompleta.filtrar(filtro)
+        return if (items.isEmpty()) ListaRelevamientosUiState.Vacia else ListaRelevamientosUiState.Contenido(items)
+    }
+
+    fun filtroCambiado(filtro: FiltroRelevamientos) {
+        _state.update {
+            val lista = when (it.lista) {
+                ListaRelevamientosUiState.Cargando, is ListaRelevamientosUiState.Error -> it.lista
+                else -> listaFiltrada(filtro)
+            }
+            it.copy(filtro = filtro, lista = lista)
+        }
+    }
+
+    fun abrirDetalle(item: Relevamiento) {
+        val actual = listaCompleta.find { it.id == item.id } ?: return
+        if (_state.value.eliminando || _state.value.formulario.guardando) return
+        _state.update { it.copy(seleccionado = actual, errorOperacion = null) }
+    }
+
+    fun cerrarDetalle() {
+        if (_state.value.eliminando || _state.value.formulario.guardando) return
+        formularioVersion++
+        _state.update { it.copy(seleccionado = null, formularioVisible = false, aEliminar = null, errorOperacion = null) }
+    }
+
+    fun editarSeleccionado() {
+        val item = _state.value.seleccionado ?: return
+        if (_state.value.eliminando) return
+        formularioVersion++
+        _state.update { it.copy(formularioVisible = true, errorOperacion = null, formulario = FormularioRelevamientoUiState(
+            id = item.id, nota = item.nota, fechaIso = item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), tareaId = item.tareaId,
+        )) }
     }
 
     fun reintentarTareas() {
@@ -121,9 +186,10 @@ class RelevamientosViewModel(
     }
 
     fun abrirFormulario() {
+        if (_state.value.eliminando || _state.value.formulario.guardando) return
         formularioVersion++
         _state.update {
-            it.copy(formularioVisible = true, formulario = FormularioRelevamientoUiState(
+            it.copy(seleccionado = null, errorOperacion = null, formularioVisible = true, formulario = FormularioRelevamientoUiState(
                 fechaIso = clock.todayIn(TimeZone.currentSystemDefault()).toString(),
             ))
         }
@@ -145,7 +211,7 @@ class RelevamientosViewModel(
 
     fun guardar() {
         val form = _state.value.formulario
-        if (form.guardando) return
+        if (form.guardando || _state.value.eliminando) return
         val owner = userId ?: return errorFormulario(ErrorRelevamientosUi.SESION)
         val obra = obraId ?: return
         val fecha = runCatching { LocalDate.parse(form.fechaIso).atStartOfDayIn(TimeZone.UTC) }.getOrNull()
@@ -155,18 +221,59 @@ class RelevamientosViewModel(
         _state.update { it.copy(formulario = form.copy(guardando = true, error = null)) }
         viewModelScope.launch(contextoJob) {
             try {
-                val result = crearRelevamiento(owner, obra, RelevamientoDraft(fecha, form.nota, form.tareaId))
-                if (revision != contexto || versionForm != formularioVersion) return@launch
-                when (result) {
-                    is ResultadoRelevamiento.Exito -> _state.update {
-                        it.copy(formularioVisible = false, formulario = FormularioRelevamientoUiState())
-                    }
-                    is ResultadoRelevamiento.Fallo -> errorFormulario(result.error.toUi())
+                val draft = RelevamientoDraft(fecha, form.nota, form.tareaId)
+                val error = if (form.id == null) {
+                    (crearRelevamiento(owner, obra, draft) as? ResultadoRelevamiento.Fallo)?.error
+                } else {
+                    (actualizarRelevamiento(owner, obra, form.id, draft) as? ResultadoRelevamiento.Fallo)?.error
                 }
+                if (revision != contexto || versionForm != formularioVersion) return@launch
+                if (error == null) {
+                    _state.update {
+                        val filtro = if (form.id == null) FiltroRelevamientos.Todos else it.filtro
+                        it.copy(formularioVisible = false, formulario = FormularioRelevamientoUiState(), filtro = filtro,
+                            lista = if (it.lista is ListaRelevamientosUiState.Error) it.lista else listaFiltrada(filtro))
+                    }
+                } else errorFormulario(error.toUi())
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
                 if (revision == contexto && versionForm == formularioVersion) errorFormulario(ErrorRelevamientosUi.DESCONOCIDO)
+            }
+        }
+    }
+
+    fun solicitarEliminacion() {
+        val actual = _state.value
+        if (actual.eliminando || actual.formulario.guardando) return
+        _state.update { it.copy(aEliminar = it.seleccionado, errorOperacion = null) }
+    }
+
+    fun cancelarEliminacion() = _state.update { it.copy(aEliminar = null) }
+
+    fun confirmarEliminacion() {
+        val owner = userId ?: return
+        val obra = obraId ?: return
+        val actual = _state.value
+        val item = actual.aEliminar ?: return
+        if (actual.eliminando) return
+        val revision = contexto
+        _state.update { it.copy(aEliminar = null, eliminando = true, errorOperacion = null) }
+        viewModelScope.launch(contextoJob) {
+            try {
+                val result = eliminarRelevamiento(owner, obra, item.id)
+                actualizar(revision) {
+                    when (result) {
+                        is ResultadoRelevamiento.Exito -> it.copy(seleccionado = null, formularioVisible = false)
+                        is ResultadoRelevamiento.Fallo -> it.copy(errorOperacion = result.error.toUi())
+                    }
+                }
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                actualizar(revision) { it.copy(errorOperacion = ErrorRelevamientosUi.DESCONOCIDO) }
+            } finally {
+                actualizar(revision) { it.copy(eliminando = false) }
             }
         }
     }
@@ -180,6 +287,7 @@ class RelevamientosViewModel(
     }
 
     private fun ErrorRelevamiento.toUi() = when (this) {
+        ErrorRelevamiento.NO_ENCONTRADO -> ErrorRelevamientosUi.INEXISTENTE
         ErrorRelevamiento.NOTA_VACIA -> ErrorRelevamientosUi.NOTA
         ErrorRelevamiento.FECHA_INVALIDA -> ErrorRelevamientosUi.FECHA
         ErrorRelevamiento.NO_AUTORIZADA -> ErrorRelevamientosUi.SESION
