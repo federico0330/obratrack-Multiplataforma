@@ -40,7 +40,7 @@
 ## Próximo
 1. Verificar el aislamiento de datos con dos cuentas reales y las reglas publicadas, sin modificarlas.
 2. Completar la comprobación real de Firebase en iOS cuando haya una Mac o CI disponible. El workflow figura deshabilitado manualmente.
-3. Continuar con alta y listado de relevamientos, con vínculo opcional a tarea; fotos y permisos en un corte posterior.
+3. Continuar con edición y baja de relevamientos, manteniendo `ultimaVisita`; después avanzar con fotos y permisos en un corte propio.
 
 ## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
 - Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
@@ -85,7 +85,7 @@
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.
-- Compose stateless + UDF; ViewModels no contienen strings ni Context; constructor injection desde `AppContainer`.
+- Compose stateless + UDF; ViewModels no contienen strings ni Context; constructor injection desde `AppGraph`.
 - Mantener `obras` raíz con `userId`, `nombre`, `cliente`, `publica`, `direccion`, `fechaInicio` Timestamp y `estado` minúsculo.
 - No crear `usuarios/{uid}` ni modificar/desplegar reglas. Visibilidad pública no habilita explorar ni seguir obras en este corte.
 - “Hoy” se calcula con la zona local; `fechaInicio` se guarda desde medianoche UTC. La hora de visita son minutos desde medianoche.
@@ -113,3 +113,16 @@
 - Recorrido manual en el teléfono: alta de `PRUEBA_QA_TAREAS_20261105` en la obra de QA existente, edición de título y fechas con calendario, persistencia tras reiniciar, cambio a completada con actualización del resumen y cancelación/confirmación de baja. Se eliminó únicamente la tarea creada para esta prueba; la obra de QA anterior se conserva. Se revisó visualmente el formulario en modo oscuro.
 - Entorno de verificación: copia de trabajo temporal fuera del repo, con ruta sin espacios, JBR de Android Studio y compilador Kotlin en el proceso de Gradle. No se incorporaron scripts de entorno al proyecto.
 - iOS no se volvió a ejecutar: el workflow `iOS Simulator` figura `disabled_manually`. Esta verificación es Android; no acredita el flujo real de Firebase en iOS ni aislamiento entre dos cuentas.
+
+
+## Relevamientos: alta y listado (rama `codex/relevamientos-alta-listado`)
+- Se agregó una sección en el detalle de obra para listar relevamientos y crear uno con fecha, nota y tarea opcional. La fecha usa el calendario compartido; la nota se valida y normaliza en el dominio. La lista ordena por fecha descendente y muestra el vínculo con la tarea. El detalle de obra muestra el último relevamiento.
+- `core:domain` define modelo, draft, contrato y casos de uso; `core:data` mapea DTO y errores; `core:firebase` contiene el adaptador GitLive y la transacción. `RelevamientosViewModel` coordina sesión, consultas y formulario; los composables reciben estado y acciones. Las dependencias se construyen en `AppGraph`.
+- Se conserva `obras/{id}/relevamientos`, `userId`, `fecha` como Timestamp, `nota` y `tareaId` opcional. La lectura contempla documentos nativos con foto, ubicación y próxima visita; este formulario crea únicamente fecha, nota y vínculo. No se cambiaron reglas ni índices de Firestore.
+- La transacción comprueba el dueño de la obra y, si se eligió una tarea, su existencia y dueño dentro de esa misma obra. Guarda el relevamiento y actualiza `ultimaVisita` juntos. Usa el máximo entre la fecha nueva y la existente, para que cargar un relevamiento anterior no haga retroceder el resumen. El ID se genera fuera del bloque que Firestore puede reintentar.
+- El ViewModel descarta respuestas de una obra o sesión anteriores, conserva el borrador ante un error y bloquea envíos duplicados. El selector permite guardar sin vínculo si no hay tareas o no se pudieron cargar; una tarea eliminada antes de confirmar se informa como error, sin perder la nota. Los textos están en es/en/it.
+- Pasaron 245 pruebas: domain 71, data 35, firebase 44, auth 57 y obras 38. Incluyen 28 casos nuevos sobre validación, orden, mapeos nativos, errores, cancelación, vínculo, última visita, reintento y respuestas demoradas. Compilaron el APK de la app y el de instrumentación.
+- `RelevamientosFirebaseTest` pasó en Android físico con Firestore real: alta con y sin tarea, lectura, rechazo de tarea inexistente sin escrituras parciales y conservación/avance de `ultimaVisita`, usando lecturas del servidor. Creó una obra aislada y limpió sus registros al terminar.
+- `RelevamientosUiTest` pasó en el mismo teléfono: abrió una obra de QA, creó una nota sin tarea y otra vinculada, comprobó ambos documentos en el servidor y volvió a abrir la app para verificar el listado. Limpió la obra, tarea y relevamientos al terminar. El recorrido tarda unos 30 segundos y requiere `firebaseIntegration=true`, sesión abierta y teléfono desbloqueado. Se agregaron identificadores de controles para sincronizar las acciones; Android los expone a UI Automator sin cambiar los textos visibles.
+- Para ejecutar las pruebas de dispositivo: `:androidApp:connectedDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.firebaseIntegration=true -Pandroid.testInstrumentationRunnerArguments.class=com.unaj.appmoviles.obratrack.RelevamientosFirebaseTest,com.unaj.appmoviles.obratrack.RelevamientosUiTest`. Sin el argumento de integración se omiten las escrituras de prueba.
+- Se revisó visualmente el formulario y la fecha del último relevamiento en modo oscuro durante el recorrido. iOS sigue sin una ejecución nueva, por el workflow deshabilitado. Edición, baja, historial de cambios, captura de fotos y ubicación quedan para cortes posteriores; tampoco se acredita aún aislamiento con dos cuentas ni funcionamiento sin conexión.
