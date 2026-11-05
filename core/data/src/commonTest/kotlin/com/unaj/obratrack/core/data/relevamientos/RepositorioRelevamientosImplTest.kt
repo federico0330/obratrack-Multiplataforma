@@ -1,0 +1,93 @@
+package com.unaj.obratrack.core.data.relevamientos
+
+import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoDataSource
+import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoFailure
+import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
+import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
+import com.unaj.obratrack.domain.model.RelevamientoDraft
+import com.unaj.obratrack.domain.model.Ubicacion
+import com.unaj.obratrack.domain.repository.ErrorRelevamiento
+import com.unaj.obratrack.domain.repository.ResultadoRelevamiento
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.test.runTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
+import kotlin.time.Instant
+
+class RepositorioRelevamientosImplTest {
+    @Test
+    fun leeDocumentosNativosConYsinCamposOpcionales() = runTest {
+        val remote = RemotoFalso()
+        val completo = remote.dto.copy(tareaId = "tarea", fotoUrl = "https://example.com/foto.jpg", latitud = -34.0,
+            longitud = -58.0, proximaVisitaMillis = 40, horaVisita = 600)
+        remote.lista = FirebaseRelevamientoResult.Success(listOf(remote.dto, completo))
+        val result = RepositorioRelevamientosImpl(remote).observarDeObra("uid", "obra").first() as ResultadoRelevamiento.Exito
+        assertEquals("uid" to "obra", remote.destino)
+        assertNull(result.dato.first().tareaId)
+        assertEquals(Ubicacion(-34.0, -58.0), result.dato.last().ubicacion)
+        assertEquals("tarea", result.dato.last().tareaId)
+        assertEquals(Instant.fromEpochMilliseconds(40), result.dato.last().proximaVisita)
+        assertEquals(600, result.dato.last().horaVisita)
+    }
+
+    @Test
+    fun crearEnviaUidObraFechaYVinculoYRecuperaIdRemoto() = runTest {
+        val remote = RemotoFalso()
+        val result = RepositorioRelevamientosImpl(remote).crear("uid", "obra",
+            RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota", "tarea")) as ResultadoRelevamiento.Exito
+        assertEquals("remoto", result.dato.id)
+        assertEquals(RelevamientoDto("", "obra", "uid", 20, "Nota", "tarea"), remote.enviado)
+    }
+
+    @Test
+    fun traduceCadaFalloRemotoSinMostrarExcepciones() = runTest {
+        for ((remoteError, error) in listOf(
+            FirebaseRelevamientoFailure.PermissionDenied to ErrorRelevamiento.NO_AUTORIZADA,
+            FirebaseRelevamientoFailure.TaskUnavailable to ErrorRelevamiento.TAREA_NO_DISPONIBLE,
+            FirebaseRelevamientoFailure.Network to ErrorRelevamiento.RED,
+            FirebaseRelevamientoFailure.Unexpected to ErrorRelevamiento.DESCONOCIDO,
+        )) {
+            val remote = RemotoFalso().apply { fallo = remoteError }
+            val repo = RepositorioRelevamientosImpl(remote)
+            val esperado = ResultadoRelevamiento.Fallo(error)
+            assertEquals(esperado, repo.crear("uid", "obra", RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")))
+            assertEquals(esperado, repo.observarDeObra("uid", "obra").first())
+        }
+    }
+
+    @Test
+    fun excepcionInesperadaSeInformaComoFallo() = runTest {
+        val repo = RepositorioRelevamientosImpl(RemotoFalso().apply { excepcion = IllegalStateException() })
+        assertEquals(ResultadoRelevamiento.Fallo(ErrorRelevamiento.DESCONOCIDO), repo.observarDeObra("uid", "obra").first())
+    }
+
+    @Test
+    fun cancelacionSePropagaEnLecturaYAlta() = runTest {
+        val repo = RepositorioRelevamientosImpl(RemotoFalso().apply { excepcion = CancellationException() })
+        assertFailsWith<CancellationException> { repo.observarDeObra("uid", "obra").first() }
+        assertFailsWith<CancellationException> { repo.crear("uid", "obra", RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")) }
+    }
+}
+
+private class RemotoFalso : FirebaseRelevamientoDataSource {
+    val dto = RelevamientoDto("remoto", "obra", "uid", 20, "Nota")
+    var lista: FirebaseRelevamientoResult<List<RelevamientoDto>> = FirebaseRelevamientoResult.Success(emptyList())
+    var destino: Pair<String, String>? = null
+    var enviado: RelevamientoDto? = null
+    var fallo: FirebaseRelevamientoFailure? = null
+    var excepcion: Exception? = null
+    override fun observarDeObra(userId: String, obraId: String) = flow {
+        destino = userId to obraId
+        excepcion?.let { throw it }
+        emit(fallo?.let { FirebaseRelevamientoResult.Failure(it) } ?: lista)
+    }
+    override suspend fun crear(dto: RelevamientoDto): FirebaseRelevamientoResult<RelevamientoDto> {
+        excepcion?.let { throw it }
+        enviado = dto
+        return fallo?.let { FirebaseRelevamientoResult.Failure(it) } ?: FirebaseRelevamientoResult.Success(this.dto)
+    }
+}
