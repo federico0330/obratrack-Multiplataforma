@@ -35,6 +35,7 @@ kotlin {
 dependencies {
     androidTestImplementation(project(":core:firebase"))
     androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test.uiautomator:uiautomator:2.3.0")
     androidTestImplementation("dev.gitlive:firebase-auth:2.7.0")
     androidTestImplementation("dev.gitlive:firebase-firestore:2.7.0")
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")

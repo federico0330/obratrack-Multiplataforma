@@ -1,5 +1,10 @@
 package com.unaj.obratrack.composeapp
 
+import com.unaj.obratrack.core.data.relevamientos.RepositorioRelevamientosImpl
+import com.unaj.obratrack.core.firebase.relevamientos.GitLiveFirebaseRelevamientoDataSource
+import com.unaj.obratrack.domain.usecase.CrearRelevamiento
+import com.unaj.obratrack.domain.usecase.ObservarRelevamientos
+import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
 import com.unaj.obratrack.core.data.obras.RepositorioObrasImpl
 import com.unaj.obratrack.core.data.tareas.RepositorioTareasImpl
@@ -31,6 +36,13 @@ class AppGraph {
     private val authRepository = RepositorioAutenticacionImpl(GitLiveFirebaseAuthDataSource())
     private val obrasRepository = RepositorioObrasImpl(GitLiveFirebaseObraDataSource())
     private val tareasRepository = RepositorioTareasImpl(GitLiveFirebaseTareaDataSource())
+
+    private val relevamientosRepository = RepositorioRelevamientosImpl(GitLiveFirebaseRelevamientoDataSource())
+
+    fun crearRelevamientosViewModel() = RelevamientosViewModel(
+        ObservarSesion(authRepository), ObservarRelevamientos(relevamientosRepository),
+        CrearRelevamiento(relevamientosRepository), ObservarTareas(tareasRepository),
+    )
 
     fun crearAuthViewModel() = AuthViewModel(
         IniciarSesion(authRepository),
