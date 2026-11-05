@@ -42,6 +42,9 @@ class TareasViewModel(
     private val _state = MutableStateFlow(TareasUiState())
     val state = _state.asStateFlow()
     private var listaJob: Job? = null
+    private var contexto = 0L
+    private var formularioVersion = 0L
+    private var operacionesJob = Job(viewModelScope.coroutineContext[Job])
     private var userId: String? = null
     private var obraId: String? = null
 
@@ -72,6 +75,7 @@ class TareasViewModel(
 
     fun cerrarObra() {
         obraId = null
+        invalidarContexto()
         listaJob?.cancel()
         _state.value = TareasUiState()
     }
@@ -80,23 +84,26 @@ class TareasViewModel(
 
     private fun sesionPerdida() {
         userId = null
+        invalidarContexto()
         listaJob?.cancel()
         _state.value = TareasUiState(lista = ListaTareasUiState.Error(ErrorTareasUi.SESION))
     }
 
     private fun observar() {
+        invalidarContexto()
         listaJob?.cancel()
         val owner = userId ?: return
         val obra = obraId ?: return
         _state.value = TareasUiState()
+        val revision = contexto
         listaJob = viewModelScope.launch {
             observarTareas(owner, obra)
                 .catch { error ->
                     if (error is CancellationException) throw error
-                    _state.update { it.copy(lista = ListaTareasUiState.Error(ErrorTareasUi.DESCONOCIDO)) }
+                    actualizarContexto(revision) { it.copy(lista = ListaTareasUiState.Error(ErrorTareasUi.DESCONOCIDO)) }
                 }
                 .collect { result ->
-                    _state.update { it.copy(lista = result.aListaUi()) }
+                    actualizarContexto(revision) { it.copy(lista = result.aListaUi()) }
                 }
         }
     }
@@ -114,27 +121,36 @@ class TareasViewModel(
         }
     }
 
-    fun abrirFormulario() = _state.update {
-        it.copy(formularioVisible = true, formulario = FormularioTareaUiState(), errorOperacion = null)
+    fun abrirFormulario() {
+        formularioVersion++
+        _state.update {
+            it.copy(formularioVisible = true, formulario = FormularioTareaUiState(), errorOperacion = null)
+        }
     }
 
-    fun editar(tarea: Tarea) = _state.update {
-        it.copy(
-            formularioVisible = true,
-            errorOperacion = null,
-            formulario = FormularioTareaUiState(
-                tareaId = tarea.id,
-                titulo = tarea.titulo,
-                descripcion = tarea.descripcion,
-                categoria = tarea.categoria,
-                fechaInicio = tarea.fechaInicio?.toString().orEmpty(),
-                fechaFin = tarea.fechaFin?.toString().orEmpty(),
-                estado = tarea.estado,
-            ),
-        )
+    fun editar(tarea: Tarea) {
+        formularioVersion++
+        _state.update {
+            it.copy(
+                formularioVisible = true,
+                errorOperacion = null,
+                formulario = FormularioTareaUiState(
+                    tareaId = tarea.id,
+                    titulo = tarea.titulo,
+                    descripcion = tarea.descripcion,
+                    categoria = tarea.categoria,
+                    fechaInicio = tarea.fechaInicio?.toString().orEmpty(),
+                    fechaFin = tarea.fechaFin?.toString().orEmpty(),
+                    estado = tarea.estado,
+                ),
+            )
+        }
     }
 
-    fun cerrarFormulario() = _state.update { it.copy(formularioVisible = false) }
+    fun cerrarFormulario() {
+        formularioVersion++
+        _state.update { it.copy(formularioVisible = false) }
+    }
     fun tituloCambiado(value: String) = updateForm { copy(titulo = value, error = null) }
     fun descripcionCambiada(value: String) = updateForm { copy(descripcion = value, error = null) }
     fun categoriaCambiada(value: CategoriaTarea) = updateForm { copy(categoria = value, error = null) }
@@ -144,6 +160,7 @@ class TareasViewModel(
     fun guardar() {
         val owner = userId ?: return updateForm { copy(error = ErrorTareasUi.SESION) }
         val obra = obraId ?: return
+        val versionForm = formularioVersion
         val form = _state.value.formulario
         if (form.guardando) return
         val inicio = parsearFecha(form.fechaInicio) ?: return updateForm { copy(error = ErrorTareasUi.FECHA_FORMATO) }
@@ -157,7 +174,8 @@ class TareasViewModel(
             estado = form.estado,
         )
         updateForm { copy(guardando = true, error = null) }
-        viewModelScope.launch {
+        val revision = contexto
+        viewModelScope.launch(operacionesJob) {
             try {
                 val tareaId = form.tareaId
                 val error = if (tareaId == null) {
@@ -165,6 +183,7 @@ class TareasViewModel(
                 } else {
                     (actualizarTarea(owner, obra, tareaId, draft) as? ResultadoTarea.Fallo)?.error
                 }
+                if (revision != contexto || versionForm != formularioVersion) return@launch
                 if (error == null) {
                     _state.update { it.copy(formularioVisible = false, formulario = FormularioTareaUiState()) }
                 } else {
@@ -173,7 +192,9 @@ class TareasViewModel(
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                updateForm { copy(guardando = false, error = ErrorTareasUi.DESCONOCIDO) }
+                if (revision == contexto && versionForm == formularioVersion) {
+                    updateForm { copy(guardando = false, error = ErrorTareasUi.DESCONOCIDO) }
+                }
             }
         }
     }
@@ -183,18 +204,19 @@ class TareasViewModel(
         val obra = obraId ?: return
         if (_state.value.actualizandoId != null) return
         _state.update { it.copy(actualizandoId = tarea.id, errorOperacion = null) }
-        viewModelScope.launch {
+        val revision = contexto
+        viewModelScope.launch(operacionesJob) {
             try {
                 val resultado = cambiarEstadoTarea(owner, obra, tarea.id, estado)
                 if (resultado is ResultadoTarea.Fallo) {
-                    _state.update { it.copy(errorOperacion = resultado.error.toUiError()) }
+                    actualizarContexto(revision) { it.copy(errorOperacion = resultado.error.toUiError()) }
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                _state.update { it.copy(errorOperacion = ErrorTareasUi.DESCONOCIDO) }
+                actualizarContexto(revision) { it.copy(errorOperacion = ErrorTareasUi.DESCONOCIDO) }
             } finally {
-                _state.update { it.copy(actualizandoId = null) }
+                actualizarContexto(revision) { it.copy(actualizandoId = null) }
             }
         }
     }
@@ -214,20 +236,32 @@ class TareasViewModel(
         val tarea = estado.tareaAEliminar ?: return
         if (estado.eliminando) return
         _state.update { it.copy(tareaAEliminar = null, eliminando = true, errorOperacion = null) }
-        viewModelScope.launch {
+        val revision = contexto
+        viewModelScope.launch(operacionesJob) {
             try {
                 val resultado = eliminarTarea(owner, obra, tarea.id, estado.vinculados)
                 if (resultado is ResultadoTarea.Fallo) {
-                    _state.update { it.copy(errorOperacion = resultado.error.toUiError()) }
+                    actualizarContexto(revision) { it.copy(errorOperacion = resultado.error.toUiError()) }
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
             } catch (_: Exception) {
-                _state.update { it.copy(errorOperacion = ErrorTareasUi.DESCONOCIDO) }
+                actualizarContexto(revision) { it.copy(errorOperacion = ErrorTareasUi.DESCONOCIDO) }
             } finally {
-                _state.update { it.copy(eliminando = false) }
+                actualizarContexto(revision) { it.copy(eliminando = false) }
             }
         }
+    }
+
+    private fun invalidarContexto() {
+        // Una reapertura de la misma obra también es un contexto nuevo.
+        contexto++
+        operacionesJob.cancel()
+        operacionesJob = Job(viewModelScope.coroutineContext[Job])
+    }
+
+    private inline fun actualizarContexto(revision: Long, transform: (TareasUiState) -> TareasUiState) {
+        if (revision == contexto) _state.update(transform)
     }
 
     private fun updateForm(transform: FormularioTareaUiState.() -> FormularioTareaUiState) =
@@ -248,6 +282,7 @@ class TareasViewModel(
         ErrorTarea.FECHA_FIN_ANTERIOR -> ErrorTareasUi.FECHA_FIN_ANTERIOR
         ErrorTarea.NO_AUTORIZADA -> ErrorTareasUi.PERMISOS
         ErrorTarea.RED -> ErrorTareasUi.RED
+        ErrorTarea.DEMASIADOS_VINCULADOS -> ErrorTareasUi.DEMASIADOS_VINCULADOS
         ErrorTarea.FALLO_PARCIAL -> ErrorTareasUi.BAJA_PARCIAL
         ErrorTarea.DESCONOCIDO -> ErrorTareasUi.DESCONOCIDO
     }
