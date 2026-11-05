@@ -1,6 +1,9 @@
 package com.unaj.obratrack.features.auth
 
 import com.unaj.obratrack.core.ui.Iconos
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,22 +16,26 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -105,6 +112,45 @@ internal fun AuthTextField(
         singleLine = true,
         modifier = modifier.fillMaxWidth(),
     )
+}
+
+/**
+ * Botón con la marca de Google según sus guías: logo "G" original sin recolorear, fondo y borde
+ * neutros (claro: #FFFFFF / #747775 / texto #1F1F1F; oscuro: #131314 / #8E918F / texto #E3E3E3).
+ */
+@Composable
+internal fun GoogleSignInButton(text: String, enabled: Boolean, loading: Boolean, onClick: () -> Unit) {
+    val dark = isSystemInDarkTheme()
+    val container = if (dark) Color(0xFF131314) else Color(0xFFFFFFFF)
+    val content = if (dark) Color(0xFFE3E3E3) else Color(0xFF1F1F1F)
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        border = BorderStroke(1.dp, if (dark) Color(0xFF8E918F) else Color(0xFF747775)),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = container,
+            contentColor = content,
+            disabledContainerColor = container.copy(alpha = 0.38f),
+            disabledContentColor = content.copy(alpha = 0.38f),
+        ),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                color = LocalContentColor.current,
+            )
+        } else {
+            Image(
+                painter = painterResource(Res.drawable.ic_google_g),
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+            )
+            Spacer(Modifier.width(10.dp))
+            Text(text)
+        }
+    }
 }
 
 @Composable

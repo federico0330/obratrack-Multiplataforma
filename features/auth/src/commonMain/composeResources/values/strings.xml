@@ -7,6 +7,8 @@
     <string name="auth_sign_in">Iniciar sesión</string>
     <string name="auth_register_subtitle">Creá tu cuenta para empezar</string>
     <string name="auth_repeat_password_label">Repetir contraseña</string>
+    <string name="auth_or">o</string>
+    <string name="auth_google_sign_in">Continuar con Google</string>
     <string name="auth_create_account">Crear cuenta</string>
     <string name="auth_have_account">Ya tengo cuenta</string>
     <string name="auth_register_error_invalid_email">El correo electrónico no es válido.</string>

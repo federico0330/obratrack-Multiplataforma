@@ -14,8 +14,10 @@ class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalComposeUiApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val proveedorTokenGoogle = (application as ObraTrackApplication).proveedorTokenGoogle
+        proveedorTokenGoogle.adjuntar(this)
         setContent {
-            Box(Modifier.semantics { testTagsAsResourceId = true }) { ObraTrackApp() }
+            Box(Modifier.semantics { testTagsAsResourceId = true }) { ObraTrackApp(proveedorTokenGoogle) }
         }
     }
 }

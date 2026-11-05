@@ -2,12 +2,16 @@ package com.unaj.obratrack.features.auth
 
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.domain.repository.ErrorAuth
+import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
+import com.unaj.obratrack.domain.repository.RepositorioAccesoGoogle
 import com.unaj.obratrack.domain.repository.RepositorioAutenticacion
 import com.unaj.obratrack.domain.repository.ResultadoAcceso
 import com.unaj.obratrack.domain.repository.ResultadoCerrarSesion
 import com.unaj.obratrack.domain.repository.ResultadoRegistro
+import com.unaj.obratrack.domain.repository.ResultadoTokenGoogle
 import com.unaj.obratrack.domain.usecase.CerrarSesion
 import com.unaj.obratrack.domain.usecase.IniciarSesion
+import com.unaj.obratrack.domain.usecase.IniciarSesionConGoogle
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -211,17 +215,76 @@ class AuthViewModelTest {
         assertFalse(viewModel.state.value.isLoading)
     }
 
+    @Test
+    fun googleExitosoDejaUsuarioYSinError() = runTest {
+        val viewModel = viewModelCon(RepositorioFalso(), tokenGoogle = ResultadoTokenGoogle.Exito("token"))
+
+        viewModel.signInWithGoogle()
+
+        assertEquals(usuarioGoogle, viewModel.state.value.user)
+        assertNull(viewModel.state.value.error)
+        assertFalse(viewModel.state.value.isGoogleLoading)
+    }
+
+    @Test
+    fun cancelarGoogleNoMuestraError() = runTest {
+        val viewModel = viewModelCon(RepositorioFalso(), tokenGoogle = ResultadoTokenGoogle.Cancelado)
+
+        viewModel.signInWithGoogle()
+
+        assertNull(viewModel.state.value.user)
+        assertNull(viewModel.state.value.error)
+        assertFalse(viewModel.state.value.isGoogleLoading)
+    }
+
+    @Test
+    fun googleSinConexionLlegaAlEstado() = runTest {
+        val viewModel = viewModelCon(RepositorioFalso(), tokenGoogle = ResultadoTokenGoogle.SinConexion)
+
+        viewModel.signInWithGoogle()
+
+        assertEquals(AuthError.NoConnection, viewModel.state.value.error)
+        assertFalse(viewModel.state.value.isGoogleLoading)
+    }
+
+    @Test
+    fun googleConFalloLlegaComoInesperado() = runTest {
+        val viewModel = viewModelCon(RepositorioFalso(), tokenGoogle = ResultadoTokenGoogle.Fallo)
+
+        viewModel.signInWithGoogle()
+
+        assertEquals(AuthError.Unexpected, viewModel.state.value.error)
+    }
+
     private fun completarYIngresar(viewModel: AuthViewModel) {
         viewModel.onEmailChanged("persona@ejemplo.com")
         viewModel.onPasswordChanged("secreto")
         viewModel.signIn()
     }
 
-    private fun viewModelCon(repositorio: RepositorioFalso) = AuthViewModel(
+    private fun viewModelCon(
+        repositorio: RepositorioFalso,
+        tokenGoogle: ResultadoTokenGoogle = ResultadoTokenGoogle.Cancelado,
+    ) = AuthViewModel(
         login = IniciarSesion(repositorio),
         observarSesion = ObservarSesion(repositorio),
         cerrarSesion = CerrarSesion(repositorio),
+        loginConGoogle = IniciarSesionConGoogle(ProveedorTokenFalso(tokenGoogle), AccesoGoogleFalso(repositorio)),
     )
+}
+
+private val usuarioGoogle = Usuario("g1", "persona@gmail.com", "Persona")
+
+private class ProveedorTokenFalso(private val resultado: ResultadoTokenGoogle) : ProveedorTokenGoogle {
+    override suspend fun obtenerIdToken() = resultado
+}
+
+/** Como Firebase: un acceso con Google exitoso también actualiza el Flow de sesión. */
+private class AccesoGoogleFalso(private val sesion: RepositorioFalso) : RepositorioAccesoGoogle {
+    override suspend fun iniciarSesionConGoogle(idToken: String): ResultadoAcceso {
+        sesion.forzarSesion(usuarioGoogle)
+        return ResultadoAcceso.Exito(usuarioGoogle)
+    }
 }
 
 /** Imita a Firebase: iniciar o cerrar sesión con éxito actualiza el Flow de sesión. */
@@ -250,6 +313,10 @@ private class RepositorioFalso(
         val resultado = resultadoAcceso ?: ResultadoAcceso.Exito(Usuario("u1", email, null))
         if (resultado is ResultadoAcceso.Exito) sesionActual.value = resultado.usuario
         return resultado
+    }
+
+    fun forzarSesion(usuario: Usuario) {
+        sesionActual.value = usuario
     }
 
     override suspend fun cerrarSesion(): ResultadoCerrarSesion {

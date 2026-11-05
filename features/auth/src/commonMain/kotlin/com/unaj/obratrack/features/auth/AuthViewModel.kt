@@ -4,8 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.unaj.obratrack.domain.usecase.CerrarSesion
 import com.unaj.obratrack.domain.usecase.IniciarSesion
+import com.unaj.obratrack.domain.usecase.IniciarSesionConGoogle
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.ResultadoLogin
+import com.unaj.obratrack.domain.usecase.ResultadoLoginGoogle
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +21,7 @@ class AuthViewModel(
     private val login: IniciarSesion,
     private val observarSesion: ObservarSesion,
     private val cerrarSesion: CerrarSesion,
+    private val loginConGoogle: IniciarSesionConGoogle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(AuthUiState())
     val state = _state.asStateFlow()
@@ -65,6 +68,22 @@ class AuthViewModel(
                 it.copy(
                     isLoading = false,
                     user = (result as? ResultadoLogin.Exito)?.usuario ?: it.user,
+                    error = result.toAuthError(),
+                )
+            }
+        }
+    }
+
+    fun signInWithGoogle() {
+        if (!_state.value.canSignInWithGoogle) return
+        ensureObservingSession()
+        viewModelScope.launch {
+            _state.update { it.copy(isGoogleLoading = true, error = null) }
+            val result = loginConGoogle()
+            _state.update {
+                it.copy(
+                    isGoogleLoading = false,
+                    user = (result as? ResultadoLoginGoogle.Exito)?.usuario ?: it.user,
                     error = result.toAuthError(),
                 )
             }

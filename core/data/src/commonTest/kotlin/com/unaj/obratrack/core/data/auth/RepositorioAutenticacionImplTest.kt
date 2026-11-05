@@ -45,6 +45,25 @@ class RepositorioAutenticacionImplTest {
     fun inesperadoSeMapea() = falloAcceso(AuthFailure.Unexpected, ErrorAuth.Inesperado)
 
     @Test
+    fun accesoConGoogleUsaElTokenYConvierteElDto() = runTest {
+        val remote = FuenteAuthFalsa(signInWithGoogle = AuthResult.Success(AuthUserDto("u1", "a@gmail.com", "Ana")))
+
+        val result = RepositorioAutenticacionImpl(remote).iniciarSesionConGoogle("token")
+
+        assertEquals(ResultadoAcceso.Exito(Usuario("u1", "a@gmail.com", "Ana")), result)
+        assertEquals("token", remote.ultimoTokenGoogle)
+    }
+
+    @Test
+    fun accesoConGoogleSinConexionSeMapea() = runTest {
+        val remote = FuenteAuthFalsa(signInWithGoogle = AuthResult.Failure(AuthFailure.NoConnection))
+
+        val result = RepositorioAutenticacionImpl(remote).iniciarSesionConGoogle("token")
+
+        assertEquals(ResultadoAcceso.Fallo(ErrorAuth.SinConexion), result)
+    }
+
+    @Test
     fun cerrarSesionExitosa() = runTest {
         val remote = FuenteAuthFalsa(signOut = AuthResult.Success(Unit))
 
@@ -117,12 +136,19 @@ class RepositorioAutenticacionImplTest {
 
 private class FuenteAuthFalsa(
     private val signIn: AuthResult<AuthUserDto> = AuthResult.Failure(AuthFailure.Unexpected),
+    private val signInWithGoogle: AuthResult<AuthUserDto> = AuthResult.Failure(AuthFailure.Unexpected),
     private val signOut: AuthResult<Unit> = AuthResult.Success(Unit),
     private val signUp: RegistrationResult = RegistrationResult.Failure(RegistrationFailure.Unexpected),
     usuario: AuthUserDto? = null,
 ) : FirebaseAuthDataSource {
+    var ultimoTokenGoogle: String? = null
+
     override val currentUser: Flow<AuthUserDto?> = flowOf(usuario)
     override suspend fun signIn(email: String, password: String) = signIn
+    override suspend fun signInWithGoogle(idToken: String): AuthResult<AuthUserDto> {
+        ultimoTokenGoogle = idToken
+        return signInWithGoogle
+    }
     override suspend fun signOut() = signOut
     override suspend fun signUp(email: String, password: String) = signUp
 }

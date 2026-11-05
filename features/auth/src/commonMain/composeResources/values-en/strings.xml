@@ -6,6 +6,8 @@
     <string name="auth_sign_in">Sign in</string>
     <string name="auth_register_subtitle">Create your account to get started</string>
     <string name="auth_repeat_password_label">Repeat password</string>
+    <string name="auth_or">or</string>
+    <string name="auth_google_sign_in">Continue with Google</string>
     <string name="auth_create_account">Create account</string>
     <string name="auth_have_account">I already have an account</string>
     <string name="auth_register_error_invalid_email">The email address is not valid.</string>
