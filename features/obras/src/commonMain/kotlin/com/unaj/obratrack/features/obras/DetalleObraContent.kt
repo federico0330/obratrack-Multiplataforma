@@ -60,6 +60,9 @@ internal fun DetalleObraContent(
                         obra.fechaInicio.toLocalDateTime(TimeZone.UTC).date.toString(),
                     ),
                 )
+                obra.ultimaVisita?.let { fecha ->
+                    Text(stringResource(Res.string.obras_last_visit_value, fecha.toLocalDateTime(TimeZone.UTC).date.toString()))
+                }
                 Text(
                     stringResource(
                         Res.string.obras_visibility_value,

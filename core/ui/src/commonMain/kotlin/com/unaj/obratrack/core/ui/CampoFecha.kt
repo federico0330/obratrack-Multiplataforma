@@ -41,6 +41,7 @@ fun CampoFecha(
     onDateChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     onClear: (() -> Unit)? = null,
+    enabled: Boolean = true,
 ) {
     var abierto by remember { mutableStateOf(false) }
     Box(modifier) {
@@ -48,6 +49,7 @@ fun CampoFecha(
             value = fechaIso,
             onValueChange = {},
             readOnly = true,
+            enabled = enabled,
             label = { Text(label) },
             trailingIcon = {
                 Icon(
@@ -59,9 +61,9 @@ fun CampoFecha(
             modifier = Modifier.fillMaxWidth(),
         )
         // El campo de solo lectura no recibe toques de forma confiable: una capa transparente los captura.
-        Box(Modifier.matchParentSize().clickable { abierto = true })
+        Box(Modifier.matchParentSize().clickable(enabled = enabled) { abierto = true })
     }
-    if (abierto) {
+    if (abierto && enabled) {
         val estado = rememberDatePickerState(
             initialSelectedDateMillis = runCatching { LocalDate.parse(fechaIso) }.getOrNull()
                 ?.atStartOfDayIn(TimeZone.UTC)?.toEpochMilliseconds(),

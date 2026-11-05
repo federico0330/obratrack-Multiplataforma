@@ -1,0 +1,147 @@
+package com.unaj.obratrack.features.obras
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import com.unaj.obratrack.core.ui.CampoFecha
+import com.unaj.obratrack.core.ui.ErrorBlock
+import com.unaj.obratrack.core.ui.IconoBoton
+import com.unaj.obratrack.core.ui.Iconos
+import com.unaj.obratrack.features.obras.generated.resources.*
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.stringResource
+
+data class RelevamientosAcciones(
+    val onCreate: () -> Unit,
+    val onRetry: () -> Unit,
+    val onRetryTasks: () -> Unit,
+    val onCloseForm: () -> Unit,
+    val onNoteChange: (String) -> Unit,
+    val onDateChange: (String) -> Unit,
+    val onTaskChange: (String?) -> Unit,
+    val onSave: () -> Unit,
+)
+
+@Composable
+fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcciones, modifier: Modifier = Modifier) {
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(stringResource(Res.string.relevamientos_title), style = MaterialTheme.typography.titleLarge)
+        if (state.formularioVisible) {
+            FormularioRelevamiento(state.formulario, state.tareas, acciones)
+        } else {
+            when (val lista = state.lista) {
+                ListaRelevamientosUiState.Cargando -> CircularProgressIndicator()
+                ListaRelevamientosUiState.Vacia -> Text(stringResource(Res.string.relevamientos_empty))
+                is ListaRelevamientosUiState.Error -> {
+                    ErrorBlock(mensajeRelevamiento(lista.motivo))
+                    TextButton(onClick = acciones.onRetry) { Text(stringResource(Res.string.relevamientos_retry)) }
+                }
+                is ListaRelevamientosUiState.Contenido -> lista.items.forEach { item ->
+                    OutlinedCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text(item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), style = MaterialTheme.typography.titleMedium)
+                            Text(item.nota)
+                            item.tareaId?.let { id ->
+                                val titulo = state.tareas.items.firstOrNull { it.id == id }?.titulo
+                                    ?: stringResource(Res.string.relevamientos_task_unavailable)
+                                Text(stringResource(Res.string.relevamientos_linked_task, titulo),
+                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            }
+                        }
+                    }
+                }
+            }
+            Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth().testTag("relevamientos_create")) {
+                IconoBoton(Iconos.Add)
+                Text(stringResource(Res.string.relevamientos_create))
+            }
+        }
+    }
+}
+
+@Composable
+private fun FormularioRelevamiento(
+    form: FormularioRelevamientoUiState,
+    tareas: OpcionesTareasUiState,
+    acciones: RelevamientosAcciones,
+) {
+    Text(stringResource(Res.string.relevamientos_create), style = MaterialTheme.typography.titleMedium)
+    CampoFecha(form.fechaIso, stringResource(Res.string.relevamientos_date), acciones.onDateChange, enabled = !form.guardando)
+    OutlinedTextField(
+        value = form.nota, onValueChange = acciones.onNoteChange,
+        label = { Text(stringResource(Res.string.relevamientos_note)) },
+        enabled = !form.guardando, minLines = 3, modifier = Modifier.fillMaxWidth().testTag("relevamientos_note"),
+    )
+    SelectorTarea(form, tareas, acciones)
+    form.error?.let { ErrorBlock(mensajeRelevamiento(it)) }
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        Button(onClick = acciones.onSave, enabled = !form.guardando, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
+            if (form.guardando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+            else Text(stringResource(Res.string.relevamientos_save))
+        }
+        OutlinedButton(onClick = acciones.onCloseForm, enabled = !form.guardando, modifier = Modifier.weight(1f)) {
+            Text(stringResource(Res.string.relevamientos_cancel))
+        }
+    }
+}
+
+@Composable
+private fun SelectorTarea(form: FormularioRelevamientoUiState, tareas: OpcionesTareasUiState, acciones: RelevamientosAcciones) {
+    var abierto by remember { mutableStateOf(false) }
+    Text(stringResource(Res.string.relevamientos_task_optional), style = MaterialTheme.typography.labelMedium)
+    val sinTarea = stringResource(Res.string.relevamientos_no_task)
+    val seleccion = if (form.tareaId == null) sinTarea
+        else tareas.items.firstOrNull { it.id == form.tareaId }?.titulo ?: stringResource(Res.string.relevamientos_task_unavailable)
+    Box {
+        OutlinedButton(onClick = { abierto = true }, enabled = !form.guardando, modifier = Modifier.fillMaxWidth().testTag("relevamientos_task")) {
+            Text(seleccion)
+        }
+        DropdownMenu(expanded = abierto && !form.guardando, onDismissRequest = { abierto = false }) {
+            DropdownMenuItem(text = { Text(sinTarea) }, onClick = { abierto = false; acciones.onTaskChange(null) })
+            tareas.items.forEach { tarea ->
+                DropdownMenuItem(modifier = Modifier.testTag("relevamientos_task_${tarea.id}"), text = { Text(tarea.titulo) }, onClick = { abierto = false; acciones.onTaskChange(tarea.id) })
+            }
+        }
+    }
+    when {
+        tareas.cargando -> Text(stringResource(Res.string.relevamientos_tasks_loading), style = MaterialTheme.typography.bodySmall)
+        tareas.error -> {
+            Text(stringResource(Res.string.relevamientos_tasks_error), style = MaterialTheme.typography.bodySmall)
+            TextButton(onClick = acciones.onRetryTasks, enabled = !form.guardando) { Text(stringResource(Res.string.relevamientos_retry)) }
+        }
+        tareas.items.isEmpty() -> Text(stringResource(Res.string.relevamientos_tasks_empty), style = MaterialTheme.typography.bodySmall)
+    }
+}
+
+@Composable
+private fun mensajeRelevamiento(error: ErrorRelevamientosUi): String = stringResource(when (error) {
+    ErrorRelevamientosUi.NOTA -> Res.string.relevamientos_error_note
+    ErrorRelevamientosUi.FECHA -> Res.string.relevamientos_error_date
+    ErrorRelevamientosUi.SESION -> Res.string.relevamientos_error_session
+    ErrorRelevamientosUi.TAREA -> Res.string.relevamientos_error_task
+    ErrorRelevamientosUi.RED -> Res.string.relevamientos_error_network
+    ErrorRelevamientosUi.DESCONOCIDO -> Res.string.relevamientos_error_generic
+})

@@ -92,4 +92,26 @@
     <string name="obras_start_date_value">Start date: %1$s</string>
     <string name="obras_visibility">Visibility</string>
     <string name="tareas_error_delete_limit">This task has too many linked surveys to delete safely. No data was changed.</string>
+    <string name="relevamientos_title">Surveys</string>
+    <string name="relevamientos_empty">There are no surveys in this work yet.</string>
+    <string name="relevamientos_retry">Retry</string>
+    <string name="relevamientos_create">New survey</string>
+    <string name="relevamientos_date">Date</string>
+    <string name="relevamientos_note">Note</string>
+    <string name="relevamientos_task_optional">Task (optional)</string>
+    <string name="relevamientos_no_task">No linked task</string>
+    <string name="relevamientos_task_unavailable">Task unavailable</string>
+    <string name="relevamientos_linked_task">Task: %1$s</string>
+    <string name="relevamientos_save">Save</string>
+    <string name="relevamientos_cancel">Cancel</string>
+    <string name="relevamientos_tasks_loading">Loading tasks…</string>
+    <string name="relevamientos_tasks_error">We could not load tasks. You can save without linking one.</string>
+    <string name="relevamientos_tasks_empty">This work has no tasks yet. You can save without linking one.</string>
+    <string name="relevamientos_error_note">Write a note for this survey.</string>
+    <string name="relevamientos_error_date">Choose a valid date.</string>
+    <string name="relevamientos_error_session">You do not have access to this work. Sign in again.</string>
+    <string name="relevamientos_error_task">The task is no longer available. Choose another or save without linking it.</string>
+    <string name="relevamientos_error_network">Could not connect. Check your connection and try again.</string>
+    <string name="relevamientos_error_generic">Could not complete the operation. Try again.</string>
+    <string name="obras_last_visit_value">Latest survey: %1$s</string>
 </resources>

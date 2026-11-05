@@ -92,4 +92,26 @@
     <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
     <string name="obras_visibility">Visibilidad</string>
     <string name="tareas_error_delete_limit">La tarea tiene demasiados relevamientos vinculados para eliminarla de forma segura. No se modificó ningún dato.</string>
+    <string name="relevamientos_title">Relevamientos</string>
+    <string name="relevamientos_empty">Todavía no hay relevamientos en esta obra.</string>
+    <string name="relevamientos_retry">Reintentar</string>
+    <string name="relevamientos_create">Nuevo relevamiento</string>
+    <string name="relevamientos_date">Fecha</string>
+    <string name="relevamientos_note">Nota</string>
+    <string name="relevamientos_task_optional">Tarea (opcional)</string>
+    <string name="relevamientos_no_task">Sin tarea vinculada</string>
+    <string name="relevamientos_task_unavailable">Tarea no disponible</string>
+    <string name="relevamientos_linked_task">Tarea: %1$s</string>
+    <string name="relevamientos_save">Guardar</string>
+    <string name="relevamientos_cancel">Cancelar</string>
+    <string name="relevamientos_tasks_loading">Cargando tareas…</string>
+    <string name="relevamientos_tasks_error">No pudimos cargar las tareas. Podés guardar sin vincular una.</string>
+    <string name="relevamientos_tasks_empty">Esta obra todavía no tiene tareas. Podés guardar sin vincular una.</string>
+    <string name="relevamientos_error_note">Escribí una nota para el relevamiento.</string>
+    <string name="relevamientos_error_date">Elegí una fecha válida.</string>
+    <string name="relevamientos_error_session">No tenés acceso a esta obra. Volvé a iniciar sesión.</string>
+    <string name="relevamientos_error_task">La tarea ya no está disponible. Elegí otra o guardá sin vincularla.</string>
+    <string name="relevamientos_error_network">No pudimos conectar. Revisá tu conexión y volvé a intentar.</string>
+    <string name="relevamientos_error_generic">No pudimos completar la operación. Intentá de nuevo.</string>
+    <string name="obras_last_visit_value">Último relevamiento: %1$s</string>
 </resources>

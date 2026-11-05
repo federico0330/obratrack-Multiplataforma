@@ -31,6 +31,9 @@ import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
 import com.unaj.obratrack.features.obras.MisObrasScreen
 import com.unaj.obratrack.features.obras.ObrasViewModel
+import com.unaj.obratrack.features.obras.RelevamientosAcciones
+import com.unaj.obratrack.features.obras.RelevamientosSection
+import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.features.obras.TareasAcciones
 import com.unaj.obratrack.features.obras.TareasSection
 import com.unaj.obratrack.features.obras.TareasViewModel
@@ -49,21 +52,29 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
     val tareasViewModel: TareasViewModel = viewModel { graph.crearTareasViewModel() }
+    val relevamientosViewModel: RelevamientosViewModel = viewModel { graph.crearRelevamientosViewModel() }
     val perfilViewModel: PerfilViewModel = viewModel { graph.crearPerfilViewModel() }
     val authState by authViewModel.state.collectAsState()
     val registroState by registroViewModel.state.collectAsState()
     val obrasState by obrasViewModel.state.collectAsState()
     val tareasState by tareasViewModel.state.collectAsState()
+    val relevamientosState by relevamientosViewModel.state.collectAsState()
     var enRegistro by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(authState.user) {
         if (authState.user != null) enRegistro = false
     }
 
-    // Las tareas siguen a la obra abierta en el detalle.
+    // Ambas secciones siguen a la obra abierta en el detalle.
     val obraAbiertaId = obrasState.obraSeleccionada?.id
     LaunchedEffect(obraAbiertaId) {
-        if (obraAbiertaId != null) tareasViewModel.abrirObra(obraAbiertaId) else tareasViewModel.cerrarObra()
+        if (obraAbiertaId != null) {
+            tareasViewModel.abrirObra(obraAbiertaId)
+            relevamientosViewModel.abrirObra(obraAbiertaId)
+        } else {
+            tareasViewModel.cerrarObra()
+            relevamientosViewModel.cerrarObra()
+        }
     }
 
     ObraTrackTheme {
@@ -124,6 +135,19 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                                                 onStartChange = tareasViewModel::fechaInicioCambiada,
                                                 onEndChange = tareasViewModel::fechaFinCambiada,
                                                 onSave = tareasViewModel::guardar,
+                                            ),
+                                        )
+                                        RelevamientosSection(
+                                            state = relevamientosState,
+                                            acciones = RelevamientosAcciones(
+                                                onCreate = relevamientosViewModel::abrirFormulario,
+                                                onRetry = relevamientosViewModel::reintentar,
+                                                onRetryTasks = relevamientosViewModel::reintentarTareas,
+                                                onCloseForm = relevamientosViewModel::cerrarFormulario,
+                                                onNoteChange = relevamientosViewModel::notaCambiada,
+                                                onDateChange = relevamientosViewModel::fechaCambiada,
+                                                onTaskChange = relevamientosViewModel::tareaCambiada,
+                                                onSave = relevamientosViewModel::guardar,
                                             ),
                                         )
                                     },

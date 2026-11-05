@@ -92,4 +92,26 @@
     <string name="obras_start_date_value">Data di inizio: %1$s</string>
     <string name="obras_visibility">Visibilità</string>
     <string name="tareas_error_delete_limit">Questa attività ha troppi rilievi collegati per eliminarla in sicurezza. Nessun dato è stato modificato.</string>
+    <string name="relevamientos_title">Rilievi</string>
+    <string name="relevamientos_empty">Non ci sono ancora rilievi in questo lavoro.</string>
+    <string name="relevamientos_retry">Riprova</string>
+    <string name="relevamientos_create">Nuovo rilievo</string>
+    <string name="relevamientos_date">Data</string>
+    <string name="relevamientos_note">Nota</string>
+    <string name="relevamientos_task_optional">Attività (facoltativa)</string>
+    <string name="relevamientos_no_task">Nessuna attività collegata</string>
+    <string name="relevamientos_task_unavailable">Attività non disponibile</string>
+    <string name="relevamientos_linked_task">Attività: %1$s</string>
+    <string name="relevamientos_save">Salva</string>
+    <string name="relevamientos_cancel">Annulla</string>
+    <string name="relevamientos_tasks_loading">Caricamento delle attività…</string>
+    <string name="relevamientos_tasks_error">Impossibile caricare le attività. Puoi salvare senza collegarne una.</string>
+    <string name="relevamientos_tasks_empty">Questo lavoro non ha ancora attività. Puoi salvare senza collegarne una.</string>
+    <string name="relevamientos_error_note">Scrivi una nota per il rilievo.</string>
+    <string name="relevamientos_error_date">Scegli una data valida.</string>
+    <string name="relevamientos_error_session">Non hai accesso a questo lavoro. Accedi di nuovo.</string>
+    <string name="relevamientos_error_task">Questa attività non è più disponibile. Scegline un’altra oppure salva senza collegarla.</string>
+    <string name="relevamientos_error_network">Connessione non riuscita. Controlla la connessione e riprova.</string>
+    <string name="relevamientos_error_generic">Impossibile completare l’operazione. Riprova.</string>
+    <string name="obras_last_visit_value">Ultimo rilievo: %1$s</string>
 </resources>
