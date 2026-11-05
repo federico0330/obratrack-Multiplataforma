@@ -8,6 +8,8 @@ import dev.gitlive.firebase.firestore.DocumentSnapshot
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.FirebaseFirestoreException
 import dev.gitlive.firebase.firestore.GeoPoint
+import dev.gitlive.firebase.firestore.FieldValue
+import dev.gitlive.firebase.firestore.Source
 import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.code
 import dev.gitlive.firebase.firestore.firestore
@@ -63,6 +65,69 @@ class GitLiveFirebaseRelevamientoDataSource(
         FirebaseRelevamientoResult.Failure(error.toFailure())
     }
 
+    override suspend fun actualizar(
+        userId: String, obraId: String, id: String, fields: RelevamientoUpdateFields,
+    ): FirebaseRelevamientoResult<Unit> = cambiar(userId, obraId, id, fields)
+
+    override suspend fun eliminar(userId: String, obraId: String, id: String): FirebaseRelevamientoResult<Unit> =
+        cambiar(userId, obraId, id, null)
+
+    private suspend fun cambiar(
+        userId: String, obraId: String, id: String, fields: RelevamientoUpdateFields?,
+    ): FirebaseRelevamientoResult<Unit> = try {
+        val obra = firestore.collection("obras").document(obraId)
+        val relevamientos = obra.collection("relevamientos")
+        val ref = relevamientos.document(id)
+        firestore.runTransaction {
+            val transaction = this
+            val tx = object : TransaccionCambioRelevamiento {
+                override suspend fun leerDuenoObra(): String? {
+                    val snapshot = transaction.get(obra)
+                    return if (snapshot.exists) snapshot.get("userId") else null
+                }
+                override suspend fun leerDuenoRelevamiento(): String? {
+                    val snapshot = transaction.get(ref)
+                    return if (snapshot.exists) snapshot.get("userId") else null
+                }
+                override suspend fun leerDuenoTarea(id: String): String? {
+                    val snapshot = transaction.get(obra.collection("tareas").document(id))
+                    return if (snapshot.exists) snapshot.get("userId") else null
+                }
+                override suspend fun leerFechas(): Map<String, Long> =
+                    // Se vuelve a consultar en cada intento. Las mutaciones de ambos clientes
+                    // escriben la obra leída por la transacción y fuerzan reintento si cambia.
+                    relevamientos.get(Source.SERVER).documents.mapNotNull { doc ->
+                        doc.timestampMillis("fecha")?.let { doc.id to it }
+                    }.toMap()
+
+                override fun actualizar(fields: RelevamientoUpdateFields, ultimaVisitaMillis: Long) {
+                    transaction.updateFields(ref) {
+                        "fecha" to Timestamp.fromMilliseconds(fields.fechaMillis.toDouble())
+                        "nota" to fields.nota
+                        "tareaId" to (fields.tareaId ?: FieldValue.delete)
+                    }
+                    transaction.updateFields(obra) {
+                        "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble())
+                    }
+                }
+                override fun eliminar(ultimaVisitaMillis: Long?) {
+                    transaction.delete(ref)
+                    transaction.updateFields(obra) {
+                        "ultimaVisita" to (ultimaVisitaMillis?.let {
+                            Timestamp.fromMilliseconds(it.toDouble())
+                        } ?: FieldValue.delete)
+                    }
+                }
+            }
+            if (fields == null) prepararBaja(userId, id, tx) else prepararEdicion(userId, id, fields, tx)
+        }
+        FirebaseRelevamientoResult.Success(Unit)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        FirebaseRelevamientoResult.Failure(error.toFailure())
+    }
+
     private fun DocumentSnapshot.timestampMillis(field: String): Long? =
         if (contains(field)) get<Timestamp?>(field)?.toMilliseconds()?.toLong() else null
 
@@ -81,6 +146,7 @@ class GitLiveFirebaseRelevamientoDataSource(
     }
 
     private fun Throwable.toFailure(): FirebaseRelevamientoFailure = when (this) {
+        is RelevamientoNoEncontradoException -> FirebaseRelevamientoFailure.NotFound
         is ObraNoAutorizadaException -> FirebaseRelevamientoFailure.PermissionDenied
         is TareaNoDisponibleException -> FirebaseRelevamientoFailure.TaskUnavailable
         is FirebaseNetworkException -> FirebaseRelevamientoFailure.Network

@@ -16,7 +16,7 @@ data class RelevamientoDto(
     val horaVisita: Int? = null,
 )
 
-enum class FirebaseRelevamientoFailure { PermissionDenied, TaskUnavailable, Network, Unexpected }
+enum class FirebaseRelevamientoFailure { PermissionDenied, TaskUnavailable, NotFound, Network, Unexpected }
 sealed interface FirebaseRelevamientoResult<out T> {
     data class Success<T>(val value: T) : FirebaseRelevamientoResult<T>
     data class Failure(val error: FirebaseRelevamientoFailure) : FirebaseRelevamientoResult<Nothing>
@@ -25,4 +25,9 @@ sealed interface FirebaseRelevamientoResult<out T> {
 interface FirebaseRelevamientoDataSource {
     fun observarDeObra(userId: String, obraId: String): Flow<FirebaseRelevamientoResult<List<RelevamientoDto>>>
     suspend fun crear(dto: RelevamientoDto): FirebaseRelevamientoResult<RelevamientoDto>
+    suspend fun actualizar(userId: String, obraId: String, id: String, fields: RelevamientoUpdateFields): FirebaseRelevamientoResult<Unit>
+    suspend fun eliminar(userId: String, obraId: String, id: String): FirebaseRelevamientoResult<Unit>
 }
+
+/** Solo campos editables en este formulario; el resto del documento se conserva. */
+data class RelevamientoUpdateFields(val fechaMillis: Long, val nota: String, val tareaId: String?)

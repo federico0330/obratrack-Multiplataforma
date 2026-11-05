@@ -1,6 +1,8 @@
 package com.unaj.obratrack.domain.usecase
 
 import com.unaj.obratrack.domain.model.Relevamiento
+import com.unaj.obratrack.domain.model.FiltroRelevamientos
+import com.unaj.obratrack.domain.model.filtrar
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
 import com.unaj.obratrack.domain.repository.RepositorioRelevamientos
@@ -70,11 +72,44 @@ class RelevamientoUseCasesTest {
         assertEquals(error, ObservarRelevamientos(repo)("uid", "obra").first())
         assertEquals(error, CrearRelevamiento(repo)("uid", "obra", RelevamientoDraft(Instant.fromEpochMilliseconds(10), "Nota")))
     }
+    @Test
+    fun editarValidaNormalizaYConservaIdYDesvinculo() = runTest {
+        val repo = RelevamientosFalso()
+        val draft = RelevamientoDraft(Instant.fromEpochMilliseconds(20), "  Nota editada  ")
+        assertEquals(ResultadoRelevamiento.Exito(Unit), ActualizarRelevamiento(repo)("uid", "obra", "id", draft))
+        assertEquals("id", repo.modificado)
+        assertEquals("Nota editada", repo.creado?.nota)
+        assertNull(repo.creado?.tareaId)
+        assertEquals(ResultadoRelevamiento.Fallo(ErrorRelevamiento.NOTA_VACIA),
+            ActualizarRelevamiento(repo)("uid", "obra", "id", draft.copy(nota = " ")))
+    }
+
+    @Test
+    fun idsInvalidosNoInvocanLaBaja() = runTest {
+        val repo = RelevamientosFalso()
+        assertEquals(ResultadoRelevamiento.Fallo(ErrorRelevamiento.NO_AUTORIZADA), EliminarRelevamiento(repo)("", "obra", "id"))
+        assertEquals(ResultadoRelevamiento.Fallo(ErrorRelevamiento.NO_ENCONTRADO), EliminarRelevamiento(repo)("uid", "obra", " "))
+        assertNull(repo.modificado)
+        assertEquals(ResultadoRelevamiento.Exito(Unit), EliminarRelevamiento(repo)("uid", "obra", "id"))
+        assertEquals("id", repo.modificado)
+    }
+
+    @Test
+    fun filtrosDistinguenTodosSinTareaYTareaElegida() {
+        val items = listOf(null, "a", "b").mapIndexed { i, tarea ->
+            Relevamiento(i.toString(), "obra", "uid", Instant.fromEpochMilliseconds(20), "Nota", tarea)
+        }
+        assertEquals(items, items.filtrar(FiltroRelevamientos.Todos))
+        assertEquals(listOf("0"), items.filtrar(FiltroRelevamientos.SinTarea).map { it.id })
+        assertEquals(listOf("1"), items.filtrar(FiltroRelevamientos.DeTarea("a")).map { it.id })
+    }
+
 }
 
 private class RelevamientosFalso : RepositorioRelevamientos {
     var lista: ResultadoRelevamiento<List<Relevamiento>> = ResultadoRelevamiento.Exito(emptyList())
     var alta: ResultadoRelevamiento<Relevamiento> = ResultadoRelevamiento.Fallo(ErrorRelevamiento.RED)
+    var modificado: String? = null
     var creado: RelevamientoDraft? = null
     var destino: Pair<String, String>? = null
     override fun observarDeObra(userId: String, obraId: String) = flowOf(lista).also { destino = userId to obraId }
@@ -82,5 +117,14 @@ private class RelevamientosFalso : RepositorioRelevamientos {
         destino = userId to obraId
         creado = draft
         return alta
+    }
+    override suspend fun actualizar(userId: String, obraId: String, id: String, draft: RelevamientoDraft): ResultadoRelevamiento<Unit> {
+        modificado = id
+        creado = draft
+        return ResultadoRelevamiento.Exito(Unit)
+    }
+    override suspend fun eliminar(userId: String, obraId: String, id: String): ResultadoRelevamiento<Unit> {
+        modificado = id
+        return ResultadoRelevamiento.Exito(Unit)
     }
 }

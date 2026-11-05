@@ -114,4 +114,18 @@
     <string name="relevamientos_error_network">No pudimos conectar. Revisá tu conexión y volvé a intentar.</string>
     <string name="relevamientos_error_generic">No pudimos completar la operación. Intentá de nuevo.</string>
     <string name="obras_last_visit_value">Último relevamiento: %1$s</string>
+    <string name="relevamientos_delete">Eliminar relevamiento</string>
+    <string name="relevamientos_delete_confirmation">Se eliminará este relevamiento. La tarea vinculada y los demás relevamientos se conservan.</string>
+    <string name="relevamientos_confirm_delete">Confirmar eliminación</string>
+    <string name="relevamientos_edit">Editar relevamiento</string>
+    <string name="relevamientos_detail">Detalle del relevamiento</string>
+    <string name="relevamientos_back">Volver al listado</string>
+    <string name="relevamientos_error_not_found">Este relevamiento ya no está disponible. Actualizá el listado.</string>
+    <string name="relevamientos_filter_all">Todos los relevamientos</string>
+    <string name="relevamientos_filter">Mostrar: %1$s</string>
+    <string name="relevamientos_filter_empty">No hay relevamientos para este filtro.</string>
+    <string name="relevamientos_location">Ubicación: %1$s, %2$s</string>
+    <string name="relevamientos_next_visit">Próxima visita: %1$s</string>
+    <string name="relevamientos_view_photo">Ver foto adjunta</string>
+    <string name="relevamientos_photo_error">No pudimos abrir la foto.</string>
 </resources>

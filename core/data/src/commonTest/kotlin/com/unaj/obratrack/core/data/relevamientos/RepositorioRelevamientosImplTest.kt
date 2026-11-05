@@ -4,6 +4,7 @@ import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoDataSo
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoFailure
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
+import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoUpdateFields
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
@@ -47,6 +48,7 @@ class RepositorioRelevamientosImplTest {
     fun traduceCadaFalloRemotoSinMostrarExcepciones() = runTest {
         for ((remoteError, error) in listOf(
             FirebaseRelevamientoFailure.PermissionDenied to ErrorRelevamiento.NO_AUTORIZADA,
+            FirebaseRelevamientoFailure.NotFound to ErrorRelevamiento.NO_ENCONTRADO,
             FirebaseRelevamientoFailure.TaskUnavailable to ErrorRelevamiento.TAREA_NO_DISPONIBLE,
             FirebaseRelevamientoFailure.Network to ErrorRelevamiento.RED,
             FirebaseRelevamientoFailure.Unexpected to ErrorRelevamiento.DESCONOCIDO,
@@ -55,6 +57,8 @@ class RepositorioRelevamientosImplTest {
             val repo = RepositorioRelevamientosImpl(remote)
             val esperado = ResultadoRelevamiento.Fallo(error)
             assertEquals(esperado, repo.crear("uid", "obra", RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")))
+            assertEquals(esperado, repo.actualizar("uid", "obra", "id", RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")))
+            assertEquals(esperado, repo.eliminar("uid", "obra", "id"))
             assertEquals(esperado, repo.observarDeObra("uid", "obra").first())
         }
     }
@@ -71,6 +75,17 @@ class RepositorioRelevamientosImplTest {
         assertFailsWith<CancellationException> { repo.observarDeObra("uid", "obra").first() }
         assertFailsWith<CancellationException> { repo.crear("uid", "obra", RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")) }
     }
+    @Test
+    fun editarMapeaSoloLosCamposEditablesYBajaConservaElDestino() = runTest {
+        val remote = RemotoFalso()
+        val repo = RepositorioRelevamientosImpl(remote)
+        assertEquals(ResultadoRelevamiento.Exito(Unit), repo.actualizar("uid", "obra", "id",
+            RelevamientoDraft(Instant.fromEpochMilliseconds(40), "Nota nueva", null)))
+        assertEquals(RelevamientoUpdateFields(40, "Nota nueva", null), remote.editado)
+        assertEquals(ResultadoRelevamiento.Exito(Unit), repo.eliminar("uid", "obra", "id"))
+        assertEquals(Triple("uid", "obra", "id"), remote.operacion)
+    }
+
 }
 
 private class RemotoFalso : FirebaseRelevamientoDataSource {
@@ -78,6 +93,8 @@ private class RemotoFalso : FirebaseRelevamientoDataSource {
     var lista: FirebaseRelevamientoResult<List<RelevamientoDto>> = FirebaseRelevamientoResult.Success(emptyList())
     var destino: Pair<String, String>? = null
     var enviado: RelevamientoDto? = null
+    var editado: RelevamientoUpdateFields? = null
+    var operacion: Triple<String, String, String>? = null
     var fallo: FirebaseRelevamientoFailure? = null
     var excepcion: Exception? = null
     override fun observarDeObra(userId: String, obraId: String) = flow {
@@ -89,5 +106,14 @@ private class RemotoFalso : FirebaseRelevamientoDataSource {
         excepcion?.let { throw it }
         enviado = dto
         return fallo?.let { FirebaseRelevamientoResult.Failure(it) } ?: FirebaseRelevamientoResult.Success(this.dto)
+    }
+    override suspend fun actualizar(userId: String, obraId: String, id: String, fields: RelevamientoUpdateFields): FirebaseRelevamientoResult<Unit> {
+        editado = fields
+        return eliminar(userId, obraId, id)
+    }
+    override suspend fun eliminar(userId: String, obraId: String, id: String): FirebaseRelevamientoResult<Unit> {
+        excepcion?.let { throw it }
+        operacion = Triple(userId, obraId, id)
+        return fallo?.let { FirebaseRelevamientoResult.Failure(it) } ?: FirebaseRelevamientoResult.Success(Unit)
     }
 }

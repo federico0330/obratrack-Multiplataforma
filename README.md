@@ -4,7 +4,7 @@
 
 - [x] Login, registro y gestión de obras en Android con Firebase.
 - [x] Alta, edición, estados y baja de tareas.
-- [x] Alta y listado de relevamientos, con vínculo opcional a una tarea.
+- [x] Alta, detalle, edición y baja de relevamientos; vínculo opcional y filtros por tarea.
 - [x] Pantallas de acceso y Mis obras compartidas con iOS; navegación login/registro probada en simulador.
 - [x] Capas separadas para dominio, datos, Firebase y presentación.
 - [x] Pruebas unitarias para reglas, repositorios y ViewModels.
