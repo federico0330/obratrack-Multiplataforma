@@ -11,6 +11,7 @@ import androidx.test.uiautomator.By
 import androidx.test.uiautomator.BySelector
 import androidx.test.uiautomator.Direction
 import androidx.test.uiautomator.UiDevice
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import dev.gitlive.firebase.Firebase
@@ -42,6 +43,7 @@ class RelevamientosAbmUiTest {
         val tarea = obra.collection("tareas").document("tarea-abm")
         val nombre = "PRUEBA_QA_ABM_${obra.id.take(6)}"
         fun buscar(selector: BySelector): UiObject2 {
+            device.waitForIdle()
             device.wait(Until.findObject(selector), 1_000)?.let { return it }
             for (direccion in listOf(Direction.DOWN, Direction.UP)) {
                 for (intento in 0 until 12) {
@@ -53,11 +55,23 @@ class RelevamientosAbmUiTest {
             }
             error("No se encontró: $selector")
         }
+        fun tocar(selector: BySelector) {
+            for (intento in 0 until 3) {
+                try {
+                    buscar(selector).click()
+                    device.waitForIdle()
+                    return
+                } catch (error: StaleObjectException) {
+                    if (intento == 2) throw error
+                }
+            }
+        }
+        fun pulsar(id: String) = tocar(By.res(id))
         fun boton(id: String) = buscar(By.res(id))
         fun opcion(texto: String) = requireNotNull(device.wait(Until.findObject(By.text(Pattern.compile(texto))), 5_000))
         fun confirmarBaja(id: String) {
-            boton("relevamientos_item_$id").click()
-            boton("relevamientos_delete").click()
+            pulsar("relevamientos_item_$id")
+            pulsar("relevamientos_delete")
             opcion("Confirm deletion|Confirmar eliminación|Conferma eliminazione").click()
             buscar(By.res("relevamientos_create").enabled(true))
         }
@@ -77,12 +91,12 @@ class RelevamientosAbmUiTest {
                 context.startActivity(context.packageManager.getLaunchIntentForPackage(context.packageName)!!
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
                 assertTrue(device.wait(Until.hasObject(By.text(Pattern.compile("My works|Mis obras|I miei lavori"))), 15_000))
-                buscar(By.text(nombre)).click()
-                boton("relevamientos_item_editar").click()
-                boton("relevamientos_edit").click()
+                tocar(By.text(nombre))
+                pulsar("relevamientos_item_editar")
+                pulsar("relevamientos_edit")
                 // Atrás cierra el formulario y mantiene el detalle del relevamiento abierto.
                 device.pressBack()
-                boton("relevamientos_edit").click()
+                pulsar("relevamientos_edit")
                 val editor = boton("relevamientos_note")
                 editor.click()
                 device.waitForIdle()
@@ -96,28 +110,28 @@ class RelevamientosAbmUiTest {
                         .hideSoftInputFromWindow(activity.window.decorView.windowToken, 0)
                 }
                 device.waitForIdle()
-                boton("relevamientos_task").click()
+                pulsar("relevamientos_task")
                 opcion("No linked task|Sin tarea vinculada|Nessuna attività collegata").click()
-                boton("relevamientos_save").click()
+                pulsar("relevamientos_save")
                 boton("relevamientos_edit")
                 assertEquals("PRUEBA_QA_EDITADA", registros.document("editar").get(Source.SERVER).get<String>("nota"))
                 assertFalse(registros.document("editar").get(Source.SERVER).contains("tareaId"))
-                boton("relevamientos_back").click()
-                boton("relevamientos_filter").click()
+                pulsar("relevamientos_back")
+                pulsar("relevamientos_filter")
                 opcion("No linked task|Sin tarea vinculada|Nessuna attività collegata").click()
                 boton("relevamientos_item_editar")
                 assertFalse(device.hasObject(By.res("relevamientos_item_otro")))
-                boton("relevamientos_filter").click()
+                pulsar("relevamientos_filter")
                 opcion("TAREA_QA_ABM").click()
                 boton("relevamientos_item_otro")
                 assertFalse(device.hasObject(By.res("relevamientos_item_editar")))
-                boton("relevamientos_filter").click()
+                pulsar("relevamientos_filter")
                 opcion("All surveys|Todos los relevamientos|Tutti i rilievi").click()
-                boton("relevamientos_item_editar").click()
-                boton("relevamientos_delete").click()
+                pulsar("relevamientos_item_editar")
+                pulsar("relevamientos_delete")
                 opcion("Cancel|Cancelar|Annulla").click()
                 assertTrue(registros.document("editar").get(Source.SERVER).exists)
-                boton("relevamientos_back").click()
+                pulsar("relevamientos_back")
                 confirmarBaja("editar")
                 assertEquals(1793491200000L, obra.get(Source.SERVER).get<Timestamp>("ultimaVisita").toMilliseconds().toLong())
                 confirmarBaja("otro")

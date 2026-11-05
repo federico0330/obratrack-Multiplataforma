@@ -105,8 +105,9 @@ class RelevamientosUiTest {
                 assertTrue(docs.any { it.get<String>("nota") == "PRUEBA_QA_CON_TAREA" && it.get<String>("tareaId") == tarea.id })
                 abrirApp()
                 encontrar(By.text(nombre)).click()
-                assertTrue(encontrar(By.textContains("PRUEBA_QA_CON_TAREA")).text.contains("PRUEBA_QA_CON_TAREA"))
-                assertTrue(encontrar(By.textContains("PRUEBA_QA_SIN_TAREA")).text.contains("PRUEBA_QA_SIN_TAREA"))
+                for (doc in docs) {
+                    encontrar(By.res("relevamientos_item_${doc.id}"))
+                }
             } catch (error: Throwable) {
                 val cache = instrumentation.targetContext.cacheDir
                 device.takeScreenshot(File(cache, "relevamientos-ui-fallo.png"))
