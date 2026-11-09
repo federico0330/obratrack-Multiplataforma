@@ -124,7 +124,7 @@
     <string name="relevamientos_filter_all">Todos los relevamientos</string>
     <string name="relevamientos_filter">Mostrar: %1$s</string>
     <string name="relevamientos_filter_empty">No hay relevamientos para este filtro.</string>
-    <string name="relevamientos_location">Ubicación: %1$s, %2$s</string>
+    <string name="relevamientos_location">Ubicación: %1$s</string>
     <string name="relevamientos_next_visit">Próxima visita: %1$s</string>
     <string name="relevamientos_photo_error">No pudimos cargar la foto.</string>
     <string name="relevamientos_photo">Foto (opcional)</string>
@@ -137,4 +137,15 @@
     <string name="relevamientos_error_photo_upload">No pudimos subir la foto. Intentá de nuevo o elegí otra.</string>
     <string name="relevamientos_error_photo_read">No pudimos leer la foto elegida. Probá con otra.</string>
     <string name="relevamientos_error_photo_camera">No pudimos abrir la cámara. Elegí una foto de la galería.</string>
+    <string name="relevamientos_location_optional">Ubicación (opcional)</string>
+    <string name="relevamientos_location_use">Usar mi ubicación</string>
+    <string name="relevamientos_location_update">Actualizar ubicación</string>
+    <string name="relevamientos_location_remove">Quitar ubicación</string>
+    <string name="relevamientos_location_cancel">Cancelar</string>
+    <string name="relevamientos_location_searching">Buscando tu ubicación…</string>
+    <string name="relevamientos_location_open_map">Abrir en el mapa</string>
+    <string name="relevamientos_error_location_permission">No tenemos permiso para usar la ubicación. Habilitalo en los ajustes del teléfono, en los permisos de ObraTrack, y volvé a intentar.</string>
+    <string name="relevamientos_error_location_disabled">Activá la ubicación del teléfono y volvé a intentar.</string>
+    <string name="relevamientos_error_location_unavailable">No pudimos obtener la ubicación. Probá en un lugar con mejor señal.</string>
+    <string name="relevamientos_error_location_invalid">La ubicación no es válida. Volvé a capturarla.</string>
 </resources>

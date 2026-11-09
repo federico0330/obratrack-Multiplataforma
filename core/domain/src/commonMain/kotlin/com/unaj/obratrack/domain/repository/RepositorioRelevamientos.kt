@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 enum class ErrorRelevamiento {
     NOTA_VACIA, FECHA_INVALIDA, NO_AUTORIZADA, TAREA_NO_DISPONIBLE, NO_ENCONTRADO, RED, DESCONOCIDO,
     FOTO_SIN_CONEXION, FOTO_MUY_GRANDE, FOTO_FALLO,
+    UBICACION_INVALIDA,
 }
 
 sealed interface ResultadoRelevamiento<out T> {

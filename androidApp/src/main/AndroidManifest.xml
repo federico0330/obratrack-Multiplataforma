@@ -1,5 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Los permisos de ubicación los agrega Compass por merge. ACCESS_FINE_LOCATION implica GPS obligatorio:
+         la ubicación del relevamiento es opcional, así que se declara como no requerido. -->
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <application
         android:name=".ObraTrackApplication"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"

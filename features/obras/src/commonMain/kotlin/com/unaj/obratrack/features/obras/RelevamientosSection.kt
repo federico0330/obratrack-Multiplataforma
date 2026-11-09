@@ -60,6 +60,9 @@ data class RelevamientosAcciones(
     val onRemovePhoto: () -> Unit,
     val onPhotoReadError: () -> Unit,
     val onCameraError: () -> Unit,
+    val onLocationCapture: () -> Unit,
+    val onLocationCancel: () -> Unit,
+    val onLocationRemove: () -> Unit,
 )
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -139,9 +142,10 @@ private fun FormularioRelevamiento(
     )
     SelectorTarea(form, tareas, acciones)
     SelectorFoto(form, acciones)
+    SelectorUbicacion(form, acciones)
     form.error?.let { ErrorBlock(mensajeRelevamiento(it)) }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = acciones.onSave, enabled = !form.guardando, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
+        Button(onClick = acciones.onSave, enabled = !form.guardando && !form.capturandoUbicacion, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
             if (form.guardando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             else Text(stringResource(Res.string.relevamientos_save))
         }
@@ -193,6 +197,10 @@ private fun mensajeRelevamiento(error: ErrorRelevamientosUi): String = stringRes
     ErrorRelevamientosUi.FOTO_FALLO -> Res.string.relevamientos_error_photo_upload
     ErrorRelevamientosUi.FOTO_LECTURA -> Res.string.relevamientos_error_photo_read
     ErrorRelevamientosUi.FOTO_CAMARA -> Res.string.relevamientos_error_photo_camera
+    ErrorRelevamientosUi.UBICACION_SIN_PERMISO -> Res.string.relevamientos_error_location_permission
+    ErrorRelevamientosUi.UBICACION_DESACTIVADA -> Res.string.relevamientos_error_location_disabled
+    ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE -> Res.string.relevamientos_error_location_unavailable
+    ErrorRelevamientosUi.UBICACION_INVALIDA -> Res.string.relevamientos_error_location_invalid
 })
 
 

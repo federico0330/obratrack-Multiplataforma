@@ -35,7 +35,15 @@ data class RelevamientoUpdateFields(
     val nota: String,
     val tareaId: String?,
     val foto: FotoUpdate = FotoUpdate.SinCambio,
+    val ubicacion: UbicacionUpdate = UbicacionUpdate.SinCambio,
 )
+
+/** `SinCambio` no toca `ubicacion` (puede venir de la app anterior); `Quitar` elimina el campo. */
+sealed interface UbicacionUpdate {
+    data object SinCambio : UbicacionUpdate
+    data class Nueva(val latitud: Double, val longitud: Double) : UbicacionUpdate
+    data object Quitar : UbicacionUpdate
+}
 
 /** `SinCambio` no toca `fotoUrl`; `Quitar` elimina el campo. */
 sealed interface FotoUpdate {

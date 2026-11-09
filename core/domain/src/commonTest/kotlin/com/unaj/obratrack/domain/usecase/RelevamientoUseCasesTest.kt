@@ -2,6 +2,8 @@ package com.unaj.obratrack.domain.usecase
 
 import com.unaj.obratrack.domain.model.CambioFoto
 import com.unaj.obratrack.domain.model.CambioFotoUrl
+import com.unaj.obratrack.domain.model.CambioUbicacion
+import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.repository.AlmacenFotos
@@ -170,6 +172,37 @@ class RelevamientoUseCasesTest {
         val draft = RelevamientoDraft(FECHA, " ", cambioFoto = CambioFoto.Nueva(byteArrayOf(1)))
         assertEquals(ResultadoRelevamiento.Fallo(ErrorRelevamiento.NOTA_VACIA), CrearRelevamiento(RelevamientosFalso(), fotos)("uid", "obra", draft))
         assertNull(fotos.subida)
+    }
+
+    @Test
+    fun laUbicacionLlegaAlRepositorioSinAlterarseEnCadaCambio() = runTest {
+        val repo = RelevamientosFalso()
+        for (cambio in listOf(CambioUbicacion.SinCambio, CambioUbicacion.Nueva(Ubicacion(-34.7746, -58.2672)), CambioUbicacion.Quitar)) {
+            val draft = RelevamientoDraft(FECHA, "Nota", cambioUbicacion = cambio)
+            CrearRelevamiento(repo, AlmacenFotosFalso())("uid", "obra", draft)
+            assertEquals(cambio, repo.creado?.cambioUbicacion)
+            repo.creado = null
+            ActualizarRelevamiento(repo, AlmacenFotosFalso())("uid", "obra", "id", draft)
+            assertEquals(cambio, repo.creado?.cambioUbicacion)
+        }
+        // Sin pedir nada, el borrador no toca la ubicación: los relevamientos de la app anterior la conservan.
+        assertEquals(CambioUbicacion.SinCambio, RelevamientoDraft(FECHA, "Nota").cambioUbicacion)
+    }
+
+    @Test
+    fun unaUbicacionImposibleNoLlegaAlRepositorioNiSubeLaFoto() = runTest {
+        val invalidas = listOf(Ubicacion(91.0, 0.0), Ubicacion(0.0, -181.0), Ubicacion(Double.NaN, 0.0), Ubicacion(0.0, Double.POSITIVE_INFINITY))
+        for (invalida in invalidas) {
+            val repo = RelevamientosFalso()
+            val fotos = AlmacenFotosFalso()
+            val draft = RelevamientoDraft(FECHA, "Nota", cambioFoto = CambioFoto.Nueva(byteArrayOf(1)), cambioUbicacion = CambioUbicacion.Nueva(invalida))
+            val error = ResultadoRelevamiento.Fallo(ErrorRelevamiento.UBICACION_INVALIDA)
+            assertEquals(error, CrearRelevamiento(repo, fotos)("uid", "obra", draft))
+            assertEquals(error, ActualizarRelevamiento(repo, fotos)("uid", "obra", "id", draft))
+            assertNull(repo.creado)
+            assertNull(repo.modificado)
+            assertNull(fotos.subida)
+        }
     }
 
     @Test

@@ -1,1 +1,2 @@
 "NSCameraUsageDescription" = "Per scattare foto dei sopralluoghi di cantiere.";
+"NSLocationWhenInUseUsageDescription" = "Per registrare dove è stato fatto ogni sopralluogo di cantiere.";

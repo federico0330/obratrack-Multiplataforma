@@ -3,6 +3,7 @@ package com.unaj.obratrack.features.obras
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.Tarea
+import com.unaj.obratrack.domain.model.Ubicacion
 
 sealed interface ListaRelevamientosUiState {
     data object Cargando : ListaRelevamientosUiState
@@ -14,6 +15,7 @@ sealed interface ListaRelevamientosUiState {
 enum class ErrorRelevamientosUi {
     NOTA, FECHA, SESION, TAREA, INEXISTENTE, RED, DESCONOCIDO,
     FOTO_SIN_CONEXION, FOTO_MUY_GRANDE, FOTO_FALLO, FOTO_LECTURA, FOTO_CAMARA,
+    UBICACION_SIN_PERMISO, UBICACION_DESACTIVADA, UBICACION_NO_DISPONIBLE, UBICACION_INVALIDA,
 }
 
 /** Foto que muestra el formulario: ninguna, la que ya estaba guardada o una recién elegida. */
@@ -31,6 +33,11 @@ data class FormularioRelevamientoUiState(
     val foto: FotoFormulario = FotoFormulario.Ninguna,
     /** Foto guardada al abrir la edición; si se quita, al guardar se elimina. */
     val fotoOriginal: FotoFormulario.Existente? = null,
+    val ubicacion: Ubicacion? = null,
+    /** Ubicación guardada al abrir la edición; si se quita, al guardar se elimina el campo. */
+    val ubicacionOriginal: Ubicacion? = null,
+    /** Mientras es true hay una búsqueda en curso y no se puede guardar. */
+    val capturandoUbicacion: Boolean = false,
     val guardando: Boolean = false,
     val error: ErrorRelevamientosUi? = null,
 )

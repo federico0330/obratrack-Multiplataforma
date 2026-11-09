@@ -24,7 +24,18 @@ data class RelevamientoDraft(
     val nota: String,
     val tareaId: String? = null,
     val cambioFoto: CambioFoto = CambioFoto.SinCambio,
+    val cambioUbicacion: CambioUbicacion = CambioUbicacion.SinCambio,
 )
+
+/**
+ * Lo que el formulario pide hacer con la ubicación. `SinCambio` no toca el campo: los relevamientos
+ * de la app anterior ya pueden traerla.
+ */
+sealed interface CambioUbicacion {
+    data object SinCambio : CambioUbicacion
+    data class Nueva(val ubicacion: Ubicacion) : CambioUbicacion
+    data object Quitar : CambioUbicacion
+}
 
 /** Lo que el formulario pide hacer con la foto. */
 sealed interface CambioFoto {

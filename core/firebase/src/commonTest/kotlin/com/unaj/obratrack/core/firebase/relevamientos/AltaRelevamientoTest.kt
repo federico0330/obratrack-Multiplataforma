@@ -1,5 +1,6 @@
 package com.unaj.obratrack.core.firebase.relevamientos
 
+import dev.gitlive.firebase.firestore.GeoPoint
 import dev.gitlive.firebase.firestore.Timestamp
 import dev.gitlive.firebase.firestore.toMilliseconds
 import kotlinx.coroutines.CancellationException
@@ -73,6 +74,17 @@ class AltaRelevamientoTest {
     fun payloadGuardaLaFotoSoloSiHay() {
         assertEquals("https://foto", dto.copy(fotoUrl = "https://foto").camposAlta()["fotoUrl"])
         assertFalse("fotoUrl" in dto.camposAlta())
+    }
+
+    @Test
+    fun payloadEscribeLaUbicacionComoGeoPointSoloSiHayLatitudYLongitud() {
+        val punto = dto.copy(latitud = -34.7746, longitud = -58.2672).camposAlta()["ubicacion"] as GeoPoint
+        assertEquals(-34.7746, punto.latitude)
+        assertEquals(-58.2672, punto.longitude)
+        assertFalse("ubicacion" in dto.camposAlta())
+        // Un solo valor no es una ubicación: no se escribe un punto a medias.
+        assertFalse("ubicacion" in dto.copy(latitud = -34.0).camposAlta())
+        assertFalse("ubicacion" in dto.copy(longitud = -58.0).camposAlta())
     }
 }
 

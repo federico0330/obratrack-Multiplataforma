@@ -166,6 +166,9 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onRemovePhoto = relevamientosViewModel::quitarFoto,
                                                 onPhotoReadError = relevamientosViewModel::fotoNoLeida,
                                                 onCameraError = relevamientosViewModel::camaraNoDisponible,
+                                                onLocationCapture = relevamientosViewModel::capturarUbicacion,
+                                                onLocationCancel = relevamientosViewModel::cancelarCaptura,
+                                                onLocationRemove = relevamientosViewModel::quitarUbicacion,
                                             ),
                                         )
                                     },

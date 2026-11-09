@@ -110,6 +110,11 @@ class GitLiveFirebaseRelevamientoDataSource(
                             is FotoUpdate.Nueva -> "fotoUrl" to foto.url
                             FotoUpdate.Quitar -> "fotoUrl" to FieldValue.delete
                         }
+                        when (val ubicacion = fields.ubicacion) {
+                            UbicacionUpdate.SinCambio -> Unit
+                            is UbicacionUpdate.Nueva -> "ubicacion" to GeoPoint(ubicacion.latitud, ubicacion.longitud)
+                            UbicacionUpdate.Quitar -> "ubicacion" to FieldValue.delete
+                        }
                     }
                     transaction.updateFields(obra) {
                         "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble())
@@ -170,4 +175,5 @@ internal fun RelevamientoDto.camposAlta(): Map<String, Any> = buildMap {
     put("nota", nota)
     tareaId?.let { put("tareaId", it) }
     fotoUrl?.let { put("fotoUrl", it) }
+    if (latitud != null && longitud != null) put("ubicacion", GeoPoint(latitud, longitud))
 }

@@ -25,6 +25,8 @@ targets:
         INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone: YES
         # Sin esta clave iOS cierra la app al abrir la cámara.
         INFOPLIST_KEY_NSCameraUsageDescription: Para sacar fotos de los relevamientos de obra.
+        # Sin esta clave iOS cierra la app al pedir la ubicación.
+        INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Para registrar dónde se hizo cada relevamiento de obra.
         TARGETED_DEVICE_FAMILY: "1,2"
         # El script de abajo edita el Info.plist ya generado; el sandbox de scripts no lo permite.
         ENABLE_USER_SCRIPT_SANDBOXING: NO

@@ -2,6 +2,8 @@ package com.unaj.obratrack.features.obras
 
 import androidx.lifecycle.ViewModelStore
 import com.unaj.obratrack.domain.model.CambioFotoUrl
+import com.unaj.obratrack.domain.model.CambioUbicacion
+import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.EstadoTarea
 import com.unaj.obratrack.domain.model.Relevamiento
@@ -22,11 +24,13 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withContext
 import kotlin.test.*
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -36,13 +40,15 @@ class RelevamientosViewModelTest {
         repo: RelevamientosVmFalso = RelevamientosVmFalso(),
         tareas: TareasRelevamientosFalso = TareasRelevamientosFalso(),
         fotos: FotosVmFalso = FotosVmFalso(),
+        ubicaciones: UbicacionVmFalsa = UbicacionVmFalsa(),
         bloque: suspend TestScope.(RelevamientosViewModel, RelevamientosVmFalso) -> Unit,
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val store = ViewModelStore()
         try {
             val vm = RelevamientosViewModel(ObservarSesion(sesion), ObservarRelevamientos(repo),
-                CrearRelevamiento(repo, fotos), ObservarTareas(tareas), ActualizarRelevamiento(repo, fotos), EliminarRelevamiento(repo), RelojRelevamientos)
+                CrearRelevamiento(repo, fotos), ObservarTareas(tareas), ActualizarRelevamiento(repo, fotos), EliminarRelevamiento(repo),
+                ObtenerUbicacionActual(ubicaciones, 15.seconds), RelojRelevamientos)
             store.put("relevamientos", vm)
             advanceUntilIdle()
             vm.abrirObra("obra")
@@ -460,6 +466,246 @@ class RelevamientosViewModelTest {
         vm.fotoElegida(byteArrayOf(8))
         assertEquals(null, vm.state.value.formulario.error)
     }
+
+    private val casa = Ubicacion(-34.7746, -58.2672)
+    private val obra = Ubicacion(-34.6, -58.4)
+
+    private fun relevamientoCon(ubicacion: Ubicacion?) =
+        Relevamiento("id", "obra", "uid", Instant.parse("2026-11-05T00:00:00Z"), "Nota", ubicacion = ubicacion)
+
+    @Test
+    fun capturaLaUbicacionYLaMuestraEnElFormulario() {
+        val ubicaciones = UbicacionVmFalsa { ResultadoUbicacion.Exito(casa) }
+        conVm(ubicaciones = ubicaciones) { vm, _ ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con ubicación")
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            val form = vm.state.value.formulario
+            assertEquals(casa, form.ubicacion)
+            assertFalse(form.capturandoUbicacion)
+            assertNull(form.error)
+            assertEquals("Con ubicación", form.nota)
+            assertEquals(1, ubicaciones.busquedas)
+        }
+    }
+
+    @Test
+    fun mientrasCapturaMuestraElIndicadorYNoSePuedeGuardarNiCapturarDeNuevo() {
+        val espera = CompletableDeferred<Unit>()
+        val ubicaciones = UbicacionVmFalsa(espera = espera)
+        conVm(ubicaciones = ubicaciones) { vm, repo ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con ubicación")
+            vm.capturarUbicacion()
+            vm.capturarUbicacion()
+            // runCurrent y no advanceUntilIdle: este avanzaría el reloj virtual hasta vencer el tiempo máximo.
+            runCurrent()
+            assertTrue(vm.state.value.formulario.capturandoUbicacion)
+            vm.guardar()
+            runCurrent()
+            assertEquals(0, repo.altas)
+            assertFalse(vm.state.value.formulario.guardando)
+            assertEquals(1, ubicaciones.busquedas)
+            espera.complete(Unit)
+            runCurrent()
+            assertFalse(vm.state.value.formulario.capturandoUbicacion)
+            assertEquals(casa, vm.state.value.formulario.ubicacion)
+            vm.guardar()
+            advanceUntilIdle()
+            assertEquals(1, repo.altas)
+        }
+    }
+
+    @Test
+    fun cadaFalloMuestraSuMensajeYConservaLaUbicacionPrevia() {
+        val casos = listOf(
+            ResultadoUbicacion.SinPermiso to ErrorRelevamientosUi.UBICACION_SIN_PERMISO,
+            ResultadoUbicacion.Desactivada to ErrorRelevamientosUi.UBICACION_DESACTIVADA,
+            ResultadoUbicacion.NoDisponible to ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE,
+        )
+        for ((resultado, error) in casos) {
+            conVm(ubicaciones = UbicacionVmFalsa { resultado }) { vm, repo ->
+                val item = relevamientoCon(obra)
+                repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(item))
+                advanceUntilIdle()
+                vm.abrirDetalle(item)
+                vm.editarSeleccionado()
+                vm.capturarUbicacion()
+                advanceUntilIdle()
+                val form = vm.state.value.formulario
+                assertEquals(error, form.error)
+                assertEquals(obra, form.ubicacion)
+                assertFalse(form.capturandoUbicacion)
+            }
+        }
+    }
+
+    @Test
+    fun unaExcepcionInesperadaDelProveedorEsNoDisponible() {
+        conVm(ubicaciones = UbicacionVmFalsa { throw IllegalStateException("sin proveedor") }) { vm, _ ->
+            vm.abrirFormulario()
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            assertEquals(ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE, vm.state.value.formulario.error)
+            assertNull(vm.state.value.formulario.ubicacion)
+            assertFalse(vm.state.value.formulario.capturandoUbicacion)
+        }
+    }
+
+    @Test
+    fun cancelarCortaLaBusquedaSinErrorYConservaLaUbicacionPrevia() {
+        val espera = CompletableDeferred<Unit>()
+        conVm(ubicaciones = UbicacionVmFalsa(espera = espera)) { vm, repo ->
+            val item = relevamientoCon(obra)
+            repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(item))
+            advanceUntilIdle()
+            vm.abrirDetalle(item)
+            vm.editarSeleccionado()
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            assertTrue(vm.state.value.formulario.capturandoUbicacion)
+            vm.cancelarCaptura()
+            val cancelado = vm.state.value
+            assertFalse(cancelado.formulario.capturandoUbicacion)
+            assertEquals(obra, cancelado.formulario.ubicacion)
+            assertNull(cancelado.formulario.error)
+            // Aunque la respuesta llegue igual, ya no cuenta.
+            espera.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(cancelado, vm.state.value)
+        }
+    }
+
+    @Test
+    fun laRespuestaConElFormularioCerradoOReabiertoSeDescarta() {
+        val espera = CompletableDeferred<Unit>()
+        conVm(ubicaciones = UbicacionVmFalsa(espera = espera)) { vm, _ ->
+            vm.abrirFormulario()
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            vm.cerrarFormulario()
+            vm.abrirFormulario()
+            vm.notaCambiada("Otro")
+            val nuevo = vm.state.value
+            espera.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(nuevo, vm.state.value)
+            assertNull(vm.state.value.formulario.ubicacion)
+        }
+    }
+
+    @Test
+    fun laRespuestaDeOtraObraOSesionSeDescarta() {
+        val espera = CompletableDeferred<Unit>()
+        conVm(ubicaciones = UbicacionVmFalsa(espera = espera)) { vm, _ ->
+            vm.abrirFormulario()
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            vm.cerrarObra()
+            vm.abrirObra("otra")
+            advanceUntilIdle()
+            vm.abrirFormulario()
+            vm.notaCambiada("Otra obra")
+            val nuevo = vm.state.value
+            espera.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(nuevo, vm.state.value)
+        }
+    }
+
+    @Test
+    fun crearEnviaLaUbicacionCapturadaYSinCapturarNoLaPide() = conVm { vm, repo ->
+        vm.abrirFormulario()
+        vm.notaCambiada("Sin ubicación")
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.SinCambio, repo.draft?.cambioUbicacion)
+        vm.abrirFormulario()
+        vm.notaCambiada("Con ubicación")
+        vm.capturarUbicacion()
+        advanceUntilIdle()
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.Nueva(casa), repo.draft?.cambioUbicacion)
+    }
+
+    @Test
+    fun editarConservaQuitaOReemplazaLaUbicacionExistente() = conVm { vm, repo ->
+        val con = relevamientoCon(obra)
+        repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(con))
+        advanceUntilIdle()
+        fun editarYGuardar(item: Relevamiento, cambio: RelevamientosViewModel.() -> Unit) {
+            vm.abrirDetalle(item)
+            vm.editarSeleccionado()
+            vm.cambio()
+            vm.guardar()
+        }
+        vm.abrirDetalle(con)
+        vm.editarSeleccionado()
+        assertEquals(obra, vm.state.value.formulario.ubicacion)
+        vm.cerrarFormulario()
+        // Sin tocarla, el campo no se escribe: la ubicación de la app anterior se conserva.
+        editarYGuardar(con) { }
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.SinCambio, repo.draftEditado?.cambioUbicacion)
+        editarYGuardar(con) { quitarUbicacion() }
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.Quitar, repo.draftEditado?.cambioUbicacion)
+        // Capturar es asíncrono: se espera la respuesta antes de guardar.
+        vm.abrirDetalle(con)
+        vm.editarSeleccionado()
+        vm.capturarUbicacion()
+        advanceUntilIdle()
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.Nueva(casa), repo.draftEditado?.cambioUbicacion)
+    }
+
+    @Test
+    fun unRelevamientoSinUbicacionNoPideNadaYQuitarSinNadaQueQuitarTampoco() = conVm { vm, repo ->
+        val sin = relevamientoCon(null)
+        repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(sin))
+        advanceUntilIdle()
+        vm.abrirDetalle(sin)
+        vm.editarSeleccionado()
+        vm.quitarUbicacion()
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.SinCambio, repo.draftEditado?.cambioUbicacion)
+    }
+
+    @Test
+    fun noSePuedeQuitarLaUbicacionMientrasSeBusca() {
+        val espera = CompletableDeferred<Unit>()
+        conVm(ubicaciones = UbicacionVmFalsa(espera = espera)) { vm, repo ->
+            val item = relevamientoCon(obra)
+            repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(item))
+            advanceUntilIdle()
+            vm.abrirDetalle(item)
+            vm.editarSeleccionado()
+            vm.capturarUbicacion()
+            advanceUntilIdle()
+            vm.quitarUbicacion()
+            assertEquals(obra, vm.state.value.formulario.ubicacion)
+            espera.complete(Unit)
+            advanceUntilIdle()
+        }
+    }
+}
+
+private class UbicacionVmFalsa(
+    private val espera: CompletableDeferred<Unit>? = null,
+    private val posicion: () -> ResultadoUbicacion = { ResultadoUbicacion.Exito(Ubicacion(-34.7746, -58.2672)) },
+) : ProveedorUbicacion {
+    var busquedas = 0
+    override suspend fun solicitarAcceso(): ResultadoUbicacion.Fallo? = null
+    override suspend fun posicionActual(): ResultadoUbicacion {
+        busquedas++
+        // La respuesta llega aunque la búsqueda ya se haya cancelado, como el diálogo de permiso de Android.
+        espera?.let { try { withContext(NonCancellable) { it.await() } } catch (_: CancellationException) { } }
+        return posicion()
+    }
 }
 
 private class FotosVmFalso(
@@ -495,6 +741,7 @@ private class RelevamientosVmFalso : RepositorioRelevamientos {
     var draft: RelevamientoDraft? = null
     var fotoUrl: String? = null
     var cambioFoto: CambioFotoUrl? = null
+    var draftEditado: RelevamientoDraft? = null
     fun stream(uid: String, obra: String) = streams.getOrPut(uid to obra) { MutableStateFlow(ResultadoRelevamiento.Exito(emptyList())) }
     override fun observarDeObra(userId: String, obraId: String) = stream(userId, obraId).also { consultas += userId to obraId }
     override suspend fun crear(userId: String, obraId: String, draft: RelevamientoDraft, fotoUrl: String?): ResultadoRelevamiento<Relevamiento> {
@@ -516,6 +763,7 @@ private class RelevamientosVmFalso : RepositorioRelevamientos {
         userId: String, obraId: String, id: String, draft: RelevamientoDraft, foto: CambioFotoUrl,
     ): ResultadoRelevamiento<Unit> {
         cambioFoto = foto
+        draftEditado = draft
         esperarCambio()
         falloCambio?.let { return ResultadoRelevamiento.Fallo(it) }
         val previo = (stream(userId, obraId).value as ResultadoRelevamiento.Exito).dato

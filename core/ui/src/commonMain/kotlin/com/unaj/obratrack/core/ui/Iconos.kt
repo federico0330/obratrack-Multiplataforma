@@ -13,7 +13,9 @@ import com.unaj.obratrack.core.ui.generated.resources.ic_edit
 import com.unaj.obratrack.core.ui.generated.resources.ic_error
 import com.unaj.obratrack.core.ui.generated.resources.ic_image
 import com.unaj.obratrack.core.ui.generated.resources.ic_logout
+import com.unaj.obratrack.core.ui.generated.resources.ic_my_location
 import com.unaj.obratrack.core.ui.generated.resources.ic_obras
+import com.unaj.obratrack.core.ui.generated.resources.ic_open_in_new
 import com.unaj.obratrack.core.ui.generated.resources.ic_pause_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_play_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_refresh
@@ -39,7 +41,9 @@ object Iconos {
     val Error: DrawableResource get() = Res.drawable.ic_error
     val Image: DrawableResource get() = Res.drawable.ic_image
     val Logout: DrawableResource get() = Res.drawable.ic_logout
+    val MyLocation: DrawableResource get() = Res.drawable.ic_my_location
     val Obras: DrawableResource get() = Res.drawable.ic_obras
+    val OpenInNew: DrawableResource get() = Res.drawable.ic_open_in_new
     val PauseCircle: DrawableResource get() = Res.drawable.ic_pause_circle
     val PlayCircle: DrawableResource get() = Res.drawable.ic_play_circle
     val Refresh: DrawableResource get() = Res.drawable.ic_refresh

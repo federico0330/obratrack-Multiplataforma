@@ -40,7 +40,7 @@ internal fun DetalleRelevamientoContent(
                     ?: stringResource(Res.string.relevamientos_task_unavailable) }
                 Text(tarea?.let { stringResource(Res.string.relevamientos_linked_task, it) }
                     ?: stringResource(Res.string.relevamientos_no_task))
-                item.ubicacion?.let { Text(stringResource(Res.string.relevamientos_location, it.latitud.toString(), it.longitud.toString())) }
+                item.ubicacion?.let { UbicacionDetalle(it) }
                 item.proximaVisita?.let { fecha ->
                     Text(stringResource(Res.string.relevamientos_next_visit, fecha.toLocalDateTime(TimeZone.UTC).date.toString()))
                     item.horaVisita?.let { minutos ->

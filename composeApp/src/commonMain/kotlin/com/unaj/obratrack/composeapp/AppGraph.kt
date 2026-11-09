@@ -3,11 +3,13 @@ package com.unaj.obratrack.composeapp
 import com.unaj.obratrack.core.data.fotos.CloudinaryConfig
 import com.unaj.obratrack.core.data.fotos.crearAlmacenFotosCloudinary
 import com.unaj.obratrack.core.data.relevamientos.RepositorioRelevamientosImpl
+import com.unaj.obratrack.core.data.ubicacion.crearProveedorUbicacionCompass
 import com.unaj.obratrack.core.firebase.relevamientos.GitLiveFirebaseRelevamientoDataSource
 import com.unaj.obratrack.domain.usecase.ActualizarRelevamiento
 import com.unaj.obratrack.domain.usecase.EliminarRelevamiento
 import com.unaj.obratrack.domain.usecase.CrearRelevamiento
 import com.unaj.obratrack.domain.usecase.ObservarRelevamientos
+import com.unaj.obratrack.domain.usecase.ObtenerUbicacionActual
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
 import com.unaj.obratrack.core.data.obras.RepositorioObrasImpl
@@ -53,10 +55,14 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
         CloudinaryConfig(cloudName = "iwsier4h", uploadPreset = "obratrack_unsigned"),
     )
 
+    // Compass se crea recién al primer pedido de ubicación.
+    private val proveedorUbicacion = crearProveedorUbicacionCompass()
+
     fun crearRelevamientosViewModel() = RelevamientosViewModel(
         ObservarSesion(authRepository), ObservarRelevamientos(relevamientosRepository),
         CrearRelevamiento(relevamientosRepository, almacenFotos), ObservarTareas(tareasRepository),
         ActualizarRelevamiento(relevamientosRepository, almacenFotos), EliminarRelevamiento(relevamientosRepository),
+        ObtenerUbicacionActual(proveedorUbicacion),
     )
 
     fun crearAuthViewModel() = AuthViewModel(

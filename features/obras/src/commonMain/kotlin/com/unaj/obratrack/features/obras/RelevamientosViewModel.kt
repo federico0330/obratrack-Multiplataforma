@@ -3,6 +3,7 @@ package com.unaj.obratrack.features.obras
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.unaj.obratrack.domain.model.CambioFoto
+import com.unaj.obratrack.domain.model.CambioUbicacion
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
@@ -12,12 +13,15 @@ import com.unaj.obratrack.domain.usecase.EliminarRelevamiento
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
 import com.unaj.obratrack.domain.repository.ResultadoRelevamiento
 import com.unaj.obratrack.domain.repository.ResultadoTarea
+import com.unaj.obratrack.domain.repository.ResultadoUbicacion
 import com.unaj.obratrack.domain.usecase.CrearRelevamiento
 import com.unaj.obratrack.domain.usecase.ObservarRelevamientos
+import com.unaj.obratrack.domain.usecase.ObtenerUbicacionActual
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.ObservarTareas
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -37,6 +41,7 @@ class RelevamientosViewModel(
     private val observarTareas: ObservarTareas,
     private val actualizarRelevamiento: ActualizarRelevamiento,
     private val eliminarRelevamiento: EliminarRelevamiento,
+    private val obtenerUbicacionActual: ObtenerUbicacionActual,
     private val clock: Clock = Clock.System,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RelevamientosUiState())
@@ -47,6 +52,7 @@ class RelevamientosViewModel(
     private var formularioVersion = 0L
     private var contextoJob = Job(viewModelScope.coroutineContext[Job])
     private var tareasJob: Job? = null
+    private var capturaJob: Job? = null
     private var listaCompleta: List<Relevamiento> = emptyList()
 
     init {
@@ -80,6 +86,7 @@ class RelevamientosViewModel(
 
     private fun renovarContexto() {
         contexto++
+        capturaJob = null
         listaCompleta = emptyList()
         contextoJob.cancel()
         contextoJob = Job(viewModelScope.coroutineContext[Job])
@@ -114,7 +121,7 @@ class RelevamientosViewModel(
             is ResultadoRelevamiento.Exito -> {
                 listaCompleta = result.dato
                 val anterior = _state.value.seleccionado
-                if (anterior != null && listaCompleta.none { it.id == anterior.id }) formularioVersion++
+                if (anterior != null && listaCompleta.none { it.id == anterior.id }) nuevaVersionFormulario()
                 _state.update { actual ->
                     val seleccionado = actual.seleccionado?.let { previo -> listaCompleta.find { it.id == previo.id } }
                     val desaparecio = actual.seleccionado != null && seleccionado == null
@@ -153,18 +160,19 @@ class RelevamientosViewModel(
 
     fun cerrarDetalle() {
         if (_state.value.eliminando || _state.value.formulario.guardando) return
-        formularioVersion++
+        nuevaVersionFormulario()
         _state.update { it.copy(seleccionado = null, formularioVisible = false, aEliminar = null, errorOperacion = null) }
     }
 
     fun editarSeleccionado() {
         val item = _state.value.seleccionado ?: return
         if (_state.value.eliminando) return
-        formularioVersion++
+        nuevaVersionFormulario()
         val foto = fotoMostrable(item)
         _state.update { it.copy(formularioVisible = true, errorOperacion = null, formulario = FormularioRelevamientoUiState(
             id = item.id, nota = item.nota, fechaIso = item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), tareaId = item.tareaId,
             foto = foto ?: FotoFormulario.Ninguna, fotoOriginal = foto,
+            ubicacion = item.ubicacion, ubicacionOriginal = item.ubicacion,
         )) }
     }
 
@@ -196,7 +204,7 @@ class RelevamientosViewModel(
 
     fun abrirFormulario() {
         if (_state.value.eliminando || _state.value.formulario.guardando) return
-        formularioVersion++
+        nuevaVersionFormulario()
         _state.update {
             it.copy(seleccionado = null, errorOperacion = null, formularioVisible = true, formulario = FormularioRelevamientoUiState(
                 fechaIso = clock.todayIn(TimeZone.currentSystemDefault()).toString(),
@@ -206,8 +214,22 @@ class RelevamientosViewModel(
 
     fun cerrarFormulario() {
         if (_state.value.formulario.guardando) return
-        formularioVersion++
+        nuevaVersionFormulario()
         _state.update { it.copy(formularioVisible = false) }
+    }
+
+    /** Invalida lo que dependa del formulario anterior: respuestas tardías y la búsqueda de ubicación en curso. */
+    private fun nuevaVersionFormulario() {
+        formularioVersion++
+        cortarCaptura()
+    }
+
+    private fun cortarCaptura() {
+        capturaJob?.cancel()
+        capturaJob = null
+        _state.update {
+            if (it.formulario.capturandoUbicacion) it.copy(formulario = it.formulario.copy(capturandoUbicacion = false)) else it
+        }
     }
 
     fun notaCambiada(value: String) = editarFormulario { copy(nota = value, error = null) }
@@ -217,6 +239,39 @@ class RelevamientosViewModel(
     fun quitarFoto() = editarFormulario { copy(foto = FotoFormulario.Ninguna, error = null) }
     fun fotoNoLeida() = editarFormulario { copy(error = ErrorRelevamientosUi.FOTO_LECTURA) }
     fun camaraNoDisponible() = editarFormulario { copy(error = ErrorRelevamientosUi.FOTO_CAMARA) }
+    fun quitarUbicacion() = editarFormulario { if (capturandoUbicacion) this else copy(ubicacion = null, error = null) }
+
+    /** Busca la ubicación del dispositivo. Una respuesta de otro formulario, obra o sesión se descarta. */
+    fun capturarUbicacion() {
+        val actual = _state.value
+        if (!actual.formularioVisible || actual.formulario.guardando || actual.formulario.capturandoUbicacion) return
+        val revision = contexto
+        val versionForm = formularioVersion
+        editarFormulario { copy(capturandoUbicacion = true, error = null) }
+        capturaJob = viewModelScope.launch(contextoJob) {
+            val resultado = try {
+                obtenerUbicacionActual()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                ResultadoUbicacion.NoDisponible
+            }
+            // El diálogo del permiso no se puede cancelar: si lo cancelaron mientras esperaba, la respuesta ya no cuenta.
+            ensureActive()
+            if (revision == contexto && versionForm == formularioVersion) editarFormulario { conResultado(resultado) }
+        }
+    }
+
+    /** El usuario cancela: conserva la ubicación que había y no muestra ningún error. */
+    fun cancelarCaptura() = cortarCaptura()
+
+    private fun FormularioRelevamientoUiState.conResultado(resultado: ResultadoUbicacion): FormularioRelevamientoUiState =
+        when (resultado) {
+            is ResultadoUbicacion.Exito -> copy(ubicacion = resultado.ubicacion, capturandoUbicacion = false, error = null)
+            ResultadoUbicacion.SinPermiso -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_SIN_PERMISO)
+            ResultadoUbicacion.Desactivada -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_DESACTIVADA)
+            ResultadoUbicacion.NoDisponible -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE)
+        }
 
     private fun editarFormulario(transform: FormularioRelevamientoUiState.() -> FormularioRelevamientoUiState) {
         // Una foto puede terminar de leerse con el formulario ya cerrado: se ignora.
@@ -229,9 +284,17 @@ class RelevamientosViewModel(
         FotoFormulario.Ninguna -> if (fotoOriginal != null) CambioFoto.Quitar else CambioFoto.SinCambio
     }
 
+    /** Sin tocar la ubicación se pide `SinCambio`, así la que ya tenía el documento no se pierde. */
+    private fun FormularioRelevamientoUiState.cambioUbicacion(): CambioUbicacion = when {
+        ubicacion != null && ubicacion != ubicacionOriginal -> CambioUbicacion.Nueva(ubicacion)
+        ubicacion == null && ubicacionOriginal != null -> CambioUbicacion.Quitar
+        else -> CambioUbicacion.SinCambio
+    }
+
     fun guardar() {
         val form = _state.value.formulario
-        if (form.guardando || _state.value.eliminando) return
+        // Con una búsqueda en curso la ubicación todavía puede cambiar: se espera o se cancela.
+        if (form.guardando || form.capturandoUbicacion || _state.value.eliminando) return
         val owner = userId ?: return errorFormulario(ErrorRelevamientosUi.SESION)
         val obra = obraId ?: return
         val fecha = runCatching { LocalDate.parse(form.fechaIso).atStartOfDayIn(TimeZone.UTC) }.getOrNull()
@@ -241,7 +304,7 @@ class RelevamientosViewModel(
         _state.update { it.copy(formulario = form.copy(guardando = true, error = null)) }
         viewModelScope.launch(contextoJob) {
             try {
-                val draft = RelevamientoDraft(fecha, form.nota, form.tareaId, form.cambioFoto())
+                val draft = RelevamientoDraft(fecha, form.nota, form.tareaId, form.cambioFoto(), form.cambioUbicacion())
                 val error = if (form.id == null) {
                     (crearRelevamiento(owner, obra, draft) as? ResultadoRelevamiento.Fallo)?.error
                 } else {
@@ -317,5 +380,6 @@ class RelevamientosViewModel(
         ErrorRelevamiento.FOTO_SIN_CONEXION -> ErrorRelevamientosUi.FOTO_SIN_CONEXION
         ErrorRelevamiento.FOTO_MUY_GRANDE -> ErrorRelevamientosUi.FOTO_MUY_GRANDE
         ErrorRelevamiento.FOTO_FALLO -> ErrorRelevamientosUi.FOTO_FALLO
+        ErrorRelevamiento.UBICACION_INVALIDA -> ErrorRelevamientosUi.UBICACION_INVALIDA
     }
 }
