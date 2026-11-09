@@ -27,6 +27,7 @@ import org.jetbrains.compose.resources.stringResource
 internal fun DetalleRelevamientoContent(
     item: Relevamiento,
     tareas: OpcionesTareasUiState,
+    direccion: DireccionUiState,
     ocupado: Boolean,
     acciones: RelevamientosAcciones,
 ) {
@@ -40,7 +41,7 @@ internal fun DetalleRelevamientoContent(
                     ?: stringResource(Res.string.relevamientos_task_unavailable) }
                 Text(tarea?.let { stringResource(Res.string.relevamientos_linked_task, it) }
                     ?: stringResource(Res.string.relevamientos_no_task))
-                item.ubicacion?.let { UbicacionDetalle(it) }
+                item.ubicacion?.let { UbicacionDetalle(it, direccion) }
                 item.proximaVisita?.let { fecha ->
                     Text(stringResource(Res.string.relevamientos_next_visit, fecha.toLocalDateTime(TimeZone.UTC).date.toString()))
                     item.horaVisita?.let { minutos ->

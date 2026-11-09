@@ -19,6 +19,7 @@ import com.unaj.obratrack.core.ui.generated.resources.ic_open_in_new
 import com.unaj.obratrack.core.ui.generated.resources.ic_pause_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_play_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_refresh
+import com.unaj.obratrack.core.ui.generated.resources.ic_search
 import com.unaj.obratrack.core.ui.generated.resources.ic_visibility
 import com.unaj.obratrack.core.ui.generated.resources.ic_visibility_off
 import com.unaj.obratrack.core.ui.generated.resources.ic_warning
@@ -47,6 +48,7 @@ object Iconos {
     val PauseCircle: DrawableResource get() = Res.drawable.ic_pause_circle
     val PlayCircle: DrawableResource get() = Res.drawable.ic_play_circle
     val Refresh: DrawableResource get() = Res.drawable.ic_refresh
+    val Search: DrawableResource get() = Res.drawable.ic_search
     val Visibility: DrawableResource get() = Res.drawable.ic_visibility
     val VisibilityOff: DrawableResource get() = Res.drawable.ic_visibility_off
     val Warning: DrawableResource get() = Res.drawable.ic_warning

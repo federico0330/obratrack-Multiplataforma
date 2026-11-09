@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.Relevamiento
+import com.unaj.obratrack.domain.repository.CandidatoDireccion
 import com.unaj.obratrack.core.ui.CampoFecha
 import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.core.ui.IconoBoton
@@ -63,6 +64,11 @@ data class RelevamientosAcciones(
     val onLocationCapture: () -> Unit,
     val onLocationCancel: () -> Unit,
     val onLocationRemove: () -> Unit,
+    val onAddressSearchOpen: () -> Unit,
+    val onAddressSearchClose: () -> Unit,
+    val onAddressTextChange: (String) -> Unit,
+    val onAddressSearch: () -> Unit,
+    val onAddressPick: (CandidatoDireccion) -> Unit,
 )
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -91,7 +97,7 @@ fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcc
         if (state.formularioVisible) {
             FormularioRelevamiento(state.formulario, state.tareas, acciones)
         } else if (state.seleccionado != null) {
-            DetalleRelevamientoContent(state.seleccionado, state.tareas, state.eliminando, acciones)
+            DetalleRelevamientoContent(state.seleccionado, state.tareas, state.direccion, state.eliminando, acciones)
         } else {
             FiltroRelevamientosSelector(state, acciones)
             when (val lista = state.lista) {

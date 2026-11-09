@@ -4,6 +4,8 @@ import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.Tarea
 import com.unaj.obratrack.domain.model.Ubicacion
+import com.unaj.obratrack.domain.repository.CandidatoDireccion
+import com.unaj.obratrack.domain.validation.ValidadorBusquedaDireccion
 
 sealed interface ListaRelevamientosUiState {
     data object Cargando : ListaRelevamientosUiState
@@ -25,6 +27,37 @@ sealed interface FotoFormulario {
     class Nueva(val bytes: ByteArray) : FotoFormulario
 }
 
+/** Dirección del relevamiento abierto en el detalle. Se carga aparte, nunca se guarda y si falta se ven solo las coordenadas. */
+sealed interface DireccionUiState {
+    /** Sin ubicación, o todavía sin consultar. */
+    data object Ninguna : DireccionUiState
+    data object Cargando : DireccionUiState
+    data class Disponible(val texto: String) : DireccionUiState
+
+    /** Falló, no hay dirección para esas coordenadas o el dispositivo no geocodifica: no es un error para el usuario. */
+    data object NoDisponible : DireccionUiState
+}
+
+sealed interface ResultadosBusquedaUi {
+    data object SinBuscar : ResultadosBusquedaUi
+    data object Buscando : ResultadosBusquedaUi
+    data class Lista(val items: List<CandidatoDireccion>) : ResultadosBusquedaUi
+    data object SinResultados : ResultadosBusquedaUi
+    data object NoDisponible : ResultadosBusquedaUi
+}
+
+/** Búsqueda de una dirección para elegir la ubicación sin estar en la obra. */
+data class BusquedaDireccionUiState(
+    /** El dispositivo geocodifica; si no, el buscador no se ofrece. */
+    val disponible: Boolean = false,
+    val abierta: Boolean = false,
+    val texto: String = "",
+    val resultados: ResultadosBusquedaUi = ResultadosBusquedaUi.SinBuscar,
+) {
+    val puedeBuscar: Boolean
+        get() = ValidadorBusquedaDireccion.normalizar(texto) != null && resultados != ResultadosBusquedaUi.Buscando
+}
+
 data class FormularioRelevamientoUiState(
     val id: String? = null,
     val nota: String = "",
@@ -38,6 +71,7 @@ data class FormularioRelevamientoUiState(
     val ubicacionOriginal: Ubicacion? = null,
     /** Mientras es true hay una búsqueda en curso y no se puede guardar. */
     val capturandoUbicacion: Boolean = false,
+    val busqueda: BusquedaDireccionUiState = BusquedaDireccionUiState(),
     val guardando: Boolean = false,
     val error: ErrorRelevamientosUi? = null,
 )
@@ -54,6 +88,7 @@ data class RelevamientosUiState(
     val formulario: FormularioRelevamientoUiState = FormularioRelevamientoUiState(),
     val tareas: OpcionesTareasUiState = OpcionesTareasUiState(),
     val seleccionado: Relevamiento? = null,
+    val direccion: DireccionUiState = DireccionUiState.Ninguna,
     val aEliminar: Relevamiento? = null,
     val eliminando: Boolean = false,
     val errorOperacion: ErrorRelevamientosUi? = null,

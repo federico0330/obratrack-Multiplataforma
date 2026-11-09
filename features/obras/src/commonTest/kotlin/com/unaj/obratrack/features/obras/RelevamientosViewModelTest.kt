@@ -41,6 +41,7 @@ class RelevamientosViewModelTest {
         tareas: TareasRelevamientosFalso = TareasRelevamientosFalso(),
         fotos: FotosVmFalso = FotosVmFalso(),
         ubicaciones: UbicacionVmFalsa = UbicacionVmFalsa(),
+        direcciones: DireccionesVmFalsa = DireccionesVmFalsa(),
         bloque: suspend TestScope.(RelevamientosViewModel, RelevamientosVmFalso) -> Unit,
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
@@ -48,7 +49,7 @@ class RelevamientosViewModelTest {
         try {
             val vm = RelevamientosViewModel(ObservarSesion(sesion), ObservarRelevamientos(repo),
                 CrearRelevamiento(repo, fotos), ObservarTareas(tareas), ActualizarRelevamiento(repo, fotos), EliminarRelevamiento(repo),
-                ObtenerUbicacionActual(ubicaciones, 15.seconds), RelojRelevamientos)
+                ObtenerUbicacionActual(ubicaciones, 15.seconds), ObtenerDireccion(direcciones), BuscarDirecciones(direcciones), RelojRelevamientos)
             store.put("relevamientos", vm)
             advanceUntilIdle()
             vm.abrirObra("obra")
@@ -691,6 +692,386 @@ class RelevamientosViewModelTest {
             espera.complete(Unit)
             advanceUntilIdle()
         }
+    }
+
+    // --- Dirección escrita: en el detalle y buscando para elegir la ubicación ---
+
+    private fun relevamientoConId(id: String, ubicacion: Ubicacion?) =
+        Relevamiento(id, "obra", "uid", Instant.parse("2026-11-05T00:00:00Z"), "Nota $id", ubicacion = ubicacion)
+
+    private suspend fun TestScope.conLista(repo: RelevamientosVmFalso, vararg items: Relevamiento) {
+        repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(items.toList())
+        advanceUntilIdle()
+    }
+
+    @Test
+    fun elDetalleCargaLaDireccionAparteYConservaLasCoordenadas() {
+        val direcciones = DireccionesVmFalsa()
+        conVm(direcciones = direcciones) { vm, repo ->
+            val item = relevamientoCon(obra)
+            conLista(repo, item)
+            vm.abrirDetalle(item)
+            assertEquals(DireccionUiState.Cargando, vm.state.value.direccion)
+            advanceUntilIdle()
+            assertEquals(DireccionUiState.Disponible("Av. Calchaquí 6200"), vm.state.value.direccion)
+            assertEquals(obra, vm.state.value.seleccionado?.ubicacion)
+            assertEquals(listOf(obra), direcciones.direccionesPedidas)
+        }
+    }
+
+    @Test
+    fun sinUbicacionNoSeConsultaLaDireccion() {
+        val direcciones = DireccionesVmFalsa()
+        conVm(direcciones = direcciones) { vm, repo ->
+            val item = relevamientoCon(null)
+            conLista(repo, item)
+            vm.abrirDetalle(item)
+            advanceUntilIdle()
+            assertEquals(DireccionUiState.Ninguna, vm.state.value.direccion)
+            assertTrue(direcciones.direccionesPedidas.isEmpty())
+        }
+    }
+
+    @Test
+    fun siLaDireccionFallaOElDispositivoNoGeocodificaElDetalleSigueConCoordenadasSinError() {
+        val casos = listOf<() -> ResultadoDireccion<String>>(
+            { ResultadoDireccion.NoDisponible }, { ResultadoDireccion.NoSoportado }, { ResultadoDireccion.SinResultados },
+            { throw IllegalStateException("el sistema falló") },
+        )
+        for (caso in casos) {
+            conVm(direcciones = DireccionesVmFalsa(direccion = { caso() })) { vm, repo ->
+                val item = relevamientoCon(obra)
+                conLista(repo, item)
+                vm.abrirDetalle(item)
+                advanceUntilIdle()
+                assertEquals(DireccionUiState.NoDisponible, vm.state.value.direccion)
+                assertEquals(obra, vm.state.value.seleccionado?.ubicacion)
+                assertNull(vm.state.value.errorOperacion)
+            }
+        }
+    }
+
+    @Test
+    fun unaDireccionTardiaDeOtroRelevamientoOCerradoElDetalleSeDescarta() {
+        val direcciones = DireccionesVmFalsa(direccion = { if (it == obra) ResultadoDireccion.Exito("Calle de la obra") else ResultadoDireccion.Exito("Calle de la casa") })
+        conVm(direcciones = direcciones) { vm, repo ->
+            val unoEnObra = relevamientoConId("a", obra)
+            val otroEnCasa = relevamientoConId("b", casa)
+            conLista(repo, unoEnObra, otroEnCasa)
+            direcciones.esperaProxima = CompletableDeferred()
+            val tardia = direcciones.esperaProxima!!
+            vm.abrirDetalle(unoEnObra)
+            runCurrent()
+            vm.abrirDetalle(otroEnCasa)
+            runCurrent()
+            assertEquals(DireccionUiState.Disponible("Calle de la casa"), vm.state.value.direccion)
+            tardia.complete(Unit)
+            runCurrent()
+            assertEquals(DireccionUiState.Disponible("Calle de la casa"), vm.state.value.direccion)
+            vm.cerrarDetalle()
+            assertEquals(DireccionUiState.Ninguna, vm.state.value.direccion)
+            advanceUntilIdle()
+            assertEquals(DireccionUiState.Ninguna, vm.state.value.direccion)
+        }
+    }
+
+    @Test
+    fun laDireccionSeRecargaSoloSiCambiaLaUbicacionDelRelevamientoAbierto() {
+        val direcciones = DireccionesVmFalsa(direccion = { ResultadoDireccion.Exito(if (it == obra) "Calle de la obra" else "Calle de la casa") })
+        conVm(direcciones = direcciones) { vm, repo ->
+            val item = relevamientoCon(obra)
+            conLista(repo, item)
+            vm.abrirDetalle(item)
+            advanceUntilIdle()
+            // Otra emisión del listado con la misma ubicación no vuelve a consultar.
+            conLista(repo, item.copy(nota = "Otra nota"))
+            assertEquals(1, direcciones.direccionesPedidas.size)
+            conLista(repo, item.copy(ubicacion = casa))
+            assertEquals(listOf(obra, casa), direcciones.direccionesPedidas)
+            assertEquals(DireccionUiState.Disponible("Calle de la casa"), vm.state.value.direccion)
+            // Si el relevamiento desaparece, la dirección también.
+            conLista(repo)
+            assertEquals(DireccionUiState.Ninguna, vm.state.value.direccion)
+        }
+    }
+
+    @Test
+    fun elBuscadorSoloSeOfreceSiElDispositivoGeocodifica() {
+        conVm(direcciones = DireccionesVmFalsa(soportado = false)) { vm, _ ->
+            vm.abrirFormulario()
+            assertFalse(vm.state.value.formulario.busqueda.disponible)
+            vm.abrirBusquedaDireccion()
+            assertFalse(vm.state.value.formulario.busqueda.abierta)
+        }
+        conVm { vm, _ ->
+            vm.abrirFormulario()
+            assertTrue(vm.state.value.formulario.busqueda.disponible)
+            vm.abrirBusquedaDireccion()
+            assertTrue(vm.state.value.formulario.busqueda.abierta)
+        }
+    }
+
+    @Test
+    fun conMenosDeTresCaracteresNoSePuedeBuscar() {
+        val direcciones = DireccionesVmFalsa()
+        conVm(direcciones = direcciones) { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("a b")
+            assertFalse(vm.state.value.formulario.busqueda.puedeBuscar)
+            vm.buscarDireccion()
+            advanceUntilIdle()
+            assertTrue(direcciones.busquedasPedidas.isEmpty())
+            assertEquals(ResultadosBusquedaUi.SinBuscar, vm.state.value.formulario.busqueda.resultados)
+            vm.textoDireccionCambiado("abc")
+            assertTrue(vm.state.value.formulario.busqueda.puedeBuscar)
+        }
+    }
+
+    @Test
+    fun buscaConElTextoNormalizadoYMuestraLosCandidatos() {
+        val direcciones = DireccionesVmFalsa()
+        conVm(direcciones = direcciones) { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("  Av.   Calchaquí  6200 ")
+            vm.buscarDireccion()
+            assertEquals(ResultadosBusquedaUi.Buscando, vm.state.value.formulario.busqueda.resultados)
+            advanceUntilIdle()
+            assertEquals(listOf("Av. Calchaquí 6200"), direcciones.busquedasPedidas)
+            assertEquals(ResultadosBusquedaUi.Lista(CANDIDATOS_VM), vm.state.value.formulario.busqueda.resultados)
+        }
+    }
+
+    @Test
+    fun elegirUnCandidatoCargaLaUbicacionComoNuevaYSeGuarda() {
+        conVm { vm, repo ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con dirección")
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            vm.buscarDireccion()
+            advanceUntilIdle()
+            val elegido = CANDIDATOS_VM[2]
+            vm.elegirDireccion(elegido)
+            val form = vm.state.value.formulario
+            assertEquals(elegido.ubicacion, form.ubicacion)
+            assertEquals(BusquedaDireccionUiState(disponible = true), form.busqueda)
+            vm.guardar()
+            advanceUntilIdle()
+            assertEquals(CambioUbicacion.Nueva(elegido.ubicacion), repo.draft?.cambioUbicacion)
+        }
+    }
+
+    @Test
+    fun soloSePuedeElegirUnCandidatoQueSeEsteMostrando() {
+        conVm { vm, _ ->
+            vm.abrirFormulario()
+            vm.elegirDireccion(CANDIDATOS_VM[0])
+            assertNull(vm.state.value.formulario.ubicacion)
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            vm.buscarDireccion()
+            advanceUntilIdle()
+            vm.elegirDireccion(CandidatoDireccion("Otra calle", Ubicacion(1.0, 1.0)))
+            assertNull(vm.state.value.formulario.ubicacion)
+        }
+    }
+
+    @Test
+    fun unaBusquedaNuevaReemplazaALaAnteriorYLaTardiaSeDescarta() {
+        val direcciones = DireccionesVmFalsa(busqueda = { ResultadoDireccion.Exito(listOf(CandidatoDireccion("Resultado de $it", casa))) })
+        conVm(direcciones = direcciones) { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("primera")
+            direcciones.esperaProxima = CompletableDeferred()
+            val tardia = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            vm.textoDireccionCambiado("segunda")
+            vm.buscarDireccion()
+            runCurrent()
+            val esperado = ResultadosBusquedaUi.Lista(listOf(CandidatoDireccion("Resultado de segunda", casa)))
+            assertEquals(esperado, vm.state.value.formulario.busqueda.resultados)
+            tardia.complete(Unit)
+            runCurrent()
+            assertEquals(esperado, vm.state.value.formulario.busqueda.resultados)
+            assertEquals(listOf("primera", "segunda"), direcciones.busquedasPedidas)
+        }
+    }
+
+    @Test
+    fun laRespuestaTardiaDeLaPrimeraBusquedaNoSeMuestraComoSiFueraDeLaSegunda() {
+        val direcciones = DireccionesVmFalsa(busqueda = { ResultadoDireccion.Exito(listOf(CandidatoDireccion("Resultado de $it", casa))) })
+        conVm(direcciones = direcciones) { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("primera")
+            direcciones.esperaProxima = CompletableDeferred()
+            val primera = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            vm.textoDireccionCambiado("segunda")
+            direcciones.esperaProxima = CompletableDeferred()
+            val segunda = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            // La segunda sigue buscando: lo que llegue de la primera no es su resultado.
+            primera.complete(Unit)
+            runCurrent()
+            assertEquals(ResultadosBusquedaUi.Buscando, vm.state.value.formulario.busqueda.resultados)
+            segunda.complete(Unit)
+            runCurrent()
+            assertEquals(
+                ResultadosBusquedaUi.Lista(listOf(CandidatoDireccion("Resultado de segunda", casa))),
+                vm.state.value.formulario.busqueda.resultados,
+            )
+        }
+    }
+
+    @Test
+    fun cerrarElBuscadorElFormularioOCambiarDeObraDescartaLaRespuestaTardia() {
+        val direcciones = DireccionesVmFalsa()
+        conVm(direcciones = direcciones) { vm, _ ->
+            // Cerrar el buscador.
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            direcciones.esperaProxima = CompletableDeferred()
+            var tardia = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            vm.cerrarBusquedaDireccion()
+            val cerrado = vm.state.value
+            tardia.complete(Unit)
+            runCurrent()
+            assertEquals(cerrado, vm.state.value)
+            // Cerrar y reabrir el formulario.
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            direcciones.esperaProxima = CompletableDeferred()
+            tardia = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            vm.cerrarFormulario()
+            vm.abrirFormulario()
+            vm.notaCambiada("Nuevo")
+            val reabierto = vm.state.value
+            tardia.complete(Unit)
+            runCurrent()
+            assertEquals(reabierto, vm.state.value)
+            // Cambiar de obra.
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            direcciones.esperaProxima = CompletableDeferred()
+            tardia = direcciones.esperaProxima!!
+            vm.buscarDireccion()
+            runCurrent()
+            vm.cerrarObra()
+            vm.abrirObra("otra")
+            runCurrent()
+            vm.abrirFormulario()
+            vm.notaCambiada("Otra obra")
+            val otraObra = vm.state.value
+            tardia.complete(Unit)
+            runCurrent()
+            assertEquals(otraObra, vm.state.value)
+        }
+    }
+
+    @Test
+    fun cambiarElTextoDescartaLosResultadosDelTextoAnterior() {
+        conVm { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            vm.buscarDireccion()
+            advanceUntilIdle()
+            assertTrue(vm.state.value.formulario.busqueda.resultados is ResultadosBusquedaUi.Lista)
+            vm.textoDireccionCambiado("Calchaquí 6200")
+            assertEquals(ResultadosBusquedaUi.SinBuscar, vm.state.value.formulario.busqueda.resultados)
+        }
+    }
+
+    @Test
+    fun cadaResultadoDeLaBusquedaSeMuestraSinBloquearElGuardado() {
+        val casos = listOf<Pair<() -> ResultadoDireccion<List<CandidatoDireccion>>, ResultadosBusquedaUi>>(
+            { ResultadoDireccion.SinResultados } to ResultadosBusquedaUi.SinResultados,
+            { ResultadoDireccion.NoDisponible } to ResultadosBusquedaUi.NoDisponible,
+            { throw IllegalStateException("el sistema falló") } to ResultadosBusquedaUi.NoDisponible,
+        )
+        for ((respuesta, esperado) in casos) {
+            conVm(direcciones = DireccionesVmFalsa(busqueda = { respuesta() })) { vm, repo ->
+                vm.abrirFormulario()
+                vm.notaCambiada("Se guarda igual")
+                vm.abrirBusquedaDireccion()
+                vm.textoDireccionCambiado("Calchaquí")
+                vm.buscarDireccion()
+                advanceUntilIdle()
+                assertEquals(esperado, vm.state.value.formulario.busqueda.resultados)
+                assertNull(vm.state.value.formulario.error)
+                vm.guardar()
+                advanceUntilIdle()
+                assertEquals(1, repo.altas)
+                assertEquals(CambioUbicacion.SinCambio, repo.draft?.cambioUbicacion)
+            }
+        }
+    }
+
+    @Test
+    fun siElDispositivoNoGeocodificaElBuscadorSeOcultaSinError() {
+        conVm(direcciones = DireccionesVmFalsa(busqueda = { ResultadoDireccion.NoSoportado })) { vm, _ ->
+            vm.abrirFormulario()
+            vm.abrirBusquedaDireccion()
+            vm.textoDireccionCambiado("Calchaquí")
+            vm.buscarDireccion()
+            advanceUntilIdle()
+            val form = vm.state.value.formulario
+            assertEquals(BusquedaDireccionUiState(), form.busqueda)
+            assertFalse(form.busqueda.disponible)
+            assertNull(form.error)
+        }
+    }
+}
+
+private val CANDIDATOS_VM = listOf(
+    CandidatoDireccion("Av. Calchaquí 6200, Florencio Varela", Ubicacion(-34.7746, -58.2672)),
+    CandidatoDireccion("Calchaquí 100, Quilmes", Ubicacion(-34.72, -58.25)),
+    CandidatoDireccion("Calchaquí 2500, Quilmes", Ubicacion(-34.73, -58.26)),
+    CandidatoDireccion("Av. Calchaquí 1, Berazategui", Ubicacion(-34.76, -58.21)),
+    CandidatoDireccion("Calchaquí s/n, Berazategui", Ubicacion(-34.77, -58.22)),
+)
+
+private class DireccionesVmFalsa(
+    private val soportado: Boolean = true,
+    private val direccion: (Ubicacion) -> ResultadoDireccion<String> = { ResultadoDireccion.Exito("Av. Calchaquí 6200") },
+    private val busqueda: (String) -> ResultadoDireccion<List<CandidatoDireccion>> = { ResultadoDireccion.Exito(CANDIDATOS_VM) },
+) : ProveedorDirecciones {
+    val direccionesPedidas = mutableListOf<Ubicacion>()
+    val busquedasPedidas = mutableListOf<String>()
+
+    /** La próxima consulta responde recién cuando se completa, y aunque la hayan cancelado: el sistema no la corta. */
+    var esperaProxima: CompletableDeferred<Unit>? = null
+
+    private suspend fun esperar() {
+        val espera = esperaProxima ?: return
+        esperaProxima = null
+        try { withContext(NonCancellable) { espera.await() } } catch (_: CancellationException) { }
+    }
+
+    override fun estaSoportado() = soportado
+
+    override suspend fun direccionDe(ubicacion: Ubicacion): ResultadoDireccion<String> {
+        direccionesPedidas += ubicacion
+        esperar()
+        return direccion(ubicacion)
+    }
+
+    override suspend fun buscar(texto: String): ResultadoDireccion<List<CandidatoDireccion>> {
+        busquedasPedidas += texto
+        esperar()
+        return busqueda(texto)
     }
 }
 

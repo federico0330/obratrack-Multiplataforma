@@ -147,5 +147,13 @@
     <string name="relevamientos_error_location_permission">ObraTrack does not have permission to use the location. Enable it in the phone settings, under the ObraTrack permissions, and try again.</string>
     <string name="relevamientos_error_location_disabled">Turn on location on your phone and try again.</string>
     <string name="relevamientos_error_location_unavailable">Could not get the location. Try somewhere with a better signal.</string>
+    <string name="relevamientos_address">Address: %1$s</string>
+    <string name="relevamientos_address_loading">Finding the address…</string>
+    <string name="relevamientos_address_search">Search address</string>
+    <string name="relevamientos_address_label">Street, number and city</string>
+    <string name="relevamientos_address_search_action">Search</string>
+    <string name="relevamientos_address_cancel">Cancel</string>
+    <string name="relevamientos_address_no_results">We could not find that address. Try another one.</string>
+    <string name="relevamientos_address_unavailable">Could not search the address. Check your connection and try again.</string>
     <string name="relevamientos_error_location_invalid">The location is not valid. Capture it again.</string>
 </resources>

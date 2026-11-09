@@ -10,12 +10,17 @@ import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.filtrar
 import com.unaj.obratrack.domain.usecase.ActualizarRelevamiento
 import com.unaj.obratrack.domain.usecase.EliminarRelevamiento
+import com.unaj.obratrack.domain.model.Ubicacion
+import com.unaj.obratrack.domain.repository.CandidatoDireccion
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
+import com.unaj.obratrack.domain.repository.ResultadoDireccion
 import com.unaj.obratrack.domain.repository.ResultadoRelevamiento
 import com.unaj.obratrack.domain.repository.ResultadoTarea
 import com.unaj.obratrack.domain.repository.ResultadoUbicacion
+import com.unaj.obratrack.domain.usecase.BuscarDirecciones
 import com.unaj.obratrack.domain.usecase.CrearRelevamiento
 import com.unaj.obratrack.domain.usecase.ObservarRelevamientos
+import com.unaj.obratrack.domain.usecase.ObtenerDireccion
 import com.unaj.obratrack.domain.usecase.ObtenerUbicacionActual
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.ObservarTareas
@@ -42,6 +47,8 @@ class RelevamientosViewModel(
     private val actualizarRelevamiento: ActualizarRelevamiento,
     private val eliminarRelevamiento: EliminarRelevamiento,
     private val obtenerUbicacionActual: ObtenerUbicacionActual,
+    private val obtenerDireccion: ObtenerDireccion,
+    private val buscarDirecciones: BuscarDirecciones,
     private val clock: Clock = Clock.System,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RelevamientosUiState())
@@ -53,6 +60,11 @@ class RelevamientosViewModel(
     private var contextoJob = Job(viewModelScope.coroutineContext[Job])
     private var tareasJob: Job? = null
     private var capturaJob: Job? = null
+    private var busquedaJob: Job? = null
+    private var direccionJob: Job? = null
+
+    /** Ubicación cuya dirección muestra (o está cargando) el detalle. */
+    private var direccionDe: Ubicacion? = null
     private var listaCompleta: List<Relevamiento> = emptyList()
 
     init {
@@ -87,6 +99,9 @@ class RelevamientosViewModel(
     private fun renovarContexto() {
         contexto++
         capturaJob = null
+        busquedaJob = null
+        direccionJob = null
+        direccionDe = null
         listaCompleta = emptyList()
         contextoJob.cancel()
         contextoJob = Job(viewModelScope.coroutineContext[Job])
@@ -133,6 +148,13 @@ class RelevamientosViewModel(
                         errorOperacion = if (desaparecio && !actual.eliminando) ErrorRelevamientosUi.INEXISTENTE else actual.errorOperacion,
                     )
                 }
+                // El relevamiento abierto pudo cambiar de ubicación (o haber desaparecido).
+                val abierto = _state.value.seleccionado
+                if (abierto == null) {
+                    if (direccionDe != null) cargarDireccion(null)
+                } else if (abierto.ubicacion != direccionDe) {
+                    cargarDireccion(abierto.ubicacion)
+                }
             }
         }
     }
@@ -156,12 +178,45 @@ class RelevamientosViewModel(
         val actual = listaCompleta.find { it.id == item.id } ?: return
         if (_state.value.eliminando || _state.value.formulario.guardando) return
         _state.update { it.copy(seleccionado = actual, errorOperacion = null) }
+        cargarDireccion(actual.ubicacion)
     }
 
     fun cerrarDetalle() {
         if (_state.value.eliminando || _state.value.formulario.guardando) return
         nuevaVersionFormulario()
         _state.update { it.copy(seleccionado = null, formularioVisible = false, aEliminar = null, errorOperacion = null) }
+        cargarDireccion(null)
+    }
+
+    /** Carga la dirección del detalle aparte de todo lo demás: si falla, el detalle sigue mostrando las coordenadas. */
+    private fun cargarDireccion(ubicacion: Ubicacion?) {
+        direccionJob?.cancel()
+        direccionJob = null
+        direccionDe = ubicacion
+        if (ubicacion == null) {
+            _state.update { it.copy(direccion = DireccionUiState.Ninguna) }
+            return
+        }
+        _state.update { it.copy(direccion = DireccionUiState.Cargando) }
+        val revision = contexto
+        direccionJob = viewModelScope.launch(contextoJob) {
+            val resultado = try {
+                obtenerDireccion(ubicacion)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                ResultadoDireccion.NoDisponible
+            }
+            // La consulta del sistema no se puede cortar: si ya se abrió otro relevamiento o se cerró el detalle,
+            // `direccionDe` cambió y esta respuesta no cuenta. Si es la misma ubicación, la dirección es la misma.
+            if (direccionDe == ubicacion) {
+                val direccion = when (resultado) {
+                    is ResultadoDireccion.Exito -> DireccionUiState.Disponible(resultado.dato)
+                    else -> DireccionUiState.NoDisponible
+                }
+                actualizar(revision) { it.copy(direccion = direccion) }
+            }
+        }
     }
 
     fun editarSeleccionado() {
@@ -173,6 +228,7 @@ class RelevamientosViewModel(
             id = item.id, nota = item.nota, fechaIso = item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), tareaId = item.tareaId,
             foto = foto ?: FotoFormulario.Ninguna, fotoOriginal = foto,
             ubicacion = item.ubicacion, ubicacionOriginal = item.ubicacion,
+            busqueda = BusquedaDireccionUiState(disponible = buscarDirecciones.estaSoportado()),
         )) }
     }
 
@@ -208,8 +264,10 @@ class RelevamientosViewModel(
         _state.update {
             it.copy(seleccionado = null, errorOperacion = null, formularioVisible = true, formulario = FormularioRelevamientoUiState(
                 fechaIso = clock.todayIn(TimeZone.currentSystemDefault()).toString(),
+                busqueda = BusquedaDireccionUiState(disponible = buscarDirecciones.estaSoportado()),
             ))
         }
+        cargarDireccion(null)
     }
 
     fun cerrarFormulario() {
@@ -218,10 +276,21 @@ class RelevamientosViewModel(
         _state.update { it.copy(formularioVisible = false) }
     }
 
-    /** Invalida lo que dependa del formulario anterior: respuestas tardías y la búsqueda de ubicación en curso. */
+    /** Invalida lo que dependa del formulario anterior: respuestas tardías y las búsquedas en curso. */
     private fun nuevaVersionFormulario() {
         formularioVersion++
         cortarCaptura()
+        cortarBusqueda()
+    }
+
+    private fun cortarBusqueda() {
+        busquedaJob?.cancel()
+        busquedaJob = null
+        _state.update {
+            if (it.formulario.busqueda.resultados == ResultadosBusquedaUi.Buscando) {
+                it.copy(formulario = it.formulario.copy(busqueda = it.formulario.busqueda.copy(resultados = ResultadosBusquedaUi.SinBuscar)))
+            } else it
+        }
     }
 
     private fun cortarCaptura() {
@@ -272,6 +341,70 @@ class RelevamientosViewModel(
             ResultadoUbicacion.Desactivada -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_DESACTIVADA)
             ResultadoUbicacion.NoDisponible -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE)
         }
+
+    fun abrirBusquedaDireccion() = editarFormulario {
+        if (busqueda.disponible) copy(busqueda = busqueda.copy(abierta = true), error = null) else this
+    }
+
+    fun cerrarBusquedaDireccion() {
+        cortarBusqueda()
+        editarFormulario { copy(busqueda = busqueda.copy(abierta = false, texto = "", resultados = ResultadosBusquedaUi.SinBuscar)) }
+    }
+
+    /** Cambiar el texto descarta la búsqueda en curso y los resultados del texto anterior. */
+    fun textoDireccionCambiado(texto: String) {
+        cortarBusqueda()
+        editarFormulario { copy(busqueda = busqueda.copy(texto = texto, resultados = ResultadosBusquedaUi.SinBuscar)) }
+    }
+
+    /** Búsqueda explícita (botón o tecla Buscar): una nueva reemplaza a la anterior y una respuesta tardía se descarta. */
+    fun buscarDireccion() {
+        val estado = _state.value
+        val busqueda = estado.formulario.busqueda
+        if (!estado.formularioVisible || estado.formulario.guardando || !busqueda.abierta || !busqueda.puedeBuscar) return
+        val texto = busqueda.texto
+        val revision = contexto
+        val versionForm = formularioVersion
+        busquedaJob?.cancel()
+        editarFormulario { copy(busqueda = this.busqueda.copy(resultados = ResultadosBusquedaUi.Buscando)) }
+        busquedaJob = viewModelScope.launch(contextoJob) {
+            val resultado = try {
+                buscarDirecciones(texto)
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                ResultadoDireccion.NoDisponible
+            }
+            // La consulta del sistema no se puede cortar: si ya se canceló o se buscó otra cosa, esta respuesta no cuenta.
+            ensureActive()
+            if (revision == contexto && versionForm == formularioVersion) editarFormulario { conResultadoBusqueda(resultado) }
+        }
+    }
+
+    /** Elegir un candidato carga esa ubicación como nueva. Solo vale uno de los que se están mostrando. */
+    fun elegirDireccion(candidato: CandidatoDireccion) {
+        val mostrados = (_state.value.formulario.busqueda.resultados as? ResultadosBusquedaUi.Lista)?.items.orEmpty()
+        if (candidato !in mostrados) return
+        cortarBusqueda()
+        editarFormulario {
+            if (capturandoUbicacion) this
+            else copy(ubicacion = candidato.ubicacion, error = null, busqueda = busqueda.copy(abierta = false, texto = "", resultados = ResultadosBusquedaUi.SinBuscar))
+        }
+    }
+
+    private fun FormularioRelevamientoUiState.conResultadoBusqueda(
+        resultado: ResultadoDireccion<List<CandidatoDireccion>>,
+    ): FormularioRelevamientoUiState {
+        // Solo se acepta la respuesta de la búsqueda que sigue en curso.
+        if (busqueda.resultados != ResultadosBusquedaUi.Buscando) return this
+        return when (resultado) {
+            is ResultadoDireccion.Exito -> copy(busqueda = busqueda.copy(resultados = ResultadosBusquedaUi.Lista(resultado.dato)))
+            ResultadoDireccion.SinResultados -> copy(busqueda = busqueda.copy(resultados = ResultadosBusquedaUi.SinResultados))
+            ResultadoDireccion.NoDisponible -> copy(busqueda = busqueda.copy(resultados = ResultadosBusquedaUi.NoDisponible))
+            // El dispositivo no geocodifica: el buscador deja de ofrecerse, sin ningún error.
+            ResultadoDireccion.NoSoportado -> copy(busqueda = BusquedaDireccionUiState())
+        }
+    }
 
     private fun editarFormulario(transform: FormularioRelevamientoUiState.() -> FormularioRelevamientoUiState) {
         // Una foto puede terminar de leerse con el formulario ya cerrado: se ignora.

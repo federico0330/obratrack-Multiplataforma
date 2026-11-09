@@ -169,6 +169,11 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onLocationCapture = relevamientosViewModel::capturarUbicacion,
                                                 onLocationCancel = relevamientosViewModel::cancelarCaptura,
                                                 onLocationRemove = relevamientosViewModel::quitarUbicacion,
+                                                onAddressSearchOpen = relevamientosViewModel::abrirBusquedaDireccion,
+                                                onAddressSearchClose = relevamientosViewModel::cerrarBusquedaDireccion,
+                                                onAddressTextChange = relevamientosViewModel::textoDireccionCambiado,
+                                                onAddressSearch = relevamientosViewModel::buscarDireccion,
+                                                onAddressPick = relevamientosViewModel::elegirDireccion,
                                             ),
                                         )
                                     },

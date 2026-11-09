@@ -32,6 +32,8 @@ kotlin {
             implementation("dev.jordond.compass:geolocation-mobile:4.0.1")
             implementation("dev.jordond.compass:permissions:4.0.1")
             implementation("dev.jordond.compass:permissions-mobile:4.0.1")
+            implementation("dev.jordond.compass:geocoder:4.0.1")
+            implementation("dev.jordond.compass:geocoder-mobile:4.0.1")
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:3.6.0")

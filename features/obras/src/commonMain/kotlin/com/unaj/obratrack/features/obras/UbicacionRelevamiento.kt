@@ -1,13 +1,20 @@
 package com.unaj.obratrack.features.obras
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -15,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.core.ui.IconoBoton
 import com.unaj.obratrack.core.ui.Iconos
@@ -74,14 +82,71 @@ internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: Re
                 }
             }
         }
+        // Sin geocodificador en el dispositivo el buscador no se ofrece.
+        if (form.busqueda.disponible) BuscadorDireccion(form.busqueda, form.guardando, acciones)
     }
 }
 
-/** Coordenadas del relevamiento y el botón para verlas en el mapa del teléfono. */
+/** Elegir la ubicación escribiendo una dirección: hasta 5 candidatos y el elegido se carga como ubicación nueva. */
 @Composable
-internal fun UbicacionDetalle(ubicacion: Ubicacion) {
+private fun BuscadorDireccion(busqueda: BusquedaDireccionUiState, deshabilitado: Boolean, acciones: RelevamientosAcciones) {
+    if (!busqueda.abierta) {
+        OutlinedButton(onClick = acciones.onAddressSearchOpen, enabled = !deshabilitado, modifier = Modifier.testTag("relevamientos_address_open")) {
+            IconoBoton(Iconos.Search)
+            Text(stringResource(Res.string.relevamientos_address_search))
+        }
+        return
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = busqueda.texto, onValueChange = acciones.onAddressTextChange, singleLine = true,
+            label = { Text(stringResource(Res.string.relevamientos_address_label)) },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { acciones.onAddressSearch() }),
+            enabled = !deshabilitado,
+            modifier = Modifier.fillMaxWidth().testTag("relevamientos_address_text"),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Button(onClick = acciones.onAddressSearch, enabled = busqueda.puedeBuscar && !deshabilitado, modifier = Modifier.testTag("relevamientos_address_search")) {
+                if (busqueda.resultados == ResultadosBusquedaUi.Buscando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
+                else Text(stringResource(Res.string.relevamientos_address_search_action))
+            }
+            TextButton(onClick = acciones.onAddressSearchClose, modifier = Modifier.testTag("relevamientos_address_close")) {
+                Text(stringResource(Res.string.relevamientos_address_cancel))
+            }
+        }
+        when (val resultados = busqueda.resultados) {
+            ResultadosBusquedaUi.SinBuscar, ResultadosBusquedaUi.Buscando -> Unit
+            is ResultadosBusquedaUi.Lista -> resultados.items.forEach { candidato ->
+                OutlinedCard(onClick = { acciones.onAddressPick(candidato) }, enabled = !deshabilitado, modifier = Modifier.fillMaxWidth().testTag("relevamientos_address_result")) {
+                    Text(candidato.texto, modifier = Modifier.padding(12.dp))
+                }
+            }
+            ResultadosBusquedaUi.SinResultados -> Text(stringResource(Res.string.relevamientos_address_no_results), style = MaterialTheme.typography.bodySmall)
+            ResultadosBusquedaUi.NoDisponible -> Text(
+                stringResource(Res.string.relevamientos_address_unavailable), style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+    }
+}
+
+/** Coordenadas del relevamiento, su dirección si se consiguió y el botón para verlas en el mapa del teléfono. */
+@Composable
+internal fun UbicacionDetalle(ubicacion: Ubicacion, direccion: DireccionUiState) {
     val uriHandler = LocalUriHandler.current
     Text(stringResource(Res.string.relevamientos_location, formatearCoordenadas(ubicacion)), modifier = Modifier.testTag("relevamientos_location_value"))
+    // Si la dirección no está disponible no se muestra nada: las coordenadas alcanzan y no es un error.
+    when (direccion) {
+        DireccionUiState.Cargando -> Text(
+            stringResource(Res.string.relevamientos_address_loading), style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("relevamientos_address_loading"),
+        )
+        is DireccionUiState.Disponible -> Text(
+            stringResource(Res.string.relevamientos_address, direccion.texto), modifier = Modifier.testTag("relevamientos_address_value"),
+        )
+        DireccionUiState.Ninguna, DireccionUiState.NoDisponible -> Unit
+    }
     OutlinedButton(
         onClick = {
             try {
