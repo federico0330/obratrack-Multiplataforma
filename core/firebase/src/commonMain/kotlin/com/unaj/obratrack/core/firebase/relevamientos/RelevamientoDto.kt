@@ -30,4 +30,16 @@ interface FirebaseRelevamientoDataSource {
 }
 
 /** Solo campos editables en este formulario; el resto del documento se conserva. */
-data class RelevamientoUpdateFields(val fechaMillis: Long, val nota: String, val tareaId: String?)
+data class RelevamientoUpdateFields(
+    val fechaMillis: Long,
+    val nota: String,
+    val tareaId: String?,
+    val foto: FotoUpdate = FotoUpdate.SinCambio,
+)
+
+/** `SinCambio` no toca `fotoUrl`; `Quitar` elimina el campo. */
+sealed interface FotoUpdate {
+    data object SinCambio : FotoUpdate
+    data class Nueva(val url: String) : FotoUpdate
+    data object Quitar : FotoUpdate
+}

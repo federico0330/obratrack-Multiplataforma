@@ -26,6 +26,15 @@ class CambioRelevamientoTest {
     }
 
     @Test
+    fun laEdicionLlevaElCambioDeFotoSinAlterarlo() = runTest {
+        for (foto in listOf(FotoUpdate.SinCambio, FotoUpdate.Nueva("https://foto"), FotoUpdate.Quitar)) {
+            val tx = CambioFalso()
+            prepararEdicion("uid", "otro", RelevamientoUpdateFields(40, "Editado", null, foto), tx)
+            assertEquals(foto, tx.editado?.foto)
+        }
+    }
+
+    @Test
     fun editarElUnicoUsaSuNuevaFecha() = runTest {
         val tx = CambioFalso().apply { fechas = mapOf("ultimo" to 30) }
         prepararEdicion("uid", "ultimo", RelevamientoUpdateFields(5, "Editado", null), tx)

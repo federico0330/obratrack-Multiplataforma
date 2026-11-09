@@ -56,6 +56,9 @@ data class RelevamientosAcciones(
     val onCancelDelete: () -> Unit,
     val onConfirmDelete: () -> Unit,
     val onFilterChange: (FiltroRelevamientos) -> Unit,
+    val onPhotoPicked: (ByteArray) -> Unit,
+    val onRemovePhoto: () -> Unit,
+    val onPhotoReadError: () -> Unit,
 )
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -131,6 +134,7 @@ private fun FormularioRelevamiento(
         enabled = !form.guardando, minLines = 3, modifier = Modifier.fillMaxWidth().testTag("relevamientos_note"),
     )
     SelectorTarea(form, tareas, acciones)
+    SelectorFoto(form, acciones)
     form.error?.let { ErrorBlock(mensajeRelevamiento(it)) }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Button(onClick = acciones.onSave, enabled = !form.guardando, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
@@ -180,6 +184,10 @@ private fun mensajeRelevamiento(error: ErrorRelevamientosUi): String = stringRes
     ErrorRelevamientosUi.TAREA -> Res.string.relevamientos_error_task
     ErrorRelevamientosUi.RED -> Res.string.relevamientos_error_network
     ErrorRelevamientosUi.DESCONOCIDO -> Res.string.relevamientos_error_generic
+    ErrorRelevamientosUi.FOTO_SIN_CONEXION -> Res.string.relevamientos_error_photo_network
+    ErrorRelevamientosUi.FOTO_MUY_GRANDE -> Res.string.relevamientos_error_photo_too_large
+    ErrorRelevamientosUi.FOTO_FALLO -> Res.string.relevamientos_error_photo_upload
+    ErrorRelevamientosUi.FOTO_LECTURA -> Res.string.relevamientos_error_photo_read
 })
 
 

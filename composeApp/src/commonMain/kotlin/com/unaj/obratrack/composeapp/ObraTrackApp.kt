@@ -162,6 +162,9 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onCancelDelete = relevamientosViewModel::cancelarEliminacion,
                                                 onConfirmDelete = relevamientosViewModel::confirmarEliminacion,
                                                 onFilterChange = relevamientosViewModel::filtroCambiado,
+                                                onPhotoPicked = relevamientosViewModel::fotoElegida,
+                                                onRemovePhoto = relevamientosViewModel::quitarFoto,
+                                                onPhotoReadError = relevamientosViewModel::fotoNoLeida,
                                             ),
                                         )
                                     },

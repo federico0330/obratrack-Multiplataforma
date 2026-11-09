@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
 class AltaRelevamientoTest {
@@ -66,6 +67,12 @@ class AltaRelevamientoTest {
         assertEquals(setOf("userId", "fecha", "nota"), campos.keys)
         assertEquals(20.0, (campos["fecha"] as Timestamp).toMilliseconds())
         assertEquals("tarea", dto.copy(tareaId = "tarea").camposAlta()["tareaId"])
+    }
+
+    @Test
+    fun payloadGuardaLaFotoSoloSiHay() {
+        assertEquals("https://foto", dto.copy(fotoUrl = "https://foto").camposAlta()["fotoUrl"])
+        assertFalse("fotoUrl" in dto.camposAlta())
     }
 }
 

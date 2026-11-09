@@ -126,6 +126,14 @@
     <string name="relevamientos_filter_empty">Nessun rilievo corrisponde a questo filtro.</string>
     <string name="relevamientos_location">Posizione: %1$s, %2$s</string>
     <string name="relevamientos_next_visit">Prossima visita: %1$s</string>
-    <string name="relevamientos_view_photo">Visualizza foto allegata</string>
-    <string name="relevamientos_photo_error">Impossibile aprire la foto.</string>
+    <string name="relevamientos_photo_error">Impossibile caricare la foto.</string>
+    <string name="relevamientos_photo">Foto (facoltativa)</string>
+    <string name="relevamientos_photo_description">Foto del sopralluogo</string>
+    <string name="relevamientos_photo_pick">Scegli dalla galleria</string>
+    <string name="relevamientos_photo_change">Cambia foto</string>
+    <string name="relevamientos_photo_remove">Rimuovi foto</string>
+    <string name="relevamientos_error_photo_network">Impossibile caricare la foto senza connessione. I dati sono conservati: controlla la connessione e salva di nuovo.</string>
+    <string name="relevamientos_error_photo_too_large">La foto è ancora troppo pesante dopo il ridimensionamento. Scegline un’altra.</string>
+    <string name="relevamientos_error_photo_upload">Impossibile caricare la foto. Riprova o scegline un’altra.</string>
+    <string name="relevamientos_error_photo_read">Impossibile leggere la foto selezionata. Prova con un’altra.</string>
 </resources>

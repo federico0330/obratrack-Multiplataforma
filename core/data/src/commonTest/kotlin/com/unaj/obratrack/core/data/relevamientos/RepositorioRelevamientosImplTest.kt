@@ -3,6 +3,8 @@ package com.unaj.obratrack.core.data.relevamientos
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoDataSource
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoFailure
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
+import com.unaj.obratrack.core.firebase.relevamientos.FotoUpdate
+import com.unaj.obratrack.domain.model.CambioFotoUrl
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoUpdateFields
 import com.unaj.obratrack.domain.model.RelevamientoDraft
@@ -42,6 +44,34 @@ class RepositorioRelevamientosImplTest {
             RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota", "tarea")) as ResultadoRelevamiento.Exito
         assertEquals("remoto", result.dato.id)
         assertEquals(RelevamientoDto("", "obra", "uid", 20, "Nota", "tarea"), remote.enviado)
+    }
+
+    @Test
+    fun crearYEditarPasanLaFotoYaSubida() = runTest {
+        val remote = RemotoFalso()
+        val repo = RepositorioRelevamientosImpl(remote)
+        val draft = RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")
+        repo.crear("uid", "obra", draft, "https://foto")
+        assertEquals("https://foto", remote.enviado?.fotoUrl)
+        val casos = listOf(
+            CambioFotoUrl.SinCambio to FotoUpdate.SinCambio,
+            CambioFotoUrl.Nueva("https://otra") to FotoUpdate.Nueva("https://otra"),
+            CambioFotoUrl.Quitar to FotoUpdate.Quitar,
+        )
+        for ((cambio, esperado) in casos) {
+            repo.actualizar("uid", "obra", "id", draft, cambio)
+            assertEquals(esperado, remote.editado?.foto)
+        }
+    }
+
+    @Test
+    fun laFotoDeCloudinarySeMuestraReducidaYLaOriginalSeConserva() = runTest {
+        val remote = RemotoFalso()
+        val original = "https://res.cloudinary.com/iwsier4h/image/upload/v1/relevamientos/obra/a.jpg"
+        remote.lista = FirebaseRelevamientoResult.Success(listOf(remote.dto.copy(fotoUrl = original)))
+        val item = (RepositorioRelevamientosImpl(remote).observarDeObra("uid", "obra").first() as ResultadoRelevamiento.Exito).dato.single()
+        assertEquals(original, item.fotoUrl)
+        assertEquals("https://res.cloudinary.com/iwsier4h/image/upload/c_fill,w_800/v1/relevamientos/obra/a.jpg", item.fotoVistaUrl)
     }
 
     @Test

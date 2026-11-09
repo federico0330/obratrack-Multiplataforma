@@ -2,6 +2,7 @@ package com.unaj.obratrack.features.obras
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.unaj.obratrack.domain.model.CambioFoto
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
@@ -160,9 +161,17 @@ class RelevamientosViewModel(
         val item = _state.value.seleccionado ?: return
         if (_state.value.eliminando) return
         formularioVersion++
+        val foto = fotoMostrable(item)
         _state.update { it.copy(formularioVisible = true, errorOperacion = null, formulario = FormularioRelevamientoUiState(
             id = item.id, nota = item.nota, fechaIso = item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), tareaId = item.tareaId,
+            foto = foto ?: FotoFormulario.Ninguna, fotoOriginal = foto,
         )) }
+    }
+
+    /** Solo se muestran URLs web; otro valor en `fotoUrl` se conserva sin tocarlo. */
+    private fun fotoMostrable(item: Relevamiento): FotoFormulario.Existente? {
+        val url = item.fotoUrl?.takeIf { it.startsWith("https://") || it.startsWith("http://") } ?: return null
+        return FotoFormulario.Existente(url, item.fotoVistaUrl ?: url)
     }
 
     fun reintentarTareas() {
@@ -204,9 +213,19 @@ class RelevamientosViewModel(
     fun notaCambiada(value: String) = editarFormulario { copy(nota = value, error = null) }
     fun fechaCambiada(value: String) = editarFormulario { copy(fechaIso = value, error = null) }
     fun tareaCambiada(value: String?) = editarFormulario { copy(tareaId = value, error = null) }
+    fun fotoElegida(bytes: ByteArray) = editarFormulario { copy(foto = FotoFormulario.Nueva(bytes), error = null) }
+    fun quitarFoto() = editarFormulario { copy(foto = FotoFormulario.Ninguna, error = null) }
+    fun fotoNoLeida() = editarFormulario { copy(error = ErrorRelevamientosUi.FOTO_LECTURA) }
 
     private fun editarFormulario(transform: FormularioRelevamientoUiState.() -> FormularioRelevamientoUiState) {
-        _state.update { if (it.formulario.guardando) it else it.copy(formulario = it.formulario.transform()) }
+        // Una foto puede terminar de leerse con el formulario ya cerrado: se ignora.
+        _state.update { if (it.formulario.guardando || !it.formularioVisible) it else it.copy(formulario = it.formulario.transform()) }
+    }
+
+    private fun FormularioRelevamientoUiState.cambioFoto(): CambioFoto = when (val actual = foto) {
+        is FotoFormulario.Nueva -> CambioFoto.Nueva(actual.bytes)
+        is FotoFormulario.Existente -> CambioFoto.SinCambio
+        FotoFormulario.Ninguna -> if (fotoOriginal != null) CambioFoto.Quitar else CambioFoto.SinCambio
     }
 
     fun guardar() {
@@ -221,7 +240,7 @@ class RelevamientosViewModel(
         _state.update { it.copy(formulario = form.copy(guardando = true, error = null)) }
         viewModelScope.launch(contextoJob) {
             try {
-                val draft = RelevamientoDraft(fecha, form.nota, form.tareaId)
+                val draft = RelevamientoDraft(fecha, form.nota, form.tareaId, form.cambioFoto())
                 val error = if (form.id == null) {
                     (crearRelevamiento(owner, obra, draft) as? ResultadoRelevamiento.Fallo)?.error
                 } else {
@@ -294,5 +313,8 @@ class RelevamientosViewModel(
         ErrorRelevamiento.TAREA_NO_DISPONIBLE -> ErrorRelevamientosUi.TAREA
         ErrorRelevamiento.RED -> ErrorRelevamientosUi.RED
         ErrorRelevamiento.DESCONOCIDO -> ErrorRelevamientosUi.DESCONOCIDO
+        ErrorRelevamiento.FOTO_SIN_CONEXION -> ErrorRelevamientosUi.FOTO_SIN_CONEXION
+        ErrorRelevamiento.FOTO_MUY_GRANDE -> ErrorRelevamientosUi.FOTO_MUY_GRANDE
+        ErrorRelevamiento.FOTO_FALLO -> ErrorRelevamientosUi.FOTO_FALLO
     }
 }
