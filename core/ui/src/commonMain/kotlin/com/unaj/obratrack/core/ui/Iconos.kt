@@ -5,11 +5,13 @@ import com.unaj.obratrack.core.ui.generated.resources.ic_add
 import com.unaj.obratrack.core.ui.generated.resources.ic_add_photo
 import com.unaj.obratrack.core.ui.generated.resources.ic_arrow_back
 import com.unaj.obratrack.core.ui.generated.resources.ic_calendar
+import com.unaj.obratrack.core.ui.generated.resources.ic_camera
 import com.unaj.obratrack.core.ui.generated.resources.ic_check_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_circle_outline
 import com.unaj.obratrack.core.ui.generated.resources.ic_delete
 import com.unaj.obratrack.core.ui.generated.resources.ic_edit
 import com.unaj.obratrack.core.ui.generated.resources.ic_error
+import com.unaj.obratrack.core.ui.generated.resources.ic_image
 import com.unaj.obratrack.core.ui.generated.resources.ic_logout
 import com.unaj.obratrack.core.ui.generated.resources.ic_obras
 import com.unaj.obratrack.core.ui.generated.resources.ic_pause_circle
@@ -29,11 +31,13 @@ object Iconos {
     val AddPhoto: DrawableResource get() = Res.drawable.ic_add_photo
     val ArrowBack: DrawableResource get() = Res.drawable.ic_arrow_back
     val Calendar: DrawableResource get() = Res.drawable.ic_calendar
+    val Camera: DrawableResource get() = Res.drawable.ic_camera
     val CheckCircle: DrawableResource get() = Res.drawable.ic_check_circle
     val CircleOutline: DrawableResource get() = Res.drawable.ic_circle_outline
     val Delete: DrawableResource get() = Res.drawable.ic_delete
     val Edit: DrawableResource get() = Res.drawable.ic_edit
     val Error: DrawableResource get() = Res.drawable.ic_error
+    val Image: DrawableResource get() = Res.drawable.ic_image
     val Logout: DrawableResource get() = Res.drawable.ic_logout
     val Obras: DrawableResource get() = Res.drawable.ic_obras
     val PauseCircle: DrawableResource get() = Res.drawable.ic_pause_circle

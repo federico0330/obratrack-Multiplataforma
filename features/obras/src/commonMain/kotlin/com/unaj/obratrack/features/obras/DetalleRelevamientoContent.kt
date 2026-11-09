@@ -47,7 +47,7 @@ internal fun DetalleRelevamientoContent(
                         Text((minutos / 60).toString().padStart(2, '0') + ":" + (minutos % 60).toString().padStart(2, '0'))
                     }
                 }
-                item.fotoUrl?.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let { url ->
+                item.fotoWeb()?.let { url ->
                     FotoRelevamiento(item.fotoVistaUrl ?: url)
                 }
             }

@@ -447,6 +447,19 @@ class RelevamientosViewModelTest {
         vm.fotoElegida(byteArrayOf(1))
         assertEquals(cerrado, vm.state.value)
     }
+
+    @Test
+    fun camaraNoDisponibleMuestraErrorYConservaElFormulario() = conVm { vm, _ ->
+        vm.abrirFormulario()
+        vm.notaCambiada("Revoque")
+        vm.fotoElegida(byteArrayOf(7))
+        val antes = vm.state.value.formulario
+        vm.camaraNoDisponible()
+        assertEquals(antes.copy(error = ErrorRelevamientosUi.FOTO_CAMARA), vm.state.value.formulario)
+        // Una foto elegida después limpia el error.
+        vm.fotoElegida(byteArrayOf(8))
+        assertEquals(null, vm.state.value.formulario.error)
+    }
 }
 
 private class FotosVmFalso(

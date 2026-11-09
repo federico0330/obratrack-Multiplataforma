@@ -92,6 +92,11 @@
 - Quedan imágenes huérfanas en Cloudinary al reemplazar o quitar una foto, al borrar el relevamiento o si Firestore falla después de la subida: sin firma no se pueden borrar. Sin conexión se informa un error y se conserva el formulario; la cola de subidas queda para la etapa offline.
 - Probado en un teléfono Android: crear con foto de la galería, verla en el detalle, reemplazarla y quitarla al editar. Falta probar el error sin conexión (modo avión). La rama se actualizó sobre `main` con el login con Google.
 
+## Fotos de relevamientos, PR 2 (rama `feat/fotos-camara`, sobre `feat/fotos-cloudinary`)
+- Cámara con `rememberCameraPickerLauncher` de FileKit (Android e iOS), sin dependencias nuevas de UI. Android no declara `CAMERA`, así que usa la cámara del sistema sin pedir permiso. iOS lleva `NSCameraUsageDescription` traducido en `iosApp/Resources/*.lproj`. La foto temporal se borra después de leerla. Miniatura de 64 dp en el listado (recorte `c_fill,w_160,h_160`).
+- En Android, compresor propio (`androidx.exifinterface` 1.4.2): lee la foto reducida con `inSampleSize`, la endereza según EXIF y la decodifica una sola vez para todas las calidades; FileKit cargaba la imagen completa (unos 200 MB con 50 MP). iOS sigue con FileKit.
+- La cámara se probó en un teléfono Android. Pendiente: confirmar con una foto de alta resolución (50 MP). iOS (cámara, textos del permiso y `core:data`) no se puede compilar ni probar desde Windows. Si Android cierra la app con la cámara abierta, el formulario se pierde (el ViewModel no guarda estado).
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.

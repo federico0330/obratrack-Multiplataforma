@@ -170,7 +170,7 @@ class RelevamientosViewModel(
 
     /** Solo se muestran URLs web; otro valor en `fotoUrl` se conserva sin tocarlo. */
     private fun fotoMostrable(item: Relevamiento): FotoFormulario.Existente? {
-        val url = item.fotoUrl?.takeIf { it.startsWith("https://") || it.startsWith("http://") } ?: return null
+        val url = item.fotoWeb() ?: return null
         return FotoFormulario.Existente(url, item.fotoVistaUrl ?: url)
     }
 
@@ -216,6 +216,7 @@ class RelevamientosViewModel(
     fun fotoElegida(bytes: ByteArray) = editarFormulario { copy(foto = FotoFormulario.Nueva(bytes), error = null) }
     fun quitarFoto() = editarFormulario { copy(foto = FotoFormulario.Ninguna, error = null) }
     fun fotoNoLeida() = editarFormulario { copy(error = ErrorRelevamientosUi.FOTO_LECTURA) }
+    fun camaraNoDisponible() = editarFormulario { copy(error = ErrorRelevamientosUi.FOTO_CAMARA) }
 
     private fun editarFormulario(transform: FormularioRelevamientoUiState.() -> FormularioRelevamientoUiState) {
         // Una foto puede terminar de leerse con el formulario ya cerrado: se ignora.

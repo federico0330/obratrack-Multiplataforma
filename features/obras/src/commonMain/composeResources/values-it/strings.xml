@@ -130,10 +130,11 @@
     <string name="relevamientos_photo">Foto (facoltativa)</string>
     <string name="relevamientos_photo_description">Foto del sopralluogo</string>
     <string name="relevamientos_photo_pick">Scegli dalla galleria</string>
-    <string name="relevamientos_photo_change">Cambia foto</string>
     <string name="relevamientos_photo_remove">Rimuovi foto</string>
+    <string name="relevamientos_photo_take">Scatta foto</string>
     <string name="relevamientos_error_photo_network">Impossibile caricare la foto senza connessione. I dati sono conservati: controlla la connessione e salva di nuovo.</string>
     <string name="relevamientos_error_photo_too_large">La foto è ancora troppo pesante dopo il ridimensionamento. Scegline un’altra.</string>
     <string name="relevamientos_error_photo_upload">Impossibile caricare la foto. Riprova o scegline un’altra.</string>
     <string name="relevamientos_error_photo_read">Impossibile leggere la foto selezionata. Prova con un’altra.</string>
+    <string name="relevamientos_error_photo_camera">Impossibile aprire la fotocamera. Scegli una foto dalla galleria.</string>
 </resources>
