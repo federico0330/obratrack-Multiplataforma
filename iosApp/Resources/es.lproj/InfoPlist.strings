@@ -1,1 +1,2 @@
 "NSCameraUsageDescription" = "Para sacar fotos de los relevamientos de obra.";
+"NSLocationWhenInUseUsageDescription" = "Para registrar dónde se hizo cada relevamiento de obra.";

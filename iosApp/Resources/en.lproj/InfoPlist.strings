@@ -1,1 +1,2 @@
 "NSCameraUsageDescription" = "To take photos for construction site surveys.";
+"NSLocationWhenInUseUsageDescription" = "To record where each construction site survey was done.";

@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.Relevamiento
+import com.unaj.obratrack.domain.model.Ubicacion
+import com.unaj.obratrack.domain.repository.CandidatoDireccion
 import com.unaj.obratrack.core.ui.CampoFecha
 import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.core.ui.IconoBoton
@@ -60,11 +62,28 @@ data class RelevamientosAcciones(
     val onRemovePhoto: () -> Unit,
     val onPhotoReadError: () -> Unit,
     val onCameraError: () -> Unit,
+    val onLocationCapture: () -> Unit,
+    val onLocationCancel: () -> Unit,
+    val onLocationRemove: () -> Unit,
+    val onAddressSearchOpen: () -> Unit,
+    val onAddressSearchClose: () -> Unit,
+    val onAddressTextChange: (String) -> Unit,
+    val onAddressSearch: () -> Unit,
+    val onAddressPick: (CandidatoDireccion) -> Unit,
+    val onMapOpen: () -> Unit,
+    val onMapClose: () -> Unit,
+    val onMapPick: (Ubicacion) -> Unit,
 )
 
+/** [ubicacionObra] es dónde arranca el mapa para elegir un lugar cuando el relevamiento todavía no tiene ubicación. */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcciones, modifier: Modifier = Modifier) {
+fun RelevamientosSection(
+    state: RelevamientosUiState,
+    acciones: RelevamientosAcciones,
+    modifier: Modifier = Modifier,
+    ubicacionObra: Ubicacion? = null,
+) {
     BackHandler(enabled = state.formularioVisible || state.seleccionado != null || state.aEliminar != null) {
         when {
             state.aEliminar != null -> acciones.onCancelDelete()
@@ -86,9 +105,9 @@ fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcc
         state.errorOperacion?.let { ErrorBlock(mensajeRelevamiento(it)) }
         if (state.eliminando) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (state.formularioVisible) {
-            FormularioRelevamiento(state.formulario, state.tareas, acciones)
+            FormularioRelevamiento(state.formulario, state.tareas, acciones, ubicacionObra)
         } else if (state.seleccionado != null) {
-            DetalleRelevamientoContent(state.seleccionado, state.tareas, state.eliminando, acciones)
+            DetalleRelevamientoContent(state.seleccionado, state.tareas, state.direccion, state.eliminando, acciones)
         } else {
             FiltroRelevamientosSelector(state, acciones)
             when (val lista = state.lista) {
@@ -129,6 +148,7 @@ private fun FormularioRelevamiento(
     form: FormularioRelevamientoUiState,
     tareas: OpcionesTareasUiState,
     acciones: RelevamientosAcciones,
+    ubicacionObra: Ubicacion?,
 ) {
     Text(stringResource(if (form.id == null) Res.string.relevamientos_create else Res.string.relevamientos_edit), style = MaterialTheme.typography.titleMedium)
     CampoFecha(form.fechaIso, stringResource(Res.string.relevamientos_date), acciones.onDateChange, enabled = !form.guardando)
@@ -139,9 +159,11 @@ private fun FormularioRelevamiento(
     )
     SelectorTarea(form, tareas, acciones)
     SelectorFoto(form, acciones)
+    SelectorUbicacion(form, acciones)
+    if (form.mapaAbierto) SelectorEnMapa(centroInicialDelSelector(form.ubicacion, ubicacionObra), acciones.onMapPick, acciones.onMapClose)
     form.error?.let { ErrorBlock(mensajeRelevamiento(it)) }
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Button(onClick = acciones.onSave, enabled = !form.guardando, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
+        Button(onClick = acciones.onSave, enabled = !form.guardando && !form.capturandoUbicacion, modifier = Modifier.weight(1f).testTag("relevamientos_save")) {
             if (form.guardando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
             else Text(stringResource(Res.string.relevamientos_save))
         }
@@ -193,6 +215,10 @@ private fun mensajeRelevamiento(error: ErrorRelevamientosUi): String = stringRes
     ErrorRelevamientosUi.FOTO_FALLO -> Res.string.relevamientos_error_photo_upload
     ErrorRelevamientosUi.FOTO_LECTURA -> Res.string.relevamientos_error_photo_read
     ErrorRelevamientosUi.FOTO_CAMARA -> Res.string.relevamientos_error_photo_camera
+    ErrorRelevamientosUi.UBICACION_SIN_PERMISO -> Res.string.relevamientos_error_location_permission
+    ErrorRelevamientosUi.UBICACION_DESACTIVADA -> Res.string.relevamientos_error_location_disabled
+    ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE -> Res.string.relevamientos_error_location_unavailable
+    ErrorRelevamientosUi.UBICACION_INVALIDA -> Res.string.relevamientos_error_location_invalid
 })
 
 

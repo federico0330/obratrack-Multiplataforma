@@ -124,7 +124,6 @@
     <string name="relevamientos_filter_all">Tutti i rilievi</string>
     <string name="relevamientos_filter">Mostra: %1$s</string>
     <string name="relevamientos_filter_empty">Nessun rilievo corrisponde a questo filtro.</string>
-    <string name="relevamientos_location">Posizione: %1$s, %2$s</string>
     <string name="relevamientos_next_visit">Prossima visita: %1$s</string>
     <string name="relevamientos_photo_error">Impossibile caricare la foto.</string>
     <string name="relevamientos_photo">Foto (facoltativa)</string>
@@ -137,4 +136,29 @@
     <string name="relevamientos_error_photo_upload">Impossibile caricare la foto. Riprova o scegline un’altra.</string>
     <string name="relevamientos_error_photo_read">Impossibile leggere la foto selezionata. Prova con un’altra.</string>
     <string name="relevamientos_error_photo_camera">Impossibile aprire la fotocamera. Scegli una foto dalla galleria.</string>
+    <string name="relevamientos_location_optional">Posizione (facoltativa)</string>
+    <string name="relevamientos_location_use">Usa la mia posizione</string>
+    <string name="relevamientos_location_update">Aggiorna posizione</string>
+    <string name="relevamientos_location_remove">Rimuovi posizione</string>
+    <string name="relevamientos_location_cancel">Annulla</string>
+    <string name="relevamientos_location_searching">Ricerca della posizione…</string>
+    <string name="relevamientos_location_open_map">Apri nella mappa</string>
+    <string name="relevamientos_error_location_permission">Non abbiamo il permesso di usare la posizione. Abilitalo nelle impostazioni del telefono, tra i permessi di ObraTrack, e riprova.</string>
+    <string name="relevamientos_error_location_disabled">Attiva la posizione del telefono e riprova.</string>
+    <string name="relevamientos_error_location_unavailable">Impossibile ottenere la posizione. Prova in un posto con un segnale migliore.</string>
+    <string name="relevamientos_address">Indirizzo: %1$s</string>
+    <string name="relevamientos_address_loading">Ricerca dell’indirizzo…</string>
+    <string name="relevamientos_address_search">Cerca indirizzo</string>
+    <string name="relevamientos_address_label">Via, numero e città</string>
+    <string name="relevamientos_address_search_action">Cerca</string>
+    <string name="relevamientos_address_cancel">Annulla</string>
+    <string name="relevamientos_address_no_results">Non abbiamo trovato quell’indirizzo. Prova con un altro.</string>
+    <string name="relevamientos_address_unavailable">Impossibile cercare l’indirizzo. Controlla la connessione e riprova.</string>
+    <string name="relevamientos_location_title">Posizione</string>
+    <string name="relevamientos_location_pick_on_map">Scegli sulla mappa</string>
+    <string name="relevamientos_map_description">Mappa con la posizione del sopralluogo</string>
+    <string name="relevamientos_map_pick_hint">Sposta la mappa finché il segnaposto indica il luogo del sopralluogo.</string>
+    <string name="relevamientos_map_pick_confirm">Usa questo luogo</string>
+    <string name="relevamientos_map_pick_cancel">Annulla</string>
+    <string name="relevamientos_error_location_invalid">La posizione non è valida. Acquisiscila di nuovo.</string>
 </resources>

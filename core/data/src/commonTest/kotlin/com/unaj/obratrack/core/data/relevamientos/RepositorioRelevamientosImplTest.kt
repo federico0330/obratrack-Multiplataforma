@@ -7,6 +7,8 @@ import com.unaj.obratrack.core.firebase.relevamientos.FotoUpdate
 import com.unaj.obratrack.domain.model.CambioFotoUrl
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoUpdateFields
+import com.unaj.obratrack.core.firebase.relevamientos.UbicacionUpdate
+import com.unaj.obratrack.domain.model.CambioUbicacion
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
@@ -62,6 +64,40 @@ class RepositorioRelevamientosImplTest {
             repo.actualizar("uid", "obra", "id", draft, cambio)
             assertEquals(esperado, remote.editado?.foto)
         }
+    }
+
+    @Test
+    fun crearEscribeLaUbicacionSoloSiEsNueva() = runTest {
+        val remote = RemotoFalso()
+        val repo = RepositorioRelevamientosImpl(remote)
+        val base = RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")
+        repo.crear("uid", "obra", base.copy(cambioUbicacion = CambioUbicacion.Nueva(Ubicacion(-34.7746, -58.2672))))
+        assertEquals(-34.7746, remote.enviado?.latitud)
+        assertEquals(-58.2672, remote.enviado?.longitud)
+        // Al crear no hay ubicación previa: SinCambio y Quitar equivalen a no tenerla.
+        for (cambio in listOf(CambioUbicacion.SinCambio, CambioUbicacion.Quitar)) {
+            repo.crear("uid", "obra", base.copy(cambioUbicacion = cambio))
+            assertNull(remote.enviado?.latitud)
+            assertNull(remote.enviado?.longitud)
+        }
+    }
+
+    @Test
+    fun editarPasaElCambioDeUbicacionYSinCambioNoLaToca() = runTest {
+        val remote = RemotoFalso()
+        val repo = RepositorioRelevamientosImpl(remote)
+        val base = RelevamientoDraft(Instant.fromEpochMilliseconds(20), "Nota")
+        val casos = listOf(
+            CambioUbicacion.SinCambio to UbicacionUpdate.SinCambio,
+            CambioUbicacion.Nueva(Ubicacion(-34.5, -58.5)) to UbicacionUpdate.Nueva(-34.5, -58.5),
+            CambioUbicacion.Quitar to UbicacionUpdate.Quitar,
+        )
+        for ((cambio, esperado) in casos) {
+            repo.actualizar("uid", "obra", "id", base.copy(cambioUbicacion = cambio))
+            assertEquals(esperado, remote.editado?.ubicacion)
+        }
+        repo.actualizar("uid", "obra", "id", base)
+        assertEquals(UbicacionUpdate.SinCambio, remote.editado?.ubicacion)
     }
 
     @Test

@@ -27,6 +27,13 @@ kotlin {
             implementation("io.ktor:ktor-client-core:3.6.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
             implementation("io.github.vinceglb:filekit-core:0.16.0")
+            // Compass no expone geolocation ni permissions a la compilación desde geolocation-mobile.
+            implementation("dev.jordond.compass:geolocation:4.0.1")
+            implementation("dev.jordond.compass:geolocation-mobile:4.0.1")
+            implementation("dev.jordond.compass:permissions:4.0.1")
+            implementation("dev.jordond.compass:permissions-mobile:4.0.1")
+            implementation("dev.jordond.compass:geocoder:4.0.1")
+            implementation("dev.jordond.compass:geocoder-mobile:4.0.1")
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:3.6.0")

@@ -45,7 +45,9 @@ class RepositorioRelevamientosImpl(private val remote: FirebaseRelevamientoDataS
         userId: String, obraId: String, id: String, draft: RelevamientoDraft, foto: CambioFotoUrl,
     ): ResultadoRelevamiento<Unit> = escribir {
         remote.actualizar(userId, obraId, id,
-            RelevamientoUpdateFields(draft.fecha.toEpochMilliseconds(), draft.nota, draft.tareaId, foto.toUpdate()))
+            RelevamientoUpdateFields(
+                draft.fecha.toEpochMilliseconds(), draft.nota, draft.tareaId, foto.toUpdate(), draft.cambioUbicacion.toUpdate(),
+            ))
     }
 
     override suspend fun eliminar(userId: String, obraId: String, id: String): ResultadoRelevamiento<Unit> =

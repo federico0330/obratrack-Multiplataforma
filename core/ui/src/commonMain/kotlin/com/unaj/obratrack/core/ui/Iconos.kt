@@ -13,10 +13,15 @@ import com.unaj.obratrack.core.ui.generated.resources.ic_edit
 import com.unaj.obratrack.core.ui.generated.resources.ic_error
 import com.unaj.obratrack.core.ui.generated.resources.ic_image
 import com.unaj.obratrack.core.ui.generated.resources.ic_logout
+import com.unaj.obratrack.core.ui.generated.resources.ic_map
+import com.unaj.obratrack.core.ui.generated.resources.ic_my_location
 import com.unaj.obratrack.core.ui.generated.resources.ic_obras
+import com.unaj.obratrack.core.ui.generated.resources.ic_open_in_new
 import com.unaj.obratrack.core.ui.generated.resources.ic_pause_circle
+import com.unaj.obratrack.core.ui.generated.resources.ic_place
 import com.unaj.obratrack.core.ui.generated.resources.ic_play_circle
 import com.unaj.obratrack.core.ui.generated.resources.ic_refresh
+import com.unaj.obratrack.core.ui.generated.resources.ic_search
 import com.unaj.obratrack.core.ui.generated.resources.ic_visibility
 import com.unaj.obratrack.core.ui.generated.resources.ic_visibility_off
 import com.unaj.obratrack.core.ui.generated.resources.ic_warning
@@ -39,10 +44,15 @@ object Iconos {
     val Error: DrawableResource get() = Res.drawable.ic_error
     val Image: DrawableResource get() = Res.drawable.ic_image
     val Logout: DrawableResource get() = Res.drawable.ic_logout
+    val Map: DrawableResource get() = Res.drawable.ic_map
+    val MyLocation: DrawableResource get() = Res.drawable.ic_my_location
     val Obras: DrawableResource get() = Res.drawable.ic_obras
+    val OpenInNew: DrawableResource get() = Res.drawable.ic_open_in_new
     val PauseCircle: DrawableResource get() = Res.drawable.ic_pause_circle
+    val Place: DrawableResource get() = Res.drawable.ic_place
     val PlayCircle: DrawableResource get() = Res.drawable.ic_play_circle
     val Refresh: DrawableResource get() = Res.drawable.ic_refresh
+    val Search: DrawableResource get() = Res.drawable.ic_search
     val Visibility: DrawableResource get() = Res.drawable.ic_visibility
     val VisibilityOff: DrawableResource get() = Res.drawable.ic_visibility_off
     val Warning: DrawableResource get() = Res.drawable.ic_warning

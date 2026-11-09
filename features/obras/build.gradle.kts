@@ -32,6 +32,8 @@ kotlin {
             implementation("io.github.vinceglb:filekit-dialogs-compose:0.16.0")
             implementation("io.coil-kt.coil3:coil-compose:3.6.3")
             implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.3")
+            // Mapa de la ubicación. Android e iOS están en Beta y la API puede cambiar entre versiones menores: se fija.
+            implementation("org.maplibre.compose:maplibre-compose:0.20.0")
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

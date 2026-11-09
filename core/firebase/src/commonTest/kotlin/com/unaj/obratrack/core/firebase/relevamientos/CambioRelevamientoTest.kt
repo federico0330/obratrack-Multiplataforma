@@ -35,6 +35,19 @@ class CambioRelevamientoTest {
     }
 
     @Test
+    fun laEdicionLlevaElCambioDeUbicacionSinAlterarloYPorDefectoNoLaToca() = runTest {
+        for (ubicacion in listOf(UbicacionUpdate.SinCambio, UbicacionUpdate.Nueva(-34.77, -58.26), UbicacionUpdate.Quitar)) {
+            val tx = CambioFalso()
+            prepararEdicion("uid", "otro", RelevamientoUpdateFields(40, "Editado", null, ubicacion = ubicacion), tx)
+            assertEquals(ubicacion, tx.editado?.ubicacion)
+        }
+        val sinPedirNada = CambioFalso()
+        prepararEdicion("uid", "otro", RelevamientoUpdateFields(40, "Editado", null), sinPedirNada)
+        assertEquals(UbicacionUpdate.SinCambio, sinPedirNada.editado?.ubicacion)
+        assertEquals(FotoUpdate.SinCambio, sinPedirNada.editado?.foto)
+    }
+
+    @Test
     fun editarElUnicoUsaSuNuevaFecha() = runTest {
         val tx = CambioFalso().apply { fechas = mapOf("ultimo" to 30) }
         prepararEdicion("uid", "ultimo", RelevamientoUpdateFields(5, "Editado", null), tx)
