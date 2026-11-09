@@ -97,6 +97,13 @@
 - En Android, compresor propio (`androidx.exifinterface` 1.4.2): lee la foto reducida con `inSampleSize`, la endereza según EXIF y la decodifica una sola vez para todas las calidades; FileKit cargaba la imagen completa (unos 200 MB con 50 MP). iOS sigue con FileKit.
 - La cámara se probó en un teléfono Android. Pendiente: confirmar con una foto de alta resolución (50 MP). iOS (cámara, textos del permiso y `core:data`) no se puede compilar ni probar desde Windows. Si Android cierra la app con la cámara abierta, el formulario se pierde (el ViewModel no guarda estado).
 
+## Verificación de fotos en Android
+
+- El PR #16 integró cámara, miniaturas y compresión Android a `main`. El compresor aplica el espejo horizontal antes de girar, como indica EXIF. Esto corrige las fotos que traen las dos transformaciones a la vez.
+- Pasaron 304 pruebas de host y las compilaciones de la app y sus pruebas Android. La app arrancó hasta la pantalla de acceso en el emulador. El `google-services.json` local se renovó desde Firebase para que Gradle genere `default_web_client_id` después de incorporar el acceso con Google.
+- En el emulador Android 14, las dos orientaciones espejadas fallaron antes del cambio y pasaron después. El compresor procesó un JPEG sintético de 8160 × 6120 y entregó 1920 × 1440 dentro del tope de 5 MB. El material de la prueba se guarda en `pruebas/`, fuera de Git.
+- Las pruebas de host simulan la falta de red y verifican que el formulario conserve la nota y la foto sin crear el relevamiento. Queda pendiente repetir el flujo en modo avión, cancelar la cámara y capturar a 50 MP en un teléfono. La prueba del flujo completo en iOS también queda pendiente.
+
 ## Ubicación de relevamientos, PR 1 (rama `feat/ubicacion-relevamientos`)
 - Captura con el GPS, guardado, quitar y coordenadas con «Abrir en el mapa» (`https://www.google.com/maps/search/?api=1&query=lat,lon` con el manejador de URIs de Compose). Compass 4.0.1 (`geolocation`, `geolocation-mobile`, `permissions`, `permissions-mobile`): en Android usa el `LocationManager` del sistema, sin Play Services, y los permisos entran por merge. El puerto `ProveedorUbicacion` tiene dos pasos (`solicitarAcceso` y `posicionActual`) para que el diálogo del permiso no cuente contra el tiempo máximo de 20 s de `ObtenerUbicacionActual`. Acepta la ubicación aproximada. Se escribe el campo `ubicacion` (`GeoPoint`) sin cambiar esquema ni reglas; editar sin tocarla no lo modifica, así que conserva el de la app anterior.
 - iOS: `NSLocationWhenInUseUsageDescription` en `project.yml` y traducido en `iosApp/Resources/*.lproj`. Android declara `android.hardware.location` y `.gps` como no requeridos para que Google Play no filtre dispositivos sin GPS.
