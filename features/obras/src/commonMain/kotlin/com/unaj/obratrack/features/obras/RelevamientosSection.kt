@@ -59,6 +59,7 @@ data class RelevamientosAcciones(
     val onPhotoPicked: (ByteArray) -> Unit,
     val onRemovePhoto: () -> Unit,
     val onPhotoReadError: () -> Unit,
+    val onCameraError: () -> Unit,
 )
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -99,14 +100,17 @@ fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcc
                 }
                 is ListaRelevamientosUiState.Contenido -> lista.items.forEach { item ->
                     OutlinedCard(onClick = { acciones.onSelect(item) }, enabled = !state.eliminando, modifier = Modifier.fillMaxWidth().testTag("relevamientos_item_${item.id}")) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), style = MaterialTheme.typography.titleMedium)
-                            Text(item.nota)
-                            item.tareaId?.let { id ->
-                                val titulo = state.tareas.items.firstOrNull { it.id == id }?.titulo
-                                    ?: stringResource(Res.string.relevamientos_task_unavailable)
-                                Text(stringResource(Res.string.relevamientos_linked_task, titulo),
-                                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            item.fotoWeb()?.let { url -> MiniaturaRelevamiento(item.fotoMiniaturaUrl ?: url) }
+                            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), style = MaterialTheme.typography.titleMedium)
+                                Text(item.nota)
+                                item.tareaId?.let { id ->
+                                    val titulo = state.tareas.items.firstOrNull { it.id == id }?.titulo
+                                        ?: stringResource(Res.string.relevamientos_task_unavailable)
+                                    Text(stringResource(Res.string.relevamientos_linked_task, titulo),
+                                        style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
                         }
                     }
@@ -188,6 +192,7 @@ private fun mensajeRelevamiento(error: ErrorRelevamientosUi): String = stringRes
     ErrorRelevamientosUi.FOTO_MUY_GRANDE -> Res.string.relevamientos_error_photo_too_large
     ErrorRelevamientosUi.FOTO_FALLO -> Res.string.relevamientos_error_photo_upload
     ErrorRelevamientosUi.FOTO_LECTURA -> Res.string.relevamientos_error_photo_read
+    ErrorRelevamientosUi.FOTO_CAMARA -> Res.string.relevamientos_error_photo_camera
 })
 
 

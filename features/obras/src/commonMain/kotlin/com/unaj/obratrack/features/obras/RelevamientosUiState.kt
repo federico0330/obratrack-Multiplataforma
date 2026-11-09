@@ -13,7 +13,7 @@ sealed interface ListaRelevamientosUiState {
 
 enum class ErrorRelevamientosUi {
     NOTA, FECHA, SESION, TAREA, INEXISTENTE, RED, DESCONOCIDO,
-    FOTO_SIN_CONEXION, FOTO_MUY_GRANDE, FOTO_FALLO, FOTO_LECTURA,
+    FOTO_SIN_CONEXION, FOTO_MUY_GRANDE, FOTO_FALLO, FOTO_LECTURA, FOTO_CAMARA,
 }
 
 /** Foto que muestra el formulario: ninguna, la que ya estaba guardada o una recién elegida. */

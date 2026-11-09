@@ -63,7 +63,7 @@ internal fun leerSecureUrl(cuerpo: String): String? =
     runCatching { Json.parseToJsonElement(cuerpo).jsonObject["secure_url"]?.jsonPrimitive?.contentOrNull }
         .getOrNull()?.takeIf { it.startsWith("https://") }
 
-/** Cliente con el motor de cada plataforma (OkHttp en Android, Darwin en iOS) y compresión de FileKit. */
+/** Cliente con el motor de cada plataforma (OkHttp en Android, Darwin en iOS) y su compresor de imágenes. */
 fun crearAlmacenFotosCloudinary(config: CloudinaryConfig): AlmacenFotos = AlmacenFotosCloudinary(
     config = config,
     client = HttpClient {
@@ -72,5 +72,5 @@ fun crearAlmacenFotosCloudinary(config: CloudinaryConfig): AlmacenFotos = Almace
             requestTimeoutMillis = 60_000
         }
     },
-    compresor = compresorFileKit,
+    compresor = compresorPlataforma,
 )

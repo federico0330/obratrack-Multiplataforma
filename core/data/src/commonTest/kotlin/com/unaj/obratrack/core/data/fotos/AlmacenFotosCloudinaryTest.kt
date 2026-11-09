@@ -22,7 +22,7 @@ import kotlin.test.assertTrue
 
 class AlmacenFotosCloudinaryTest {
     private val config = CloudinaryConfig("nube", "preset_sin_firma")
-    private val compresorChico = CompresorImagen { _, _, _ -> ByteArray(10) }
+    private val compresorChico = CompresorImagen { _, _, elegir -> elegir { ByteArray(10) } }
 
     private fun almacen(
         compresor: CompresorImagen = compresorChico,
@@ -70,7 +70,7 @@ class AlmacenFotosCloudinaryTest {
     @Test
     fun fotoQueNoBajaDelTopeNoSeSube() = runTest {
         var pedidos = 0
-        val grande = almacen(compresor = { _, _, _ -> ByteArray(PESO_MAXIMO_BYTES + 1) }) { pedidos++; respond("{}") }
+        val grande = almacen(compresor = { _, _, elegir -> elegir { ByteArray(PESO_MAXIMO_BYTES + 1) } }) { pedidos++; respond("{}") }
         assertEquals(ResultadoSubidaFoto.MuyGrande, grande.subir(byteArrayOf(1), "c", "n"))
         assertEquals(0, pedidos)
     }
@@ -90,18 +90,46 @@ class AlmacenFotosCloudinaryTest {
     @Test
     fun prepararFotoBajaLaCalidadHastaElObjetivoYRespetaElTope() = runTest {
         val calidades = mutableListOf<Int>()
+        var aperturas = 0
         val pesos = mapOf(85 to 3_000_000, 75 to 1_400_000)
-        val lista = prepararFoto(byteArrayOf(1)) { _, calidad, lado ->
-            calidades += calidad
+        val lista = prepararFoto(byteArrayOf(1)) { _, lado, elegir ->
+            aperturas++
             assertEquals(LADO_MAXIMO_PX, lado)
-            ByteArray(pesos.getValue(calidad))
+            elegir { calidad -> calidades += calidad; ByteArray(pesos.getValue(calidad)) }
         }
         assertEquals(listOf(85, 75), calidades)
+        assertEquals(1, aperturas, "la imagen se decodifica una sola vez")
         assertEquals(1_400_000, lista?.size)
 
-        val sobreObjetivo = prepararFoto(byteArrayOf(1)) { _, calidad, _ -> ByteArray(if (calidad == 40) 2_000_000 else 4_000_000) }
+        val sobreObjetivo = prepararFoto(byteArrayOf(1)) { _, _, elegir -> elegir { calidad -> ByteArray(if (calidad == 40) 2_000_000 else 4_000_000) } }
         assertEquals(2_000_000, sobreObjetivo?.size)
-        assertNull(prepararFoto(byteArrayOf(1)) { _, _, _ -> ByteArray(PESO_MAXIMO_BYTES + 1) })
+        assertNull(prepararFoto(byteArrayOf(1)) { _, _, elegir -> elegir { ByteArray(PESO_MAXIMO_BYTES + 1) } })
+    }
+
+    @Test
+    fun factorMuestreoLeeReducidoSinQuedarPorDebajoDelLadoMaximo() {
+        assertEquals(1, factorMuestreo(1920, 1080, 1920))
+        assertEquals(1, factorMuestreo(2850, 3800, 1920)) // a la mitad quedaría en 1900 px
+        assertEquals(2, factorMuestreo(3000, 4000, 1920))
+        assertEquals(4, factorMuestreo(8160, 6120, 1920)) // 50 MP: se lee a 2040 px
+        assertEquals(1, factorMuestreo(640, 480, 1920))
+    }
+
+    @Test
+    fun medidasReducidasConservanLaProporcion() {
+        assertEquals(1920 to 1440, medidasReducidas(4080, 3060, 1920))
+        assertEquals(1080 to 1920, medidasReducidas(2160, 3840, 1920))
+        assertEquals(640 to 480, medidasReducidas(640, 480, 1920))
+        assertEquals(1920 to 1, medidasReducidas(10_000, 2, 1920))
+    }
+
+    @Test
+    fun urlMiniaturaPideUnRecorteCuadrado() {
+        val base = "https://res.cloudinary.com/iwsier4h/image/upload/"
+        assertEquals("${base}c_fill,w_160,h_160/v1/relevamientos/o/a.jpg", urlMiniaturaCloudinary("${base}v1/relevamientos/o/a.jpg"))
+        for (igual in listOf("${base}c_fill,w_800/v1/a.jpg", "https://example.com/image/upload/a.jpg")) {
+            assertEquals(igual, urlMiniaturaCloudinary(igual))
+        }
     }
 
     @Test

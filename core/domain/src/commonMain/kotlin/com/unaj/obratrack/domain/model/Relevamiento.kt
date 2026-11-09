@@ -15,6 +15,8 @@ data class Relevamiento(
     val horaVisita: Int? = null,
     /** Versión reducida de [fotoUrl] para mostrar en pantalla; igual a [fotoUrl] si no se puede reducir. */
     val fotoVistaUrl: String? = fotoUrl,
+    /** Recorte chico de [fotoUrl] para el listado; igual a [fotoUrl] si no se puede reducir. */
+    val fotoMiniaturaUrl: String? = fotoUrl,
 )
 
 data class RelevamientoDraft(

@@ -30,6 +30,7 @@ kotlin {
         }
         androidMain.dependencies {
             implementation("io.ktor:ktor-client-okhttp:3.6.0")
+            implementation("androidx.exifinterface:exifinterface:1.4.2")
         }
         iosMain.dependencies {
             implementation("io.ktor:ktor-client-darwin:3.6.0")

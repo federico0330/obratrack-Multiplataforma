@@ -72,6 +72,7 @@ class RepositorioRelevamientosImplTest {
         val item = (RepositorioRelevamientosImpl(remote).observarDeObra("uid", "obra").first() as ResultadoRelevamiento.Exito).dato.single()
         assertEquals(original, item.fotoUrl)
         assertEquals("https://res.cloudinary.com/iwsier4h/image/upload/c_fill,w_800/v1/relevamientos/obra/a.jpg", item.fotoVistaUrl)
+        assertEquals("https://res.cloudinary.com/iwsier4h/image/upload/c_fill,w_160,h_160/v1/relevamientos/obra/a.jpg", item.fotoMiniaturaUrl)
     }
 
     @Test

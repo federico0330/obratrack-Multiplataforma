@@ -165,6 +165,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onPhotoPicked = relevamientosViewModel::fotoElegida,
                                                 onRemovePhoto = relevamientosViewModel::quitarFoto,
                                                 onPhotoReadError = relevamientosViewModel::fotoNoLeida,
+                                                onCameraError = relevamientosViewModel::camaraNoDisponible,
                                             ),
                                         )
                                     },

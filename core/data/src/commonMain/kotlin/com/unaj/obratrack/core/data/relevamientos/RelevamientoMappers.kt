@@ -1,5 +1,6 @@
 package com.unaj.obratrack.core.data.relevamientos
 
+import com.unaj.obratrack.core.data.fotos.urlMiniaturaCloudinary
 import com.unaj.obratrack.core.data.fotos.urlReducidaCloudinary
 import com.unaj.obratrack.core.firebase.relevamientos.FotoUpdate
 import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
@@ -18,6 +19,7 @@ internal fun RelevamientoDto.toDomain(): Relevamiento {
         ubicacion = if (lat != null && lon != null) Ubicacion(lat, lon) else null,
         proximaVisita = proximaVisitaMillis?.let(Instant::fromEpochMilliseconds), horaVisita = horaVisita,
         fotoVistaUrl = fotoUrl?.let(::urlReducidaCloudinary),
+        fotoMiniaturaUrl = fotoUrl?.let(::urlMiniaturaCloudinary),
     )
 }
 

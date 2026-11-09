@@ -130,10 +130,11 @@
     <string name="relevamientos_photo">Foto (opcional)</string>
     <string name="relevamientos_photo_description">Foto del relevamiento</string>
     <string name="relevamientos_photo_pick">Elegir de la galería</string>
-    <string name="relevamientos_photo_change">Cambiar foto</string>
     <string name="relevamientos_photo_remove">Quitar foto</string>
+    <string name="relevamientos_photo_take">Sacar foto</string>
     <string name="relevamientos_error_photo_network">No pudimos subir la foto sin conexión. Tus datos se conservan: revisá la conexión y volvé a guardar.</string>
     <string name="relevamientos_error_photo_too_large">La foto es demasiado pesada aun después de achicarla. Elegí otra.</string>
     <string name="relevamientos_error_photo_upload">No pudimos subir la foto. Intentá de nuevo o elegí otra.</string>
     <string name="relevamientos_error_photo_read">No pudimos leer la foto elegida. Probá con otra.</string>
+    <string name="relevamientos_error_photo_camera">No pudimos abrir la cámara. Elegí una foto de la galería.</string>
 </resources>
