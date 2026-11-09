@@ -174,7 +174,11 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onAddressTextChange = relevamientosViewModel::textoDireccionCambiado,
                                                 onAddressSearch = relevamientosViewModel::buscarDireccion,
                                                 onAddressPick = relevamientosViewModel::elegirDireccion,
+                                                onMapOpen = relevamientosViewModel::abrirMapa,
+                                                onMapClose = relevamientosViewModel::cerrarMapa,
+                                                onMapPick = relevamientosViewModel::elegirEnMapa,
                                             ),
+                                            ubicacionObra = obrasState.obraSeleccionada?.ubicacion,
                                         )
                                     },
                                 )

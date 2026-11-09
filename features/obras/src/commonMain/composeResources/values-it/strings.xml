@@ -124,7 +124,6 @@
     <string name="relevamientos_filter_all">Tutti i rilievi</string>
     <string name="relevamientos_filter">Mostra: %1$s</string>
     <string name="relevamientos_filter_empty">Nessun rilievo corrisponde a questo filtro.</string>
-    <string name="relevamientos_location">Posizione: %1$s</string>
     <string name="relevamientos_next_visit">Prossima visita: %1$s</string>
     <string name="relevamientos_photo_error">Impossibile caricare la foto.</string>
     <string name="relevamientos_photo">Foto (facoltativa)</string>
@@ -155,5 +154,11 @@
     <string name="relevamientos_address_cancel">Annulla</string>
     <string name="relevamientos_address_no_results">Non abbiamo trovato quell’indirizzo. Prova con un altro.</string>
     <string name="relevamientos_address_unavailable">Impossibile cercare l’indirizzo. Controlla la connessione e riprova.</string>
+    <string name="relevamientos_location_title">Posizione</string>
+    <string name="relevamientos_location_pick_on_map">Scegli sulla mappa</string>
+    <string name="relevamientos_map_description">Mappa con la posizione del sopralluogo</string>
+    <string name="relevamientos_map_pick_hint">Sposta la mappa finché il segnaposto indica il luogo del sopralluogo.</string>
+    <string name="relevamientos_map_pick_confirm">Usa questo luogo</string>
+    <string name="relevamientos_map_pick_cancel">Annulla</string>
     <string name="relevamientos_error_location_invalid">La posizione non è valida. Acquisiscila di nuovo.</string>
 </resources>

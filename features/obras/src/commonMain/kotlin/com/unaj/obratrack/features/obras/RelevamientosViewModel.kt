@@ -273,7 +273,7 @@ class RelevamientosViewModel(
     fun cerrarFormulario() {
         if (_state.value.formulario.guardando) return
         nuevaVersionFormulario()
-        _state.update { it.copy(formularioVisible = false) }
+        _state.update { it.copy(formularioVisible = false, formulario = it.formulario.copy(mapaAbierto = false)) }
     }
 
     /** Invalida lo que dependa del formulario anterior: respuestas tardías y las búsquedas en curso. */
@@ -341,6 +341,23 @@ class RelevamientosViewModel(
             ResultadoUbicacion.Desactivada -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_DESACTIVADA)
             ResultadoUbicacion.NoDisponible -> copy(capturandoUbicacion = false, error = ErrorRelevamientosUi.UBICACION_NO_DISPONIBLE)
         }
+
+    /** Abre el mapa para elegir el lugar. No se abre mientras el GPS busca: el resultado pisaría lo elegido. */
+    fun abrirMapa() = editarFormulario { if (capturandoUbicacion) this else copy(mapaAbierto = true, error = null) }
+
+    fun cerrarMapa() = editarFormulario { copy(mapaAbierto = false) }
+
+    /**
+     * El mapa devuelve el lugar que quedó bajo el pin, ya validado (igual se vuelve a validar al guardar). Reemplaza a la
+     * ubicación anterior, cierra el mapa y también el buscador de dirección. Solo vale con el mapa abierto.
+     */
+    fun elegirEnMapa(ubicacion: Ubicacion) {
+        cortarBusqueda()
+        editarFormulario {
+            if (!mapaAbierto) this
+            else copy(ubicacion = ubicacion, mapaAbierto = false, error = null, busqueda = busqueda.copy(abierta = false, texto = "", resultados = ResultadosBusquedaUi.SinBuscar))
+        }
+    }
 
     fun abrirBusquedaDireccion() = editarFormulario {
         if (busqueda.disponible) copy(busqueda = busqueda.copy(abierta = true), error = null) else this

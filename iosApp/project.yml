@@ -27,6 +27,8 @@ targets:
         INFOPLIST_KEY_NSCameraUsageDescription: Para sacar fotos de los relevamientos de obra.
         # Sin esta clave iOS cierra la app al pedir la ubicación.
         INFOPLIST_KEY_NSLocationWhenInUseUsageDescription: Para registrar dónde se hizo cada relevamiento de obra.
+        # El mapa (maplibre-compose) enlaza estas librerías del sistema al armar la app; sin ellas falla el enlazado.
+        OTHER_LDFLAGS: "$(inherited) -l\"c++\" -lz -framework CoreFoundation -framework CoreGraphics -framework CoreText -framework Foundation -framework ImageIO -framework Metal -framework QuartzCore"
         TARGETED_DEVICE_FAMILY: "1,2"
         # El script de abajo edita el Info.plist ya generado; el sandbox de scripts no lo permite.
         ENABLE_USER_SCRIPT_SANDBOXING: NO

@@ -124,7 +124,6 @@
     <string name="relevamientos_filter_all">Todos los relevamientos</string>
     <string name="relevamientos_filter">Mostrar: %1$s</string>
     <string name="relevamientos_filter_empty">No hay relevamientos para este filtro.</string>
-    <string name="relevamientos_location">Ubicación: %1$s</string>
     <string name="relevamientos_next_visit">Próxima visita: %1$s</string>
     <string name="relevamientos_photo_error">No pudimos cargar la foto.</string>
     <string name="relevamientos_photo">Foto (opcional)</string>
@@ -155,5 +154,11 @@
     <string name="relevamientos_address_cancel">Cancelar</string>
     <string name="relevamientos_address_no_results">No encontramos esa dirección. Probá con otra.</string>
     <string name="relevamientos_address_unavailable">No pudimos buscar la dirección. Revisá la conexión y probá de nuevo.</string>
+    <string name="relevamientos_location_title">Ubicación</string>
+    <string name="relevamientos_location_pick_on_map">Elegir en el mapa</string>
+    <string name="relevamientos_map_description">Mapa con la ubicación del relevamiento</string>
+    <string name="relevamientos_map_pick_hint">Mové el mapa hasta que el pin quede en el lugar del relevamiento.</string>
+    <string name="relevamientos_map_pick_confirm">Usar este lugar</string>
+    <string name="relevamientos_map_pick_cancel">Cancelar</string>
     <string name="relevamientos_error_location_invalid">La ubicación no es válida. Volvé a capturarla.</string>
 </resources>

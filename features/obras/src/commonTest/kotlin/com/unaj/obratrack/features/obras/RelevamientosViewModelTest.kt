@@ -694,6 +694,83 @@ class RelevamientosViewModelTest {
         }
     }
 
+    // --- Mapa para elegir el lugar ---
+
+    @Test
+    fun elMapaSeAbreYSeCierraSinTocarLaUbicacion() = conVm { vm, _ ->
+        vm.abrirFormulario()
+        assertFalse(vm.state.value.formulario.mapaAbierto)
+        vm.abrirMapa()
+        assertTrue(vm.state.value.formulario.mapaAbierto)
+        vm.cerrarMapa()
+        assertFalse(vm.state.value.formulario.mapaAbierto)
+        assertNull(vm.state.value.formulario.ubicacion)
+    }
+
+    @Test
+    fun elegirEnElMapaCargaLaUbicacionComoNuevaCierraElMapaYElBuscador() = conVm { vm, repo ->
+        vm.abrirFormulario()
+        vm.notaCambiada("Con mapa")
+        vm.abrirBusquedaDireccion()
+        vm.textoDireccionCambiado("Calchaquí")
+        vm.abrirMapa()
+        vm.elegirEnMapa(casa)
+        val form = vm.state.value.formulario
+        assertEquals(casa, form.ubicacion)
+        assertFalse(form.mapaAbierto)
+        assertEquals(BusquedaDireccionUiState(disponible = true), form.busqueda)
+        assertNull(form.error)
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.Nueva(casa), repo.draft?.cambioUbicacion)
+    }
+
+    @Test
+    fun elegirEnElMapaReemplazaLaUbicacionDeUnRelevamientoExistente() = conVm { vm, repo ->
+        val item = relevamientoCon(obra)
+        repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(item))
+        advanceUntilIdle()
+        vm.abrirDetalle(item)
+        vm.editarSeleccionado()
+        vm.abrirMapa()
+        vm.elegirEnMapa(casa)
+        vm.guardar()
+        advanceUntilIdle()
+        assertEquals(CambioUbicacion.Nueva(casa), repo.draftEditado?.cambioUbicacion)
+    }
+
+    @Test
+    fun unaEleccionSinElMapaAbiertoSeIgnora() = conVm { vm, _ ->
+        vm.abrirFormulario()
+        vm.elegirEnMapa(casa)
+        assertNull(vm.state.value.formulario.ubicacion)
+        // Y tampoco con el formulario ya cerrado.
+        vm.abrirMapa()
+        vm.cerrarFormulario()
+        val cerrado = vm.state.value
+        vm.elegirEnMapa(casa)
+        assertEquals(cerrado, vm.state.value)
+    }
+
+    @Test
+    fun cerrarElFormularioCierraElMapaYNoSeAbreMientrasElGpsBusca() {
+        val espera = CompletableDeferred<Unit>()
+        conVm(ubicaciones = UbicacionVmFalsa(espera = espera)) { vm, _ ->
+            vm.abrirFormulario()
+            vm.capturarUbicacion()
+            runCurrent()
+            vm.abrirMapa()
+            assertFalse(vm.state.value.formulario.mapaAbierto)
+            vm.cancelarCaptura()
+            vm.abrirMapa()
+            assertTrue(vm.state.value.formulario.mapaAbierto)
+            vm.cerrarFormulario()
+            assertFalse(vm.state.value.formulario.mapaAbierto)
+            espera.complete(Unit)
+            runCurrent()
+        }
+    }
+
     // --- Dirección escrita: en el detalle y buscando para elegir la ubicación ---
 
     private fun relevamientoConId(id: String, ubicacion: Ubicacion?) =

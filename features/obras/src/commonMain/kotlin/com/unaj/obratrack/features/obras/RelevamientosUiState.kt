@@ -71,6 +71,8 @@ data class FormularioRelevamientoUiState(
     val ubicacionOriginal: Ubicacion? = null,
     /** Mientras es true hay una búsqueda en curso y no se puede guardar. */
     val capturandoUbicacion: Boolean = false,
+    /** El mapa a pantalla completa para elegir el lugar está abierto. */
+    val mapaAbierto: Boolean = false,
     val busqueda: BusquedaDireccionUiState = BusquedaDireccionUiState(),
     val guardando: Boolean = false,
     val error: ErrorRelevamientosUi? = null,

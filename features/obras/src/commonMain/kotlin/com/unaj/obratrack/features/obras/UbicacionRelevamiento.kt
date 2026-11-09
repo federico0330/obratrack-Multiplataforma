@@ -33,12 +33,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.roundToLong
 
-private const val DECIMALES_PANTALLA = 5
 private const val DECIMALES_ENLACE = 6
-
-/** `lat, lon` con 5 decimales (cerca de un metro). Siempre con punto: no depende del idioma del teléfono. */
-internal fun formatearCoordenadas(ubicacion: Ubicacion): String =
-    "${formatearGrados(ubicacion.latitud, DECIMALES_PANTALLA)}, ${formatearGrados(ubicacion.longitud, DECIMALES_PANTALLA)}"
 
 /** Búsqueda de Google Maps por coordenadas; en Android abre la app de mapas y en iOS el navegador o la app instalada. */
 internal fun enlaceMapa(ubicacion: Ubicacion): String =
@@ -54,13 +49,14 @@ internal fun formatearGrados(valor: Double, decimales: Int): String {
     return "$signo${redondeado / escala}.${(redondeado % escala).toString().padStart(decimales, '0')}"
 }
 
-/** Captura con el GPS: el ViewModel hace la búsqueda; acá solo se muestran el estado y las acciones. */
+/**
+ * Ubicación del formulario: el mapa muestra dónde queda, y se puede capturar con el GPS, elegir en el mapa o buscar
+ * una dirección. El ViewModel hace el trabajo; acá solo se muestran el estado y las acciones.
+ */
 @Composable
 internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: RelevamientosAcciones) {
     Text(stringResource(Res.string.relevamientos_location_optional), style = MaterialTheme.typography.labelMedium)
-    form.ubicacion?.let {
-        Text(stringResource(Res.string.relevamientos_location, formatearCoordenadas(it)), modifier = Modifier.testTag("relevamientos_location_value"))
-    }
+    form.ubicacion?.let { MapaVistaPrevia(it) }
     if (form.capturandoUbicacion) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -74,6 +70,10 @@ internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: Re
             OutlinedButton(onClick = acciones.onLocationCapture, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_location_capture")) {
                 IconoBoton(Iconos.MyLocation)
                 Text(stringResource(if (form.ubicacion == null) Res.string.relevamientos_location_use else Res.string.relevamientos_location_update))
+            }
+            OutlinedButton(onClick = acciones.onMapOpen, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_map_open")) {
+                IconoBoton(Iconos.Map)
+                Text(stringResource(Res.string.relevamientos_location_pick_on_map))
             }
             if (form.ubicacion != null) {
                 TextButton(onClick = acciones.onLocationRemove, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_location_remove")) {
@@ -131,12 +131,13 @@ private fun BuscadorDireccion(busqueda: BusquedaDireccionUiState, deshabilitado:
     }
 }
 
-/** Coordenadas del relevamiento, su dirección si se consiguió y el botón para verlas en el mapa del teléfono. */
+/** Mapa con la ubicación del relevamiento, su dirección si se consiguió y el botón para abrirla en el mapa del teléfono. */
 @Composable
 internal fun UbicacionDetalle(ubicacion: Ubicacion, direccion: DireccionUiState) {
     val uriHandler = LocalUriHandler.current
-    Text(stringResource(Res.string.relevamientos_location, formatearCoordenadas(ubicacion)), modifier = Modifier.testTag("relevamientos_location_value"))
-    // Si la dirección no está disponible no se muestra nada: las coordenadas alcanzan y no es un error.
+    Text(stringResource(Res.string.relevamientos_location_title), style = MaterialTheme.typography.labelMedium)
+    MapaVistaPrevia(ubicacion)
+    // Si la dirección no está disponible no se muestra nada: el mapa ya dice dónde es y no es un error.
     when (direccion) {
         DireccionUiState.Cargando -> Text(
             stringResource(Res.string.relevamientos_address_loading), style = MaterialTheme.typography.bodySmall,
@@ -152,7 +153,7 @@ internal fun UbicacionDetalle(ubicacion: Ubicacion, direccion: DireccionUiState)
             try {
                 uriHandler.openUri(enlaceMapa(ubicacion))
             } catch (_: Exception) {
-                // Sin navegador ni app de mapas no hay otra forma de mostrarlo; las coordenadas siguen a la vista.
+                // Sin navegador ni app de mapas no hay otra forma de abrirlo; el mapa de la pantalla sigue a la vista.
             }
         },
         modifier = Modifier.testTag("relevamientos_location_open_map"),

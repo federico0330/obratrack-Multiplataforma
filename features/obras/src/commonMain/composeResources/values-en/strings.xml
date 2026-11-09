@@ -124,7 +124,6 @@
     <string name="relevamientos_filter_all">All surveys</string>
     <string name="relevamientos_filter">Show: %1$s</string>
     <string name="relevamientos_filter_empty">No surveys match this filter.</string>
-    <string name="relevamientos_location">Location: %1$s</string>
     <string name="relevamientos_next_visit">Next visit: %1$s</string>
     <string name="relevamientos_photo_error">Could not load the photo.</string>
     <string name="relevamientos_photo">Photo (optional)</string>
@@ -155,5 +154,11 @@
     <string name="relevamientos_address_cancel">Cancel</string>
     <string name="relevamientos_address_no_results">We could not find that address. Try another one.</string>
     <string name="relevamientos_address_unavailable">Could not search the address. Check your connection and try again.</string>
+    <string name="relevamientos_location_title">Location</string>
+    <string name="relevamientos_location_pick_on_map">Choose on map</string>
+    <string name="relevamientos_map_description">Map showing the survey location</string>
+    <string name="relevamientos_map_pick_hint">Move the map until the pin is on the survey location.</string>
+    <string name="relevamientos_map_pick_confirm">Use this place</string>
+    <string name="relevamientos_map_pick_cancel">Cancel</string>
     <string name="relevamientos_error_location_invalid">The location is not valid. Capture it again.</string>
 </resources>
