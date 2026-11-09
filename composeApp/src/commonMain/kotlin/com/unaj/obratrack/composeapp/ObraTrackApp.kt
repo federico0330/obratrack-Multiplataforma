@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
+import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.LoginScreen
 import com.unaj.obratrack.features.auth.PerfilScreen
@@ -41,13 +42,13 @@ import com.unaj.obratrack.features.obras.TareasViewModel
 /** Punto de entrada común para Android y SwiftUI. */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ObraTrackApp(uiTesting: Boolean = false) {
+fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean = false) {
     if (uiTesting) {
         AccessFlowPreview()
         return
     }
 
-    val graph = remember { AppGraph() }
+    val graph = remember { AppGraph(proveedorTokenGoogle) }
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
@@ -193,6 +194,7 @@ fun ObraTrackApp(uiTesting: Boolean = false) {
                     onEmailChanged = authViewModel::onEmailChanged,
                     onPasswordChanged = authViewModel::onPasswordChanged,
                     onSignIn = authViewModel::signIn,
+                    onSignInWithGoogle = authViewModel::signInWithGoogle,
                     onGoToRegister = { enRegistro = true },
                 )
             }

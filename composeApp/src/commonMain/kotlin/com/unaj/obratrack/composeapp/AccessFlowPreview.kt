@@ -36,6 +36,7 @@ fun AccessFlowPreview() {
                     onEmailChanged = {},
                     onPasswordChanged = {},
                     onSignIn = {},
+                    onSignInWithGoogle = {},
                     onGoToRegister = { enRegistro = true },
                 )
             }

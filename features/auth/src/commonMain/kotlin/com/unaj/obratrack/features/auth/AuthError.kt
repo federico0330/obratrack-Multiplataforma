@@ -8,6 +8,7 @@ import com.unaj.obratrack.features.auth.generated.resources.*
 import com.unaj.obratrack.domain.repository.ErrorAuth
 import com.unaj.obratrack.domain.repository.ResultadoCerrarSesion
 import com.unaj.obratrack.domain.usecase.ResultadoLogin
+import com.unaj.obratrack.domain.usecase.ResultadoLoginGoogle
 
 /** Error que la pantalla puede mostrar; el texto sale de recursos, no del ViewModel. */
 enum class AuthError {
@@ -34,6 +35,13 @@ fun ResultadoLogin.toAuthError(): AuthError? = when (this) {
     is ResultadoLogin.Exito -> null
     ResultadoLogin.DatosInvalidos -> AuthError.InvalidData
     is ResultadoLogin.Fallo -> error.toAuthError()
+}
+
+/** Null cuando entró o cuando el usuario canceló el selector de Google (cancelar no es un error). */
+fun ResultadoLoginGoogle.toAuthError(): AuthError? = when (this) {
+    is ResultadoLoginGoogle.Exito -> null
+    ResultadoLoginGoogle.Cancelado -> null
+    is ResultadoLoginGoogle.Fallo -> error.toAuthError()
 }
 
 /** Null cuando se cerró la sesión; cualquier fallo se informa como cierre fallido. */

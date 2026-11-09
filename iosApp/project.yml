@@ -22,6 +22,22 @@ targets:
         INFOPLIST_KEY_CFBundleDisplayName: ObraTrack
         INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone: YES
         TARGETED_DEVICE_FAMILY: "1,2"
+        # El script de abajo edita el Info.plist ya generado; el sandbox de scripts no lo permite.
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    postBuildScripts:
+      # Google Sign-In vuelve a la app por un URL scheme igual a REVERSED_CLIENT_ID. Se copia desde
+      # GoogleService-Info.plist (no versionado) para no escribir identificadores del proyecto en el repo.
+      - name: URL scheme de Google Sign-In
+        script: |
+          FUENTE="${SRCROOT}/GoogleService-Info.plist"
+          DESTINO="${TARGET_BUILD_DIR}/${INFOPLIST_PATH}"
+          ESQUEMA=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" "$FUENTE" 2>/dev/null || true)
+          if [ -z "$ESQUEMA" ]; then
+            echo "warning: GoogleService-Info.plist no tiene REVERSED_CLIENT_ID; Google Sign-In no va a funcionar."
+            exit 0
+          fi
+          /usr/libexec/PlistBuddy -c "Delete :CFBundleURLTypes" "$DESTINO" 2>/dev/null || true
+          /usr/libexec/PlistBuddy             -c "Add :CFBundleURLTypes array"             -c "Add :CFBundleURLTypes:0 dict"             -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes array"             -c "Add :CFBundleURLTypes:0:CFBundleURLSchemes:0 string $ESQUEMA"             "$DESTINO"
   ObraTrackIOSTests:
     type: bundle.ui-testing
     platform: iOS

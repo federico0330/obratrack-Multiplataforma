@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface FirebaseAuthDataSource {
     val currentUser: Flow<AuthUserDto?>
     suspend fun signIn(email: String, password: String): AuthResult<AuthUserDto>
+    suspend fun signInWithGoogle(idToken: String): AuthResult<AuthUserDto>
     suspend fun signOut(): AuthResult<Unit>
     suspend fun signUp(email: String, password: String): RegistrationResult
 }

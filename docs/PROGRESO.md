@@ -82,6 +82,10 @@
 - La consulta corre solo mientras la pestaña Perfil está visible (5 s de gracia). Al volver se muestra el último valor mientras actualiza; cerrar sesión no muestra error y descarta el valor, para que otra cuenta nunca vea el resumen de la anterior.
 - Perfil y Mis obras son dos suscripciones a la misma consulta de obras; se espera que el SDK de Firestore las agrupe, pero no está verificado. Pasan los tests de `core:domain` y `features:auth`; falta la revisión visual y el CI de iOS.
 
+## Continuar con Google (rama `feat/login-google`, sobre `main` con relevamientos)
+- Hecho a mano, sin KMPAuth: su módulo de Firebase arrastra GitLive 3.0.0-alpha01. En el dominio, `IniciarSesionConGoogle` usa los puertos `ProveedorTokenGoogle` (uno por plataforma: Credential Manager en `androidApp`; Google Sign-In en Swift, que responde por callback a `composeApp/iosMain`) y `RepositorioAccesoGoogle`. Este último está separado de `RepositorioAutenticacion` para no romper los fakes de otras ramas. Cancelar no muestra error.
+- Pasan los tests de todos los módulos (incluidos los relevamientos) y se probó en un dispositivo Android. Falta: el CI de iOS (`pod install` con GoogleSignIn y el script del URL scheme) y probarlo en iOS con el plist real.
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.

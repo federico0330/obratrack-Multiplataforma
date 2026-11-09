@@ -8,7 +8,9 @@ data class AuthUiState(
     val email: String = "",
     val password: String = "",
     val isLoading: Boolean = false,
+    val isGoogleLoading: Boolean = false,
     val error: AuthError? = null,
 ) {
-    val canSignIn: Boolean get() = email.isNotBlank() && password.isNotBlank() && !isLoading
+    val canSignIn: Boolean get() = email.isNotBlank() && password.isNotBlank() && !isLoading && !isGoogleLoading
+    val canSignInWithGoogle: Boolean get() = !isLoading && !isGoogleLoading
 }

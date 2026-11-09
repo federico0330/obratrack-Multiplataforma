@@ -5,7 +5,8 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.initialize
 import platform.UIKit.UIViewController
 
-fun MainViewController(uiTesting: Boolean): UIViewController {
+fun MainViewController(uiTesting: Boolean, selectorGoogle: SelectorCuentaGoogle): UIViewController {
     if (!uiTesting) Firebase.initialize()
-    return ComposeUIViewController { ObraTrackApp(uiTesting = uiTesting) }
+    val proveedorTokenGoogle = ProveedorTokenGoogleIos(selectorGoogle)
+    return ComposeUIViewController { ObraTrackApp(proveedorTokenGoogle, uiTesting = uiTesting) }
 }
