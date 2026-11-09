@@ -42,7 +42,8 @@ private fun enderezar(imagen: Bitmap, bytes: ByteArray): Bitmap {
     if (grados == 0 && !exif.isFlipped) return imagen
     val matriz = Matrix().apply {
         setRotate(grados.toFloat())
-        if (exif.isFlipped) postScale(-1f, 1f)
+        // EXIF define el giro después del espejo horizontal.
+        if (exif.isFlipped) preScale(-1f, 1f)
     }
     return reemplazar(imagen, Bitmap.createBitmap(imagen, 0, 0, imagen.width, imagen.height, matriz, true))
 }
