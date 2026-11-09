@@ -105,6 +105,11 @@ class GitLiveFirebaseRelevamientoDataSource(
                         "fecha" to Timestamp.fromMilliseconds(fields.fechaMillis.toDouble())
                         "nota" to fields.nota
                         "tareaId" to (fields.tareaId ?: FieldValue.delete)
+                        when (val foto = fields.foto) {
+                            FotoUpdate.SinCambio -> Unit
+                            is FotoUpdate.Nueva -> "fotoUrl" to foto.url
+                            FotoUpdate.Quitar -> "fotoUrl" to FieldValue.delete
+                        }
                     }
                     transaction.updateFields(obra) {
                         "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble())
@@ -164,4 +169,5 @@ internal fun RelevamientoDto.camposAlta(): Map<String, Any> = buildMap {
     put("fecha", Timestamp.fromMilliseconds(fechaMillis.toDouble()))
     put("nota", nota)
     tareaId?.let { put("tareaId", it) }
+    fotoUrl?.let { put("fotoUrl", it) }
 }

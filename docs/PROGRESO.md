@@ -86,6 +86,12 @@
 - Hecho a mano, sin KMPAuth: su módulo de Firebase arrastra GitLive 3.0.0-alpha01. En el dominio, `IniciarSesionConGoogle` usa los puertos `ProveedorTokenGoogle` (uno por plataforma: Credential Manager en `androidApp`; Google Sign-In en Swift, que responde por callback a `composeApp/iosMain`) y `RepositorioAccesoGoogle`. Este último está separado de `RepositorioAutenticacion` para no romper los fakes de otras ramas. Cancelar no muestra error.
 - Pasan los tests de todos los módulos (incluidos los relevamientos) y se probó en un dispositivo Android. Falta: el CI de iOS (`pod install` con GoogleSignIn y el script del URL scheme) y probarlo en iOS con el plist real.
 
+## Fotos de relevamientos, PR 1 (rama `feat/fotos-cloudinary`)
+- Galería, compresión, subida a Cloudinary sin firma y vista en el detalle. Misma cuenta, preset y carpeta que la app Android anterior (`iwsier4h`, `obratrack_unsigned`, `relevamientos/{obraId}`), con nombre UUID en cada subida. Puerto `AlmacenFotos` en el dominio; los casos de uso suben primero y escriben `fotoUrl` después, fuera de la transacción. Editar sin tocar la foto no modifica el campo; quitarla lo elimina.
+- `core:data/fotos`: Ktor 3.6.0 (OkHttp/Darwin), compresión de FileKit 0.16.0 (lado 1920 px, objetivo 1,5 MB, tope 5 MB) y URL reducida `c_fill,w_800` para mostrar. UI con FileKit (selector) y Coil 3.6.3. Pasan 287 pruebas de host y `assembleDebug`; core:data y composeApp no compilan para iOS desde Windows.
+- Quedan imágenes huérfanas en Cloudinary al reemplazar o quitar una foto, al borrar el relevamiento o si Firestore falla después de la subida: sin firma no se pueden borrar. Sin conexión se informa un error y se conserva el formulario; la cola de subidas queda para la etapa offline.
+- Probado en un teléfono Android: crear con foto de la galería, verla en el detalle, reemplazarla y quitarla al editar. Falta probar el error sin conexión (modo avión). La rama se actualizó sobre `main` con el login con Google.
+
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.
 - Clean Architecture: dominio define modelos, validación y puertos; data adapta DTO; Firebase queda encapsulado; UI depende del dominio.

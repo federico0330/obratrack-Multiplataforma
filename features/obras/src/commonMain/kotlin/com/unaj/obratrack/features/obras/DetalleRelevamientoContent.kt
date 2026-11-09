@@ -12,12 +12,7 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.core.ui.IconoBoton
@@ -35,8 +30,6 @@ internal fun DetalleRelevamientoContent(
     ocupado: Boolean,
     acciones: RelevamientosAcciones,
 ) {
-    val uriHandler = LocalUriHandler.current
-    var errorFoto by remember(item.id) { mutableStateOf(false) }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.testTag("relevamientos_detail")) {
         Text(stringResource(Res.string.relevamientos_detail), style = MaterialTheme.typography.titleMedium)
         OutlinedCard(Modifier.fillMaxWidth()) {
@@ -55,11 +48,8 @@ internal fun DetalleRelevamientoContent(
                     }
                 }
                 item.fotoUrl?.takeIf { it.startsWith("https://") || it.startsWith("http://") }?.let { url ->
-                    TextButton(onClick = { errorFoto = runCatching { uriHandler.openUri(url) }.isFailure }) {
-                        Text(stringResource(Res.string.relevamientos_view_photo))
-                    }
+                    FotoRelevamiento(item.fotoVistaUrl ?: url)
                 }
-                if (errorFoto) Text(stringResource(Res.string.relevamientos_photo_error), color = MaterialTheme.colorScheme.error)
             }
         }
         Button(onClick = acciones.onEdit, enabled = !ocupado,

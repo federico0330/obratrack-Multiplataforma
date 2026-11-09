@@ -29,6 +29,9 @@ kotlin {
             implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.10.0")
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
             implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
+            implementation("io.github.vinceglb:filekit-dialogs-compose:0.16.0")
+            implementation("io.coil-kt.coil3:coil-compose:3.6.3")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.6.3")
         }
         commonTest.dependencies {
             implementation(kotlin("test"))

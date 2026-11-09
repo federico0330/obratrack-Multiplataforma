@@ -2,6 +2,7 @@ package com.unaj.obratrack.core.ui
 
 import com.unaj.obratrack.core.ui.generated.resources.Res
 import com.unaj.obratrack.core.ui.generated.resources.ic_add
+import com.unaj.obratrack.core.ui.generated.resources.ic_add_photo
 import com.unaj.obratrack.core.ui.generated.resources.ic_arrow_back
 import com.unaj.obratrack.core.ui.generated.resources.ic_calendar
 import com.unaj.obratrack.core.ui.generated.resources.ic_check_circle
@@ -25,6 +26,7 @@ import org.jetbrains.compose.resources.DrawableResource
  */
 object Iconos {
     val Add: DrawableResource get() = Res.drawable.ic_add
+    val AddPhoto: DrawableResource get() = Res.drawable.ic_add_photo
     val ArrowBack: DrawableResource get() = Res.drawable.ic_arrow_back
     val Calendar: DrawableResource get() = Res.drawable.ic_calendar
     val CheckCircle: DrawableResource get() = Res.drawable.ic_check_circle

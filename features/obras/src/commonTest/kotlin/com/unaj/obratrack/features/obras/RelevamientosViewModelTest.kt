@@ -1,6 +1,7 @@
 package com.unaj.obratrack.features.obras
 
 import androidx.lifecycle.ViewModelStore
+import com.unaj.obratrack.domain.model.CambioFotoUrl
 import com.unaj.obratrack.domain.model.FiltroRelevamientos
 import com.unaj.obratrack.domain.model.EstadoTarea
 import com.unaj.obratrack.domain.model.Relevamiento
@@ -34,13 +35,14 @@ class RelevamientosViewModelTest {
         sesion: SesionRelevamientosFalsa = SesionRelevamientosFalsa(),
         repo: RelevamientosVmFalso = RelevamientosVmFalso(),
         tareas: TareasRelevamientosFalso = TareasRelevamientosFalso(),
+        fotos: FotosVmFalso = FotosVmFalso(),
         bloque: suspend TestScope.(RelevamientosViewModel, RelevamientosVmFalso) -> Unit,
     ) = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         val store = ViewModelStore()
         try {
             val vm = RelevamientosViewModel(ObservarSesion(sesion), ObservarRelevamientos(repo),
-                CrearRelevamiento(repo), ObservarTareas(tareas), ActualizarRelevamiento(repo), EliminarRelevamiento(repo), RelojRelevamientos)
+                CrearRelevamiento(repo, fotos), ObservarTareas(tareas), ActualizarRelevamiento(repo, fotos), EliminarRelevamiento(repo), RelojRelevamientos)
             store.put("relevamientos", vm)
             advanceUntilIdle()
             vm.abrirObra("obra")
@@ -349,6 +351,114 @@ class RelevamientosViewModelTest {
         assertEquals(ListaRelevamientosUiState.Vacia, vm.state.value.lista)
     }
 
+    @Test
+    fun siFallaLaSubidaConservaElFormularioYMuestraElErrorTipado() {
+        val fotos = FotosVmFalso(ResultadoSubidaFoto.SinConexion)
+        conVm(fotos = fotos) { vm, repo ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con foto")
+            vm.fotoElegida(byteArrayOf(1, 2))
+            val antes = vm.state.value.formulario
+            vm.guardar()
+            advanceUntilIdle()
+            val form = vm.state.value.formulario
+            assertEquals(ErrorRelevamientosUi.FOTO_SIN_CONEXION, form.error)
+            assertEquals(antes.copy(error = ErrorRelevamientosUi.FOTO_SIN_CONEXION), form)
+            assertTrue(vm.state.value.formularioVisible)
+            assertEquals(1, fotos.subidas)
+            assertEquals(0, repo.altas)
+        }
+    }
+
+    @Test
+    fun crearConFotoGuardaLaUrlSubida() {
+        val fotos = FotosVmFalso()
+        conVm(fotos = fotos) { vm, repo ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con foto")
+            vm.fotoElegida(byteArrayOf(1))
+            vm.guardar()
+            advanceUntilIdle()
+            assertEquals("https://foto", repo.fotoUrl)
+            assertFalse(vm.state.value.formularioVisible)
+        }
+    }
+
+    @Test
+    fun editarConservaQuitaOReemplazaLaFotoExistente() {
+        val fotos = FotosVmFalso()
+        conVm(fotos = fotos) { vm, repo ->
+            val item = Relevamiento("id", "obra", "uid", Instant.parse("2026-11-05T00:00:00Z"), "Nota", fotoUrl = "https://vieja",
+                fotoVistaUrl = "https://vieja-reducida")
+            repo.stream("uid", "obra").value = ResultadoRelevamiento.Exito(listOf(item))
+            advanceUntilIdle()
+            fun editarYGuardar(cambio: RelevamientosViewModel.() -> Unit) {
+                vm.abrirDetalle(item)
+                vm.editarSeleccionado()
+                vm.cambio()
+                vm.guardar()
+            }
+            vm.abrirDetalle(item)
+            vm.editarSeleccionado()
+            assertEquals(FotoFormulario.Existente("https://vieja", "https://vieja-reducida"), vm.state.value.formulario.foto)
+            vm.cerrarFormulario()
+            editarYGuardar { }
+            advanceUntilIdle()
+            assertEquals(CambioFotoUrl.SinCambio, repo.cambioFoto)
+            editarYGuardar { quitarFoto() }
+            advanceUntilIdle()
+            assertEquals(CambioFotoUrl.Quitar, repo.cambioFoto)
+            editarYGuardar { fotoElegida(byteArrayOf(3)) }
+            advanceUntilIdle()
+            assertEquals(CambioFotoUrl.Nueva("https://foto"), repo.cambioFoto)
+            assertEquals(1, fotos.subidas)
+        }
+    }
+
+    @Test
+    fun laSubidaDeOtraObraNoAfectaElFormularioNuevo() {
+        val espera = CompletableDeferred<Unit>()
+        val fotos = FotosVmFalso(espera = espera)
+        conVm(fotos = fotos) { vm, repo ->
+            vm.abrirFormulario()
+            vm.notaCambiada("Con foto")
+            vm.fotoElegida(byteArrayOf(1))
+            vm.guardar()
+            advanceUntilIdle()
+            vm.cerrarObra()
+            vm.abrirObra("otra")
+            advanceUntilIdle()
+            vm.abrirFormulario()
+            vm.notaCambiada("Otra obra")
+            val nuevo = vm.state.value
+            espera.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(nuevo, vm.state.value)
+        }
+    }
+
+    @Test
+    fun fotoIlegibleMuestraErrorYUnaFotoTardiaConFormularioCerradoSeIgnora() = conVm { vm, _ ->
+        vm.abrirFormulario()
+        vm.fotoNoLeida()
+        assertEquals(ErrorRelevamientosUi.FOTO_LECTURA, vm.state.value.formulario.error)
+        vm.cerrarFormulario()
+        val cerrado = vm.state.value
+        vm.fotoElegida(byteArrayOf(1))
+        assertEquals(cerrado, vm.state.value)
+    }
+}
+
+private class FotosVmFalso(
+    private val resultado: ResultadoSubidaFoto = ResultadoSubidaFoto.Exito("https://foto"),
+    private val espera: CompletableDeferred<Unit>? = null,
+) : AlmacenFotos {
+    var subidas = 0
+    override suspend fun subir(bytes: ByteArray, carpeta: String, nombre: String): ResultadoSubidaFoto {
+        subidas++
+        espera?.let { try { withContext(NonCancellable) { it.await() } } catch (_: CancellationException) { } }
+        return resultado
+    }
 }
 
 private object RelojRelevamientos : Clock {
@@ -370,11 +480,14 @@ private class RelevamientosVmFalso : RepositorioRelevamientos {
     var espera: CompletableDeferred<Unit>? = null
     var altas = 0
     var draft: RelevamientoDraft? = null
+    var fotoUrl: String? = null
+    var cambioFoto: CambioFotoUrl? = null
     fun stream(uid: String, obra: String) = streams.getOrPut(uid to obra) { MutableStateFlow(ResultadoRelevamiento.Exito(emptyList())) }
     override fun observarDeObra(userId: String, obraId: String) = stream(userId, obraId).also { consultas += userId to obraId }
-    override suspend fun crear(userId: String, obraId: String, draft: RelevamientoDraft): ResultadoRelevamiento<Relevamiento> {
+    override suspend fun crear(userId: String, obraId: String, draft: RelevamientoDraft, fotoUrl: String?): ResultadoRelevamiento<Relevamiento> {
         altas++
         this.draft = draft
+        this.fotoUrl = fotoUrl
         espera?.let {
             try { withContext(NonCancellable) { it.await() } } catch (_: CancellationException) { }
         }
@@ -386,7 +499,10 @@ private class RelevamientosVmFalso : RepositorioRelevamientos {
     private suspend fun esperarCambio() {
         esperaCambio?.let { try { withContext(NonCancellable) { it.await() } } catch (_: CancellationException) { } }
     }
-    override suspend fun actualizar(userId: String, obraId: String, id: String, draft: RelevamientoDraft): ResultadoRelevamiento<Unit> {
+    override suspend fun actualizar(
+        userId: String, obraId: String, id: String, draft: RelevamientoDraft, foto: CambioFotoUrl,
+    ): ResultadoRelevamiento<Unit> {
+        cambioFoto = foto
         esperarCambio()
         falloCambio?.let { return ResultadoRelevamiento.Fallo(it) }
         val previo = (stream(userId, obraId).value as ResultadoRelevamiento.Exito).dato

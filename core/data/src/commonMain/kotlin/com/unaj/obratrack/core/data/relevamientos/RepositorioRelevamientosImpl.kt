@@ -4,6 +4,7 @@ import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoUpdateFields
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoDataSource
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoFailure
 import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
+import com.unaj.obratrack.domain.model.CambioFotoUrl
 import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.RelevamientoDraft
 import com.unaj.obratrack.domain.repository.ErrorRelevamiento
@@ -27,8 +28,10 @@ class RepositorioRelevamientosImpl(private val remote: FirebaseRelevamientoDataS
             emit(ResultadoRelevamiento.Fallo(ErrorRelevamiento.DESCONOCIDO))
         }
 
-    override suspend fun crear(userId: String, obraId: String, draft: RelevamientoDraft): ResultadoRelevamiento<Relevamiento> = try {
-        when (val result = remote.crear(draft.toDto(userId, obraId))) {
+    override suspend fun crear(
+        userId: String, obraId: String, draft: RelevamientoDraft, fotoUrl: String?,
+    ): ResultadoRelevamiento<Relevamiento> = try {
+        when (val result = remote.crear(draft.toDto(userId, obraId, fotoUrl))) {
             is FirebaseRelevamientoResult.Success -> ResultadoRelevamiento.Exito(result.value.toDomain())
             is FirebaseRelevamientoResult.Failure -> ResultadoRelevamiento.Fallo(result.error.toDomain())
         }
@@ -38,8 +41,12 @@ class RepositorioRelevamientosImpl(private val remote: FirebaseRelevamientoDataS
         ResultadoRelevamiento.Fallo(ErrorRelevamiento.DESCONOCIDO)
     }
 
-    override suspend fun actualizar(userId: String, obraId: String, id: String, draft: RelevamientoDraft): ResultadoRelevamiento<Unit> =
-        escribir { remote.actualizar(userId, obraId, id, RelevamientoUpdateFields(draft.fecha.toEpochMilliseconds(), draft.nota, draft.tareaId)) }
+    override suspend fun actualizar(
+        userId: String, obraId: String, id: String, draft: RelevamientoDraft, foto: CambioFotoUrl,
+    ): ResultadoRelevamiento<Unit> = escribir {
+        remote.actualizar(userId, obraId, id,
+            RelevamientoUpdateFields(draft.fecha.toEpochMilliseconds(), draft.nota, draft.tareaId, foto.toUpdate()))
+    }
 
     override suspend fun eliminar(userId: String, obraId: String, id: String): ResultadoRelevamiento<Unit> =
         escribir { remote.eliminar(userId, obraId, id) }

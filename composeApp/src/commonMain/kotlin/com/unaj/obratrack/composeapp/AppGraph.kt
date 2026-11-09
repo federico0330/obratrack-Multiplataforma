@@ -1,5 +1,7 @@
 package com.unaj.obratrack.composeapp
 
+import com.unaj.obratrack.core.data.fotos.CloudinaryConfig
+import com.unaj.obratrack.core.data.fotos.crearAlmacenFotosCloudinary
 import com.unaj.obratrack.core.data.relevamientos.RepositorioRelevamientosImpl
 import com.unaj.obratrack.core.firebase.relevamientos.GitLiveFirebaseRelevamientoDataSource
 import com.unaj.obratrack.domain.usecase.ActualizarRelevamiento
@@ -46,10 +48,15 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
 
     private val relevamientosRepository = RepositorioRelevamientosImpl(GitLiveFirebaseRelevamientoDataSource())
 
+    // Misma cuenta y preset sin firma que la app Android anterior: las fotos de ambas quedan juntas.
+    private val almacenFotos = crearAlmacenFotosCloudinary(
+        CloudinaryConfig(cloudName = "iwsier4h", uploadPreset = "obratrack_unsigned"),
+    )
+
     fun crearRelevamientosViewModel() = RelevamientosViewModel(
         ObservarSesion(authRepository), ObservarRelevamientos(relevamientosRepository),
-        CrearRelevamiento(relevamientosRepository), ObservarTareas(tareasRepository),
-        ActualizarRelevamiento(relevamientosRepository), EliminarRelevamiento(relevamientosRepository),
+        CrearRelevamiento(relevamientosRepository, almacenFotos), ObservarTareas(tareasRepository),
+        ActualizarRelevamiento(relevamientosRepository, almacenFotos), EliminarRelevamiento(relevamientosRepository),
     )
 
     fun crearAuthViewModel() = AuthViewModel(
