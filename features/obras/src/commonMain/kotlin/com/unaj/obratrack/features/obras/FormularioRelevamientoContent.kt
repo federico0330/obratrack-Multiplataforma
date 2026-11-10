@@ -3,23 +3,12 @@ package com.unaj.obratrack.features.obras
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.core.ui.CampoFecha
-import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.features.obras.generated.resources.*
 import org.jetbrains.compose.resources.stringResource
@@ -60,29 +48,14 @@ internal fun FormularioRelevamientoContent(
     if (form.mapaAbierto) SelectorEnMapa(centroInicialDelSelector(form.ubicacion, ubicacionObra), acciones.onMapPick, acciones.onMapClose)
 }
 
-/**
- * Barra fija abajo: el error (para que se vea sin desplazar la pantalla) y los botones. Sube con el teclado, así
- * que no queda tapada ni al final de un formulario largo.
- */
+/** Con una búsqueda de ubicación en curso no se guarda: el lugar todavía puede cambiar. */
 @Composable
 internal fun BarraGuardarRelevamiento(form: FormularioRelevamientoUiState, acciones: RelevamientosAcciones) {
-    Surface(tonalElevation = 3.dp, shadowElevation = 3.dp, modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom))) {
-        Column(Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            form.error?.let { ErrorBlock(mensajeRelevamiento(it)) }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(
-                    onClick = acciones.onSave, enabled = !form.guardando && !form.capturandoUbicacion,
-                    modifier = Modifier.weight(1f).testTag("relevamientos_save"),
-                ) {
-                    if (form.guardando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-                    else Text(stringResource(Res.string.relevamientos_save))
-                }
-                OutlinedButton(onClick = acciones.onCloseForm, enabled = !form.guardando, modifier = Modifier.weight(1f)) {
-                    Text(stringResource(Res.string.relevamientos_cancel))
-                }
-            }
-        }
-    }
+    BarraGuardar(
+        error = form.error?.let { mensajeRelevamiento(it) }, guardando = form.guardando, puedeGuardar = !form.capturandoUbicacion,
+        textoGuardar = stringResource(Res.string.relevamientos_save), textoCancelar = stringResource(Res.string.relevamientos_cancel),
+        onGuardar = acciones.onSave, onCancelar = acciones.onCloseForm, tagGuardar = "relevamientos_save",
+    )
 }
 
 @Composable

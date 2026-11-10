@@ -41,6 +41,8 @@
     <string name="tareas_summary">Completate: %1$d · In sospeso: %2$d · In ritardo: %3$d</string>
     <string name="tareas_empty">Non ci sono ancora attività in questo lavoro.</string>
     <string name="tareas_create">Nuova attività</string>
+    <string name="tareas_section_data">Dati</string>
+    <string name="tareas_section_schedule">Pianificazione</string>
     <string name="tareas_create_title">Nuova attività</string>
     <string name="tareas_edit_title">Modifica attività</string>
     <string name="tareas_field_title">Titolo</string>

@@ -37,6 +37,7 @@ import com.unaj.obratrack.features.obras.RelevamientoScreen
 import com.unaj.obratrack.features.obras.RelevamientosAcciones
 import com.unaj.obratrack.features.obras.RelevamientosSection
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
+import com.unaj.obratrack.features.obras.TareaScreen
 import com.unaj.obratrack.features.obras.TareasAcciones
 import com.unaj.obratrack.features.obras.TareasSection
 import com.unaj.obratrack.features.obras.TareasViewModel
@@ -114,6 +115,25 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
             onMapPick = relevamientosViewModel::elegirEnMapa,
         )
     }
+    val accionesTareas = remember(tareasViewModel) {
+        TareasAcciones(
+            onCreate = tareasViewModel::abrirFormulario,
+            onRetry = tareasViewModel::reintentar,
+            onEdit = tareasViewModel::editar,
+            onChangeState = tareasViewModel::cambiarEstado,
+            onRequestDelete = tareasViewModel::solicitarEliminacion,
+            onCancelDelete = tareasViewModel::cancelarEliminacion,
+            onConfirmDelete = tareasViewModel::confirmarEliminacion,
+            onLinkedChange = tareasViewModel::vinculadosCambiados,
+            onCloseForm = tareasViewModel::cerrarFormulario,
+            onTitleChange = tareasViewModel::tituloCambiado,
+            onDescriptionChange = tareasViewModel::descripcionCambiada,
+            onCategoryChange = tareasViewModel::categoriaCambiada,
+            onStartChange = tareasViewModel::fechaInicioCambiada,
+            onEndChange = tareasViewModel::fechaFinCambiada,
+            onSave = tareasViewModel::guardar,
+        )
+    }
     val relevamientoAbierto = relevamientosState.formularioVisible || relevamientosState.seleccionado != null
     // La obra recuerda hasta dónde estaba desplazada al volver de un relevamiento; al abrir otra obra empieza de arriba.
     val scrollDetalleObra = rememberSaveable(obraAbiertaId, saver = ScrollState.Saver) { ScrollState(0) }
@@ -139,7 +159,10 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                         Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
                             when (pestana) {
                                 // Un relevamiento abierto (detalle o formulario) es una pantalla propia, no un tramo de la obra.
-                                PestanaPrincipal.OBRAS -> if (relevamientoAbierto) RelevamientoScreen(
+                                PestanaPrincipal.OBRAS -> if (tareasState.formularioVisible) TareaScreen(
+                                    state = tareasState,
+                                    acciones = accionesTareas,
+                                ) else if (relevamientoAbierto) RelevamientoScreen(
                                     state = relevamientosState,
                                     acciones = accionesRelevamientos,
                                     nombreObra = obrasState.obraSeleccionada?.nombre,
@@ -164,26 +187,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
                                     detailExtra = {
-                                        TareasSection(
-                                            state = tareasState,
-                                            acciones = TareasAcciones(
-                                                onCreate = tareasViewModel::abrirFormulario,
-                                                onRetry = tareasViewModel::reintentar,
-                                                onEdit = tareasViewModel::editar,
-                                                onChangeState = tareasViewModel::cambiarEstado,
-                                                onRequestDelete = tareasViewModel::solicitarEliminacion,
-                                                onCancelDelete = tareasViewModel::cancelarEliminacion,
-                                                onConfirmDelete = tareasViewModel::confirmarEliminacion,
-                                                onLinkedChange = tareasViewModel::vinculadosCambiados,
-                                                onCloseForm = tareasViewModel::cerrarFormulario,
-                                                onTitleChange = tareasViewModel::tituloCambiado,
-                                                onDescriptionChange = tareasViewModel::descripcionCambiada,
-                                                onCategoryChange = tareasViewModel::categoriaCambiada,
-                                                onStartChange = tareasViewModel::fechaInicioCambiada,
-                                                onEndChange = tareasViewModel::fechaFinCambiada,
-                                                onSave = tareasViewModel::guardar,
-                                            ),
-                                        )
+                                        TareasSection(state = tareasState, acciones = accionesTareas)
                                         RelevamientosSection(state = relevamientosState, acciones = accionesRelevamientos)
                                     },
                                     detalleScroll = scrollDetalleObra,

@@ -1,6 +1,5 @@
 package com.unaj.obratrack.features.obras
 
-import com.unaj.obratrack.core.ui.CampoFecha
 import com.unaj.obratrack.core.ui.Etiqueta
 import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.core.ui.IconoBoton
@@ -15,8 +14,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -24,15 +21,10 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -68,7 +60,7 @@ fun TareasSection(state: TareasUiState, acciones: TareasAcciones, modifier: Modi
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(stringResource(Res.string.tareas_title), style = MaterialTheme.typography.titleLarge)
         state.tareaAEliminar?.let { DialogoEliminarTarea(it, state.vinculados, acciones) }
-        if (state.formularioVisible) FormularioTarea(state.formulario, acciones) else ListaTareas(state, acciones)
+        ListaTareas(state, acciones)
     }
 }
 
@@ -214,69 +206,6 @@ private fun EtiquetaTarea(estado: EstadoTarea) {
 }
 
 @Composable
-private fun FormularioTarea(form: FormularioTareaUiState, acciones: TareasAcciones) {
-    Text(
-        stringResource(if (form.tareaId == null) Res.string.tareas_create_title else Res.string.tareas_edit_title),
-        style = MaterialTheme.typography.titleMedium,
-    )
-    OutlinedTextField(
-        form.titulo, acciones.onTitleChange,
-        label = { Text(stringResource(Res.string.tareas_field_title)) },
-        modifier = Modifier.fillMaxWidth(), singleLine = true,
-    )
-    OutlinedTextField(
-        form.descripcion, acciones.onDescriptionChange,
-        label = { Text(stringResource(Res.string.tareas_field_description)) },
-        modifier = Modifier.fillMaxWidth(),
-    )
-    SelectorCategoria(form.categoria, acciones.onCategoryChange)
-    CampoFecha(
-        fechaIso = form.fechaInicio,
-        label = stringResource(Res.string.tareas_field_start),
-        onDateChange = acciones.onStartChange,
-        onClear = { acciones.onStartChange("") },
-    )
-    CampoFecha(
-        fechaIso = form.fechaFin,
-        label = stringResource(Res.string.tareas_field_end),
-        onDateChange = acciones.onEndChange,
-        onClear = { acciones.onEndChange("") },
-    )
-    form.error?.let { ErrorBlock(mensajeError(it)) }
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-        Button(onClick = acciones.onSave, enabled = !form.guardando, modifier = Modifier.weight(1f)) {
-            if (form.guardando) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
-            else Text(stringResource(Res.string.tareas_save))
-        }
-        OutlinedButton(onClick = acciones.onCloseForm, enabled = !form.guardando, modifier = Modifier.weight(1f)) {
-            Text(stringResource(Res.string.tareas_cancel))
-        }
-    }
-}
-
-@Composable
-private fun SelectorCategoria(seleccionada: CategoriaTarea, onChange: (CategoriaTarea) -> Unit) {
-    var abierto by remember { mutableStateOf(false) }
-    Column {
-        Text(stringResource(Res.string.tareas_field_category), style = MaterialTheme.typography.labelMedium)
-        OutlinedButton(onClick = { abierto = true }, modifier = Modifier.fillMaxWidth()) {
-            Text(nombreCategoria(seleccionada))
-        }
-        DropdownMenu(expanded = abierto, onDismissRequest = { abierto = false }) {
-            CategoriaTarea.entries.forEach { categoria ->
-                DropdownMenuItem(
-                    text = { Text(nombreCategoria(categoria)) },
-                    onClick = {
-                        abierto = false
-                        onChange(categoria)
-                    },
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun DialogoEliminarTarea(tarea: Tarea, vinculados: RelevamientosVinculados, acciones: TareasAcciones) {
     AlertDialog(
         onDismissRequest = acciones.onCancelDelete,
@@ -323,7 +252,7 @@ private fun nombreEstado(estado: EstadoTarea): String = stringResource(
 )
 
 @Composable
-private fun nombreCategoria(categoria: CategoriaTarea): String = stringResource(
+internal fun nombreCategoria(categoria: CategoriaTarea): String = stringResource(
     when (categoria) {
         CategoriaTarea.CIMIENTOS_Y_EXCAVACION -> Res.string.tareas_cat_foundations
         CategoriaTarea.ESTRUCTURA -> Res.string.tareas_cat_structure
@@ -345,7 +274,7 @@ private fun nombreCategoria(categoria: CategoriaTarea): String = stringResource(
 )
 
 @Composable
-private fun mensajeError(error: ErrorTareasUi): String = stringResource(
+internal fun mensajeError(error: ErrorTareasUi): String = stringResource(
     when (error) {
         ErrorTareasUi.SESION, ErrorTareasUi.PERMISOS -> Res.string.tareas_error_session
         ErrorTareasUi.TITULO -> Res.string.tareas_error_title

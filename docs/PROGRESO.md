@@ -122,7 +122,8 @@
 - Ahora `RelevamientoScreen` es una pantalla propia (barra con el título «Relevamiento», «Nuevo relevamiento» o «Editar relevamiento», flecha y lápiz de editar). `RelevamientosSection` quedó solo con filtro, listado y «Nuevo relevamiento» dentro de la obra. Detalle, de lo más a lo menos importante: fecha y obra, foto, nota, tarea, ubicación (mapa, dirección, «Abrir en el mapa»), próxima visita con la hora en la misma línea, y «Eliminar» al final y separado; lo que no existe no se muestra. Formulario en tres bloques (Datos, Foto, Ubicación) con «Guardar» y «Cancelar» fijos abajo, donde también se ve el error. La obra recuerda su posición de desplazamiento al volver. Se conservaron los `testTag` de las pruebas de dispositivo (`relevamientos_back` pasó a la flecha y `relevamientos_edit` al lápiz).
 - Mapa chico: el crédito de los datos pasó a una línea debajo del mapa, con los enlaces del estilo, porque la barra de la librería solo se retrae al arrastrar y tapaba una parte del mapa para siempre. El selector a pantalla completa conserva la de la librería.
 - Verificación: pasan 406 pruebas de host y `assembleDebug`. Las pantallas se revisaron en el emulador con datos de ejemplo (detalle completo y mínimo, formulario con y sin error, selector de mapa, modo claro y oscuro). Falta revisarlas en el teléfono con datos reales y correr las pruebas de dispositivo, que escriben en Firebase y no se ejecutaron.
-- Pendiente: fechas legibles («5 nov 2026») en toda la app; aplicar el mismo patrón de pantalla propia al formulario de tareas.
+- El formulario de tareas sigue el mismo patrón: `TareaScreen` (pantalla propia, bloques Datos y Cronograma, barra fija Guardar/Cancelar). `BarraGuardar` y los bloques comunes viven en `CamposPantalla.kt`.
+- Pendiente: fechas legibles («5 nov 2026») en toda la app.
 
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.

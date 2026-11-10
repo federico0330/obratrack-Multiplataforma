@@ -41,6 +41,8 @@
     <string name="tareas_summary">Completadas: %1$d · Pendientes: %2$d · Atrasadas: %3$d</string>
     <string name="tareas_empty">Todavía no hay tareas en esta obra.</string>
     <string name="tareas_create">Nueva tarea</string>
+    <string name="tareas_section_data">Datos</string>
+    <string name="tareas_section_schedule">Cronograma</string>
     <string name="tareas_create_title">Nueva tarea</string>
     <string name="tareas_edit_title">Editar tarea</string>
     <string name="tareas_field_title">Título</string>
