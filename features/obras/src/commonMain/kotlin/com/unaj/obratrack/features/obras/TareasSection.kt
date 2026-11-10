@@ -58,7 +58,6 @@ class TareasAcciones(
 @Composable
 fun TareasSection(state: TareasUiState, acciones: TareasAcciones, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(Res.string.tareas_title), style = MaterialTheme.typography.titleLarge)
         state.tareaAEliminar?.let { DialogoEliminarTarea(it, state.vinculados, acciones) }
         ListaTareas(state, acciones)
     }

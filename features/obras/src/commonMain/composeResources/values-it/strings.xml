@@ -26,7 +26,6 @@
     <string name="obras_edit_title">Modifica lavoro</string>
     <string name="obras_edit">Modifica</string>
     <string name="obras_back">Indietro</string>
-    <string name="obras_visibility_value">Visibilità: %1$s</string>
     <string name="obras_state_active">Attivo</string>
     <string name="obras_state_paused">In pausa</string>
     <string name="obras_state_finished">Completato</string>
@@ -91,7 +90,6 @@
     <string name="tareas_cat_waterproofing">Impermeabilizzazione</string>
     <string name="tareas_cat_cleaning">Pulizia</string>
     <string name="tareas_cat_other">Altro</string>
-    <string name="obras_start_date_value">Data di inizio: %1$s</string>
     <string name="obras_visibility">Visibilità</string>
     <string name="tareas_error_delete_limit">Questa attività ha troppi rilievi collegati per eliminarla in sicurezza. Nessun dato è stato modificato.</string>
     <string name="relevamientos_title">Rilievi</string>
@@ -115,7 +113,8 @@
     <string name="relevamientos_error_task">Questa attività non è più disponibile. Scegline un’altra oppure salva senza collegarla.</string>
     <string name="relevamientos_error_network">Connessione non riuscita. Controlla la connessione e riprova.</string>
     <string name="relevamientos_error_generic">Impossibile completare l’operazione. Riprova.</string>
-    <string name="obras_last_visit_value">Ultimo rilievo: %1$s</string>
+    <string name="obras_last_visit">Ultimo rilievo</string>
+    <string name="obras_tab_summary">Riepilogo</string>
     <string name="relevamientos_delete">Elimina rilievo</string>
     <string name="relevamientos_delete_confirmation">Questo rilievo verrà eliminato. L’attività collegata e gli altri rilievi verranno conservati.</string>
     <string name="relevamientos_confirm_delete">Conferma eliminazione</string>

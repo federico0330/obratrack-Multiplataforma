@@ -123,6 +123,7 @@
 - Mapa chico: el crédito de los datos pasó a una línea debajo del mapa, con los enlaces del estilo, porque la barra de la librería solo se retrae al arrastrar y tapaba una parte del mapa para siempre. El selector a pantalla completa conserva la de la librería.
 - Verificación: pasan 406 pruebas de host y `assembleDebug`. Las pantallas se revisaron en el emulador con datos de ejemplo (detalle completo y mínimo, formulario con y sin error, selector de mapa, modo claro y oscuro). Falta revisarlas en el teléfono con datos reales y correr las pruebas de dispositivo, que escriben en Firebase y no se ejecutaron.
 - El formulario de tareas sigue el mismo patrón: `TareaScreen` (pantalla propia, bloques Datos y Cronograma, barra fija Guardar/Cancelar). `BarraGuardar` y los bloques comunes viven en `CamposPantalla.kt`.
+- Detalle de obra con pestañas Resumen | Tareas | Relevamientos (con contadores). Editar pasó a un ícono de la barra superior; la pestaña activa se recuerda por obra al volver de un formulario. `MisObrasScreen` recibe `tareasContent` y `relevamientosContent` en lugar de `detailExtra`.
 - Pendiente: fechas legibles («5 nov 2026») en toda la app.
 
 ## Decisiones vigentes

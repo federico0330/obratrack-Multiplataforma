@@ -26,7 +26,6 @@
     <string name="obras_edit_title">Editar obra</string>
     <string name="obras_edit">Editar</string>
     <string name="obras_back">Volver</string>
-    <string name="obras_visibility_value">Visibilidad: %1$s</string>
     <string name="obras_state_active">Activa</string>
     <string name="obras_state_paused">Pausada</string>
     <string name="obras_state_finished">Finalizada</string>
@@ -91,7 +90,6 @@
     <string name="tareas_cat_waterproofing">Impermeabilización</string>
     <string name="tareas_cat_cleaning">Limpieza</string>
     <string name="tareas_cat_other">Otros</string>
-    <string name="obras_start_date_value">Fecha de inicio: %1$s</string>
     <string name="obras_visibility">Visibilidad</string>
     <string name="tareas_error_delete_limit">La tarea tiene demasiados relevamientos vinculados para eliminarla de forma segura. No se modificó ningún dato.</string>
     <string name="relevamientos_title">Relevamientos</string>
@@ -115,7 +113,8 @@
     <string name="relevamientos_error_task">La tarea ya no está disponible. Elegí otra o guardá sin vincularla.</string>
     <string name="relevamientos_error_network">No pudimos conectar. Revisá tu conexión y volvé a intentar.</string>
     <string name="relevamientos_error_generic">No pudimos completar la operación. Intentá de nuevo.</string>
-    <string name="obras_last_visit_value">Último relevamiento: %1$s</string>
+    <string name="obras_last_visit">Último relevamiento</string>
+    <string name="obras_tab_summary">Resumen</string>
     <string name="relevamientos_delete">Eliminar relevamiento</string>
     <string name="relevamientos_delete_confirmation">Se eliminará este relevamiento. La tarea vinculada y los demás relevamientos se conservan.</string>
     <string name="relevamientos_confirm_delete">Confirmar eliminación</string>

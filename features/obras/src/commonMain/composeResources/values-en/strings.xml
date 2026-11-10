@@ -26,7 +26,6 @@
     <string name="obras_edit_title">Edit work</string>
     <string name="obras_edit">Edit</string>
     <string name="obras_back">Back</string>
-    <string name="obras_visibility_value">Visibility: %1$s</string>
     <string name="obras_state_active">Active</string>
     <string name="obras_state_paused">Paused</string>
     <string name="obras_state_finished">Finished</string>
@@ -91,7 +90,6 @@
     <string name="tareas_cat_waterproofing">Waterproofing</string>
     <string name="tareas_cat_cleaning">Cleaning</string>
     <string name="tareas_cat_other">Other</string>
-    <string name="obras_start_date_value">Start date: %1$s</string>
     <string name="obras_visibility">Visibility</string>
     <string name="tareas_error_delete_limit">This task has too many linked surveys to delete safely. No data was changed.</string>
     <string name="relevamientos_title">Surveys</string>
@@ -115,7 +113,8 @@
     <string name="relevamientos_error_task">The task is no longer available. Choose another or save without linking it.</string>
     <string name="relevamientos_error_network">Could not connect. Check your connection and try again.</string>
     <string name="relevamientos_error_generic">Could not complete the operation. Try again.</string>
-    <string name="obras_last_visit_value">Latest survey: %1$s</string>
+    <string name="obras_last_visit">Latest survey</string>
+    <string name="obras_tab_summary">Summary</string>
     <string name="relevamientos_delete">Delete survey</string>
     <string name="relevamientos_delete_confirmation">This survey will be deleted. The linked task and other surveys will be kept.</string>
     <string name="relevamientos_confirm_delete">Confirm deletion</string>

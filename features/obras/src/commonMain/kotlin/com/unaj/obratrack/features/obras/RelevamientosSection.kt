@@ -75,7 +75,6 @@ data class RelevamientosAcciones(
 @Composable
 fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcciones, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(Res.string.relevamientos_title), style = MaterialTheme.typography.titleLarge)
         state.errorOperacion?.let { ErrorBlock(mensajeRelevamiento(it)) }
         FiltroRelevamientosSelector(state, acciones)
         when (val lista = state.lista) {

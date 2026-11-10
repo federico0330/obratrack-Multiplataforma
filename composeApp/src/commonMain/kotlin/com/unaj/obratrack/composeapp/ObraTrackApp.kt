@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,6 +32,8 @@ import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
+import com.unaj.obratrack.features.obras.ListaRelevamientosUiState
+import com.unaj.obratrack.features.obras.ListaTareasUiState
 import com.unaj.obratrack.features.obras.MisObrasScreen
 import com.unaj.obratrack.features.obras.ObrasViewModel
 import com.unaj.obratrack.features.obras.RelevamientoScreen
@@ -136,6 +139,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
     }
     val relevamientoAbierto = relevamientosState.formularioVisible || relevamientosState.seleccionado != null
     // La obra recuerda hasta dónde estaba desplazada al volver de un relevamiento; al abrir otra obra empieza de arriba.
+    val pestanaDetalle = rememberSaveable(obraAbiertaId) { mutableIntStateOf(0) }
     val scrollDetalleObra = rememberSaveable(obraAbiertaId, saver = ScrollState.Saver) { ScrollState(0) }
 
     ObraTrackTheme {
@@ -186,10 +190,12 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                     onDateChange = obrasViewModel::fechaCambiada,
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
-                                    detailExtra = {
-                                        TareasSection(state = tareasState, acciones = accionesTareas)
-                                        RelevamientosSection(state = relevamientosState, acciones = accionesRelevamientos)
-                                    },
+                                    pestanaDetalle = pestanaDetalle.intValue,
+                                    onPestanaDetalleChange = { pestanaDetalle.intValue = it },
+                                    cantidadTareas = (tareasState.lista as? ListaTareasUiState.Contenido)?.items?.size,
+                                    cantidadRelevamientos = (relevamientosState.lista as? ListaRelevamientosUiState.Contenido)?.items?.size,
+                                    tareasContent = { TareasSection(state = tareasState, acciones = accionesTareas) },
+                                    relevamientosContent = { RelevamientosSection(state = relevamientosState, acciones = accionesRelevamientos) },
                                     detalleScroll = scrollDetalleObra,
                                 )
                                 PestanaPrincipal.PERFIL -> {

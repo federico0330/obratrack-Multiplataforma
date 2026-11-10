@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.platform.testTag
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
@@ -51,7 +52,12 @@ fun MisObrasScreen(
     onDateChange: (String) -> Unit,
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
-    detailExtra: @Composable () -> Unit = {},
+    pestanaDetalle: Int = PESTANA_RESUMEN,
+    onPestanaDetalleChange: (Int) -> Unit = {},
+    cantidadTareas: Int? = null,
+    cantidadRelevamientos: Int? = null,
+    tareasContent: @Composable () -> Unit = {},
+    relevamientosContent: @Composable () -> Unit = {},
     /** Quien llama lo guarda para que, al volver de un relevamiento, la obra siga donde estaba. */
     detalleScroll: ScrollState = rememberScrollState(),
 ) {
@@ -102,6 +108,17 @@ fun MisObrasScreen(
                             }
                         }
                     },
+                    actions = {
+                        if (enDetalle) {
+                            IconButton(
+                                onClick = onEditObra,
+                                enabled = !state.actualizando && !state.eliminando,
+                                modifier = Modifier.testTag("obras_edit"),
+                            ) {
+                                Icon(painter = painterResource(Iconos.Edit), contentDescription = stringResource(Res.string.obras_edit))
+                            }
+                        }
+                    },
                 )
                 if (state.actualizando || state.eliminando) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -133,12 +150,16 @@ fun MisObrasScreen(
             obra != null -> DetalleObraContent(
                 obra = obra,
                 state = state,
-                onEditObra = onEditObra,
                 onChangeStatus = onChangeStatus,
                 onRequestDelete = onRequestDelete,
                 padding = padding,
                 scrollState = detalleScroll,
-                detailExtra = detailExtra,
+                pestana = pestanaDetalle,
+                onPestanaChange = onPestanaDetalleChange,
+                cantidadTareas = cantidadTareas,
+                cantidadRelevamientos = cantidadRelevamientos,
+                tareasContent = tareasContent,
+                relevamientosContent = relevamientosContent,
             )
             else -> ListaObrasContent(
                 user = user,
