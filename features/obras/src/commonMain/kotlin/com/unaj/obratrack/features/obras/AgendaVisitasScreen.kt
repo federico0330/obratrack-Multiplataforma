@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.fechaLegible
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,12 +74,13 @@ fun AgendaVisitasScreen(lista: ListaObrasUiState, onRetry: () -> Unit, clock: Cl
                                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                             Text(visita.obra.nombre, style = MaterialTheme.typography.titleMedium)
                                             Text(visita.obra.direccion)
-                                            if (visita.fecha != null) {
+                                            val fechaVisita = visita.fecha
+                                            if (fechaVisita != null) {
                                                 val hora = visita.horaMinutos?.let {
                                                     "${(it / 60).toString().padStart(2, '0')}:${(it % 60).toString().padStart(2, '0')}"
                                                 }
-                                                Text(if (hora == null) visita.fecha.toString() else
-                                                    stringResource(Res.string.agenda_date_time, visita.fecha.toString(), hora))
+                                                val fecha = fechaLegible(fechaVisita)
+                                                Text(if (hora == null) fecha else stringResource(Res.string.agenda_date_time, fecha, hora))
                                             }
                                             visita.diasSinVisita?.toInt()?.let {
                                                 Text(pluralStringResource(Res.plurals.agenda_days_without_visit, it, it))

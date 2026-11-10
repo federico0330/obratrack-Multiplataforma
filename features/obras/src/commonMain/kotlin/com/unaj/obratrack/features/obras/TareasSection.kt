@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.fechaLegible
 import com.unaj.obratrack.core.ui.Etiqueta
 import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.core.ui.IconoBoton
@@ -110,9 +111,11 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                 EtiquetaTarea(tarea.estado)
             }
             Text(nombreCategoria(tarea.categoria), style = MaterialTheme.typography.bodyMedium, color = secundario)
-            if (tarea.fechaInicio != null && tarea.fechaFin != null) {
+            val inicio = tarea.fechaInicio
+            val fin = tarea.fechaFin
+            if (inicio != null && fin != null) {
                 Text(
-                    stringResource(Res.string.tareas_dates_value, tarea.fechaInicio.toString(), tarea.fechaFin.toString()),
+                    stringResource(Res.string.tareas_dates_value, fechaLegible(inicio), fechaLegible(fin)),
                     style = MaterialTheme.typography.bodyMedium,
                     color = secundario,
                 )

@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.fechaLegible
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -86,7 +87,7 @@ fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcc
                     Row(Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         item.fotoWeb()?.let { url -> MiniaturaRelevamiento(item.fotoMiniaturaUrl ?: url) }
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), style = MaterialTheme.typography.titleMedium)
+                            Text(fechaLegible(item.fecha.toLocalDateTime(TimeZone.UTC).date), style = MaterialTheme.typography.titleMedium)
                             Text(item.nota)
                             item.tareaId?.let { id ->
                                 val titulo = state.tareas.items.firstOrNull { it.id == id }?.titulo

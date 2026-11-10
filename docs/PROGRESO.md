@@ -125,7 +125,7 @@
 - El formulario de tareas sigue el mismo patrón: `TareaScreen` (pantalla propia, bloques Datos y Cronograma, barra fija Guardar/Cancelar). `BarraGuardar` y los bloques comunes viven en `CamposPantalla.kt`.
 - Detalle de obra con pestañas Resumen | Tareas | Relevamientos (con contadores). Editar pasó a un ícono de la barra superior; la pestaña activa se recuerda por obra al volver de un formulario. `MisObrasScreen` recibe `tareasContent` y `relevamientosContent` en lugar de `detailExtra`.
 - Crear tarea o relevamiento: botón flotante extendido abajo a la derecha, según la pestaña (no aparece en Resumen). Los tests instrumentados de relevamientos abren primero la pestaña (`obras_tab_relevamientos`); no se corrieron (piden Firebase).
-- Pendiente: fechas legibles («5 nov 2026») en toda la app.
+- Fechas legibles: `fechaLegible(...)` en `core/ui` ("5 nov 2026" / "Nov 5, 2026" / "5 nov 2026"), con los meses y el orden en recursos. Solo para mostrar: se guarda y compara siempre como `LocalDate` (AAAA-MM-DD). Aplicada en detalle de obra, tareas, relevamientos, agenda y `CampoFecha`.
 
 ## Decisiones vigentes
 - Login, registro y obras comparten presentación Compose Multiplatform; migrar el resto de features cuando corresponda.

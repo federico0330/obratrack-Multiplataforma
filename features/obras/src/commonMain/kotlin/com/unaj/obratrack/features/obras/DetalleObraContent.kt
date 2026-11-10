@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.fechaLegible
 import com.unaj.obratrack.core.ui.ErrorBlock
 import com.unaj.obratrack.core.ui.IconoBoton
 import com.unaj.obratrack.core.ui.Iconos
@@ -143,14 +144,14 @@ private fun ResumenObra(
                 Dato(stringResource(Res.string.obras_client), obra.cliente, Modifier.weight(1f))
                 Dato(
                     stringResource(Res.string.obras_start_date),
-                    obra.fechaInicio.toLocalDateTime(TimeZone.UTC).date.toString(),
+                    fechaLegible(obra.fechaInicio.toLocalDateTime(TimeZone.UTC).date),
                     Modifier.weight(1f),
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Dato(
                     stringResource(Res.string.obras_last_visit),
-                    obra.ultimaVisita?.toLocalDateTime(TimeZone.UTC)?.date?.toString() ?: "—",
+                    obra.ultimaVisita?.let { fechaLegible(it.toLocalDateTime(TimeZone.UTC).date) } ?: "—",
                     Modifier.weight(1f),
                 )
                 Dato(

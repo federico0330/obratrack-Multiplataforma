@@ -1,5 +1,6 @@
 package com.unaj.obratrack.features.obras
 
+import com.unaj.obratrack.core.ui.fechaLegible
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,7 +40,7 @@ internal fun DetalleRelevamientoContent(
     Column(Modifier.fillMaxWidth().testTag("relevamientos_detail"), verticalArrangement = Arrangement.spacedBy(20.dp)) {
         errorOperacion?.let { ErrorBlock(mensajeRelevamiento(it)) }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), style = MaterialTheme.typography.headlineSmall)
+            Text(fechaLegible(item.fecha.toLocalDateTime(TimeZone.UTC).date), style = MaterialTheme.typography.headlineSmall)
             nombreObra?.let {
                 Text(stringResource(Res.string.relevamientos_work_name, it), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
@@ -59,7 +60,7 @@ internal fun DetalleRelevamientoContent(
         item.ubicacion?.let { UbicacionDetalle(it, direccion) }
         item.proximaVisita?.let { fecha ->
             CampoDetalle(stringResource(Res.string.relevamientos_next_visit_label)) {
-                Text(textoVisita(fecha.toLocalDateTime(TimeZone.UTC).date.toString(), item.horaVisita), style = MaterialTheme.typography.bodyLarge)
+                Text(textoVisita(fechaLegible(fecha.toLocalDateTime(TimeZone.UTC).date), item.horaVisita), style = MaterialTheme.typography.bodyLarge)
             }
         }
         HorizontalDivider()
