@@ -1,4 +1,5 @@
 <resources>
     <string name="nav_obras">Lavori</string>
     <string name="nav_perfil">Profilo</string>
+    <string name="nav_agenda">Agenda</string>
 </resources>

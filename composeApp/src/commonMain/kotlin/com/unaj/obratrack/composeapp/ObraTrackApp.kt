@@ -30,6 +30,7 @@ import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
+import com.unaj.obratrack.features.obras.AgendaVisitasScreen
 import com.unaj.obratrack.features.obras.MisObrasScreen
 import com.unaj.obratrack.features.obras.ObrasViewModel
 import com.unaj.obratrack.features.obras.RelevamientosAcciones
@@ -88,10 +89,9 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                     var pestana by rememberSaveable(stateSaver = PestanaPrincipalSaver) {
                         mutableStateOf(PestanaPrincipal.OBRAS)
                     }
-                    // La barra solo aparece en las raíces: lista de obras y perfil, no en detalle ni formulario.
-                    val enRaiz = pestana == PestanaPrincipal.PERFIL ||
+                    val enRaiz = pestana != PestanaPrincipal.OBRAS ||
                         (obrasState.obraSeleccionada == null && !obrasState.formularioVisible)
-                    BackHandler(enabled = pestana == PestanaPrincipal.PERFIL) { pestana = PestanaPrincipal.OBRAS }
+                    BackHandler(enabled = pestana != PestanaPrincipal.OBRAS) { pestana = PestanaPrincipal.OBRAS }
                     Scaffold(
                         bottomBar = { if (enRaiz) BarraInferior(pestana) { pestana = it } },
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
@@ -183,6 +183,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                         )
                                     },
                                 )
+                                PestanaPrincipal.AGENDA -> AgendaVisitasScreen(obrasState.lista, obrasViewModel::reintentar)
                                 PestanaPrincipal.PERFIL -> {
                                     // Se recolecta solo aquí: la consulta de obras corre mientras Perfil está visible.
                                     val resumen by perfilViewModel.state.collectAsState()

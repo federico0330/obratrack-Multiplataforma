@@ -162,4 +162,16 @@
     <string name="relevamientos_map_pick_confirm">Usar este lugar</string>
     <string name="relevamientos_map_pick_cancel">Cancelar</string>
     <string name="relevamientos_error_location_invalid">La ubicación no es válida. Volvé a capturarla.</string>
+    <string name="agenda_title">Agenda de visitas</string>
+    <string name="agenda_overdue">Vencidas</string>
+    <string name="agenda_today">Hoy</string>
+    <string name="agenda_week">Esta semana</string>
+    <string name="agenda_later">Próximas</string>
+    <string name="agenda_unscheduled">Sin programar</string>
+    <string name="agenda_empty">Por ahora no hay visitas para mostrar.</string>
+    <string name="agenda_date_time">%1$s · %2$s</string>
+    <plurals name="agenda_days_without_visit">
+        <item quantity="one">%1$d día sin visita</item>
+        <item quantity="other">%1$d días sin visita</item>
+    </plurals>
 </resources>
