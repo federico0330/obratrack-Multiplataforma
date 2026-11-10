@@ -22,10 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.unaj.obratrack.core.ui.Iconos
 import com.unaj.obratrack.composeapp.generated.resources.Res
 import com.unaj.obratrack.composeapp.generated.resources.ic_nav_obras
 import com.unaj.obratrack.composeapp.generated.resources.ic_nav_perfil
 import com.unaj.obratrack.composeapp.generated.resources.nav_obras
+import com.unaj.obratrack.composeapp.generated.resources.nav_agenda
 import com.unaj.obratrack.composeapp.generated.resources.nav_perfil
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -33,7 +35,7 @@ import org.jetbrains.compose.resources.stringResource
 
 private val AlturaItem = 80.dp
 
-enum class PestanaPrincipal { OBRAS, PERFIL }
+enum class PestanaPrincipal { OBRAS, AGENDA, PERFIL }
 
 /** Guarda la pestaña por nombre: un enum no se puede guardar directamente en todas las plataformas. */
 val PestanaPrincipalSaver: Saver<PestanaPrincipal, String> = Saver(
@@ -56,6 +58,12 @@ fun BarraInferior(
             texto = stringResource(Res.string.nav_obras),
             seleccionado = seleccionada == PestanaPrincipal.OBRAS,
             onClick = { onSeleccionar(PestanaPrincipal.OBRAS) },
+        )
+        ItemNavegacion(
+            icono = Iconos.Calendar,
+            texto = stringResource(Res.string.nav_agenda),
+            seleccionado = seleccionada == PestanaPrincipal.AGENDA,
+            onClick = { onSeleccionar(PestanaPrincipal.AGENDA) },
         )
         ItemNavegacion(
             icono = Res.drawable.ic_nav_perfil,

@@ -154,6 +154,7 @@
     <string name="relevamientos_address_unavailable">Impossibile cercare l’indirizzo. Controlla la connessione e riprova.</string>
     <string name="relevamientos_location_title">Posizione</string>
     <string name="relevamientos_location_pick_on_map">Scegli sulla mappa</string>
+    <string name="relevamientos_map_loading">Caricamento mappa…</string>
     <string name="relevamientos_map_description">Mappa con la posizione del sopralluogo</string>
     <string name="relevamientos_map_pick_hint">Sposta la mappa finché il segnaposto indica il luogo del sopralluogo.</string>
     <string name="relevamientos_map_pick_confirm">Usa questo luogo</string>
@@ -164,4 +165,16 @@
     <string name="relevamientos_next_visit_label">Prossima visita</string>
     <string name="relevamientos_section_data">Dati</string>
     <string name="relevamientos_error_location_invalid">La posizione non è valida. Acquisiscila di nuovo.</string>
+    <string name="agenda_title">Agenda delle visite</string>
+    <string name="agenda_overdue">Scadute</string>
+    <string name="agenda_today">Oggi</string>
+    <string name="agenda_week">Questa settimana</string>
+    <string name="agenda_later">Prossime</string>
+    <string name="agenda_unscheduled">Da programmare</string>
+    <string name="agenda_empty">Non ci sono ancora visite da mostrare.</string>
+    <string name="agenda_date_time">%1$s · %2$s</string>
+    <plurals name="agenda_days_without_visit">
+        <item quantity="one">%1$d giorno senza visite</item>
+        <item quantity="other">%1$d giorni senza visite</item>
+    </plurals>
 </resources>

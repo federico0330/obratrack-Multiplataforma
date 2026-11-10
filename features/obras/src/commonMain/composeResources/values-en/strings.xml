@@ -154,6 +154,7 @@
     <string name="relevamientos_address_unavailable">Could not search the address. Check your connection and try again.</string>
     <string name="relevamientos_location_title">Location</string>
     <string name="relevamientos_location_pick_on_map">Choose on map</string>
+    <string name="relevamientos_map_loading">Loading map…</string>
     <string name="relevamientos_map_description">Map showing the survey location</string>
     <string name="relevamientos_map_pick_hint">Move the map until the pin is on the survey location.</string>
     <string name="relevamientos_map_pick_confirm">Use this place</string>
@@ -164,4 +165,16 @@
     <string name="relevamientos_next_visit_label">Next visit</string>
     <string name="relevamientos_section_data">Details</string>
     <string name="relevamientos_error_location_invalid">The location is not valid. Capture it again.</string>
+    <string name="agenda_title">Visit agenda</string>
+    <string name="agenda_overdue">Overdue</string>
+    <string name="agenda_today">Today</string>
+    <string name="agenda_week">This week</string>
+    <string name="agenda_later">Upcoming</string>
+    <string name="agenda_unscheduled">Unscheduled</string>
+    <string name="agenda_empty">There are no visits to show yet.</string>
+    <string name="agenda_date_time">%1$s · %2$s</string>
+    <plurals name="agenda_days_without_visit">
+        <item quantity="one">%1$d day without a visit</item>
+        <item quantity="other">%1$d days without a visit</item>
+    </plurals>
 </resources>
