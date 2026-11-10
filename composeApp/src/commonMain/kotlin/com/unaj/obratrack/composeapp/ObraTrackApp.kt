@@ -123,7 +123,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                     onDateChange = obrasViewModel::fechaCambiada,
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
-                                    detailExtra = {
+                                    detailExtra = { anclaRelevamientos ->
                                         TareasSection(
                                             state = tareasState,
                                             acciones = TareasAcciones(
@@ -178,6 +178,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                                 onMapClose = relevamientosViewModel::cerrarMapa,
                                                 onMapPick = relevamientosViewModel::elegirEnMapa,
                                             ),
+                                            modifier = anclaRelevamientos,
                                             ubicacionObra = obrasState.obraSeleccionada?.ubicacion,
                                         )
                                     },

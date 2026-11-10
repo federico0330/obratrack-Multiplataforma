@@ -49,7 +49,7 @@ fun MisObrasScreen(
     onDateChange: (String) -> Unit,
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
-    detailExtra: @Composable () -> Unit = {},
+    detailExtra: (@Composable (Modifier) -> Unit)? = null,
 ) {
     val obra = state.obraSeleccionada
     val enFormulario = state.formularioVisible
