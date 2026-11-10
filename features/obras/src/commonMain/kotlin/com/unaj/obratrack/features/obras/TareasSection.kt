@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,11 +64,6 @@ fun TareasSection(state: TareasUiState, acciones: TareasAcciones, modifier: Modi
 
 @Composable
 private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
-    // Arriba, para que "Nueva" no quede al final de una lista larga.
-    Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth()) {
-        IconoBoton(Iconos.Add)
-        Text(stringResource(Res.string.tareas_create))
-    }
     when (val lista = state.lista) {
         ListaTareasUiState.Cargando -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()

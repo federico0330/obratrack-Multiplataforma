@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,8 +27,6 @@ import com.unaj.obratrack.domain.model.Relevamiento
 import com.unaj.obratrack.domain.model.Ubicacion
 import com.unaj.obratrack.domain.repository.CandidatoDireccion
 import com.unaj.obratrack.core.ui.ErrorBlock
-import com.unaj.obratrack.core.ui.IconoBoton
-import com.unaj.obratrack.core.ui.Iconos
 import com.unaj.obratrack.features.obras.generated.resources.*
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -75,11 +72,6 @@ data class RelevamientosAcciones(
 @Composable
 fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcciones, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        // Arriba, para que "Nuevo" no quede al final de una lista larga.
-        Button(onClick = acciones.onCreate, enabled = !state.eliminando, modifier = Modifier.fillMaxWidth().testTag("relevamientos_create")) {
-            IconoBoton(Iconos.Add)
-            Text(stringResource(Res.string.relevamientos_create))
-        }
         state.errorOperacion?.let { ErrorBlock(mensajeRelevamiento(it)) }
         FiltroRelevamientosSelector(state, acciones)
         when (val lista = state.lista) {

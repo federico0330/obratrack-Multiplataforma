@@ -24,6 +24,7 @@ import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.features.obras.generated.resources.*
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -54,6 +55,10 @@ fun MisObrasScreen(
     onSave: () -> Unit,
     pestanaDetalle: Int = PESTANA_RESUMEN,
     onPestanaDetalleChange: (Int) -> Unit = {},
+    onCreateTarea: () -> Unit = {},
+    onCreateRelevamiento: () -> Unit = {},
+    /** El botón de crear relevamiento se oculta mientras se borra uno, igual que antes se deshabilitaba. */
+    puedeCrearRelevamiento: Boolean = true,
     cantidadTareas: Int? = null,
     cantidadRelevamientos: Int? = null,
     tareasContent: @Composable () -> Unit = {},
@@ -126,12 +131,13 @@ fun MisObrasScreen(
             }
         },
         floatingActionButton = {
-            if (!enFormulario && !enDetalle) {
-                ExtendedFloatingActionButton(
-                    onClick = onCreate,
-                    icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
-                    text = { Text(stringResource(Res.string.obras_create)) },
-                )
+            // Crear es la acción principal de cada pantalla; en el detalle cambia según la pestaña y no aparece en Resumen.
+            when {
+                enFormulario -> Unit
+                !enDetalle -> BotonCrear(Res.string.obras_create, onCreate)
+                pestanaDetalle == PESTANA_TAREAS -> BotonCrear(Res.string.tareas_create, onCreateTarea)
+                pestanaDetalle == PESTANA_RELEVAMIENTOS && puedeCrearRelevamiento ->
+                    BotonCrear(Res.string.relevamientos_create, onCreateRelevamiento, Modifier.testTag("relevamientos_create"))
             }
         },
     ) { padding ->
@@ -171,4 +177,14 @@ fun MisObrasScreen(
             )
         }
     }
+}
+
+@Composable
+private fun BotonCrear(texto: StringResource, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
+        text = { Text(stringResource(texto)) },
+        modifier = modifier,
+    )
 }

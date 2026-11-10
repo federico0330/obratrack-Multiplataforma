@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.verticalScroll
@@ -112,6 +114,8 @@ internal fun DetalleObraContent(
                 PESTANA_RELEVAMIENTOS -> relevamientosContent()
                 else -> ResumenObra(obra, state, ocupado, onChangeStatus, onRequestDelete)
             }
+            // Espacio para que el botón de crear, flotando abajo a la derecha, no tape la última tarjeta.
+            if (pestana != PESTANA_RESUMEN) Spacer(Modifier.height(72.dp))
         }
     }
 }

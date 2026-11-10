@@ -124,6 +124,7 @@
 - Verificación: pasan 406 pruebas de host y `assembleDebug`. Las pantallas se revisaron en el emulador con datos de ejemplo (detalle completo y mínimo, formulario con y sin error, selector de mapa, modo claro y oscuro). Falta revisarlas en el teléfono con datos reales y correr las pruebas de dispositivo, que escriben en Firebase y no se ejecutaron.
 - El formulario de tareas sigue el mismo patrón: `TareaScreen` (pantalla propia, bloques Datos y Cronograma, barra fija Guardar/Cancelar). `BarraGuardar` y los bloques comunes viven en `CamposPantalla.kt`.
 - Detalle de obra con pestañas Resumen | Tareas | Relevamientos (con contadores). Editar pasó a un ícono de la barra superior; la pestaña activa se recuerda por obra al volver de un formulario. `MisObrasScreen` recibe `tareasContent` y `relevamientosContent` en lugar de `detailExtra`.
+- Crear tarea o relevamiento: botón flotante extendido abajo a la derecha, según la pestaña (no aparece en Resumen). Los tests instrumentados de relevamientos abren primero la pestaña (`obras_tab_relevamientos`); no se corrieron (piden Firebase).
 - Pendiente: fechas legibles («5 nov 2026») en toda la app.
 
 ## Decisiones vigentes
