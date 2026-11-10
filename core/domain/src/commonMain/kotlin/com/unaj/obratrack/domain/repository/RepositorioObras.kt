@@ -4,6 +4,7 @@ import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.ObraDraft
 import com.unaj.obratrack.domain.model.EstadoObra
 import kotlinx.coroutines.flow.Flow
+import kotlin.time.Instant
 
 enum class ErrorObra {
     NOMBRE_VACIO,
@@ -26,5 +27,6 @@ interface RepositorioObras {
     suspend fun crear(userId: String, draft: ObraDraft, estado: EstadoObra): ResultadoObra<Obra>
     suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft): ResultadoObra<Unit>
     suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra): ResultadoObra<Unit>
+    suspend fun programarVisita(userId: String, obraId: String, fechaUtc: Instant?, horaMinutos: Int?): ResultadoObra<Unit>
     suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit>
 }

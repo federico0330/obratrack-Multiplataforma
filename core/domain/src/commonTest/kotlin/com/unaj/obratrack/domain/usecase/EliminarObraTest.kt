@@ -51,6 +51,10 @@ private class DeleteRepositoryFake : RepositorioObras {
     override suspend fun actualizar(userId: String, obraId: String, draft: ObraDraft) = ResultadoObra.Exito(Unit)
     override suspend fun cambiarEstado(userId: String, obraId: String, estado: EstadoObra) = ResultadoObra.Exito(Unit)
 
+    override suspend fun programarVisita(
+        userId: String, obraId: String, fechaUtc: kotlin.time.Instant?, horaMinutos: Int?,
+    ): ResultadoObra<Unit> = error("Operación no usada en esta prueba")
+
     override suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit> {
         calls++
         this.userId = userId

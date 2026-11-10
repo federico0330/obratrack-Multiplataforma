@@ -117,6 +117,22 @@ class RepositorioObrasImplTest {
         )
     }
 
+    @Test
+    fun enviaMilisegundosUtcYHoraOpcionalAlProgramar() = runTest {
+        val source = ObrasRemoteFalso()
+        val repo = RepositorioObrasImpl(source)
+        val fecha = Instant.parse("2026-11-12T00:00:00Z")
+
+        assertEquals(ResultadoObra.Exito(Unit), repo.programarVisita("uid-1", "obra-1", fecha, 1439))
+        assertEquals("uid-1", source.updatedUserId)
+        assertEquals("obra-1", source.updatedObraId)
+        assertEquals(fecha.toEpochMilliseconds() to 1439, source.visita)
+
+        source.updateResult = FirebaseObraResult.Failure(FirebaseObraFailure.PermissionDenied)
+        assertEquals(ResultadoObra.Fallo(ErrorObra.NO_AUTORIZADA), repo.programarVisita("uid-1", "obra-1", null, null))
+        assertEquals(null to null, source.visita)
+    }
+
     private fun dto(id: String = "obra-1") = ObraDto(
         id = id, userId = "uid-1", nombre = "Escuela", cliente = "Municipio", direccion = "Calle 1",
         publica = false, estado = "activa", fechaInicioMillis = Instant.parse("2026-11-01T00:00:00Z").toEpochMilliseconds(),
@@ -132,6 +148,7 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
     var updatedObraId: String? = null
     var updatedFields: ObraUpdateFields? = null
     var updatedState: String? = null
+    var visita: Pair<Long?, Int?>? = null
     var updateResult: FirebaseObraResult<Unit> = FirebaseObraResult.Success(Unit)
     var deleteResult: FirebaseObraResult<Unit> = FirebaseObraResult.Success(Unit)
     var deletedUserId: String? = null
@@ -158,6 +175,15 @@ private class ObrasRemoteFalso : FirebaseObraDataSource {
         updatedUserId = userId
         updatedObraId = obraId
         updatedState = estado
+        return updateResult
+    }
+
+    override suspend fun programarVisita(
+        userId: String, obraId: String, fechaMillis: Long?, horaMinutos: Int?,
+    ): FirebaseObraResult<Unit> {
+        updatedUserId = userId
+        updatedObraId = obraId
+        visita = fechaMillis to horaMinutos
         return updateResult
     }
 

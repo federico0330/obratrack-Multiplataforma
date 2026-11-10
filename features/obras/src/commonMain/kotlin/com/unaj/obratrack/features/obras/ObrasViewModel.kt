@@ -13,6 +13,7 @@ import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
 import com.unaj.obratrack.domain.usecase.EliminarObra
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
+import com.unaj.obratrack.domain.usecase.ProgramarVisita
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.todayIn
@@ -33,6 +36,7 @@ class ObrasViewModel(
     private val actualizarObra: ActualizarObra,
     private val cambiarEstadoObra: CambiarEstadoObra,
     private val eliminarObra: EliminarObra,
+    private val programarVisita: ProgramarVisita,
 ) : ViewModel() {
     private val _state = MutableStateFlow(ObrasUiState())
     val state = _state.asStateFlow()
@@ -54,6 +58,7 @@ class ObrasViewModel(
                             formulario = FormularioObraUiState(),
                             confirmarEliminacion = false,
                             eliminando = false,
+                            edicionVisita = null,
                         )
                     }
                 }
@@ -70,6 +75,7 @@ class ObrasViewModel(
                                     formulario = FormularioObraUiState(),
                                     confirmarEliminacion = false,
                                     eliminando = false,
+                                    edicionVisita = null,
                                 )
                             }
                         }
@@ -92,6 +98,7 @@ class ObrasViewModel(
                 errorOperacion = null,
                 confirmarEliminacion = false,
                 eliminando = false,
+                edicionVisita = null,
             )
         }
         listaJob = viewModelScope.launch {
@@ -119,6 +126,36 @@ class ObrasViewModel(
 
     fun reintentar() {
         userId?.let(::observeWorks)
+    }
+
+    fun editarVisita(obra: Obra) {
+        if (userId != obra.userId || _state.value.edicionVisita != null) return
+        _state.update { it.copy(edicionVisita = EdicionVisitaUiState(obra)) }
+    }
+
+    fun cerrarEdicionVisita() {
+        _state.update { if (it.edicionVisita?.guardando == true) it else it.copy(edicionVisita = null) }
+    }
+
+    fun guardarVisita(fecha: LocalDate?, hora: LocalTime?) {
+        val owner = userId ?: return
+        val edicion = _state.value.edicionVisita ?: return
+        if (edicion.guardando || edicion.obra.userId != owner) return
+        val pendiente = edicion.copy(guardando = true, error = null)
+        _state.update { it.copy(edicionVisita = pendiente) }
+        viewModelScope.launch {
+            val error = try {
+                (programarVisita(owner, edicion.obra.id, fecha, hora) as? ResultadoObra.Fallo)?.error?.toUiError()
+            } catch (cancelled: CancellationException) {
+                throw cancelled
+            } catch (_: Exception) {
+                ErrorObrasUi.DESCONOCIDO
+            }
+            _state.update {
+                if (it.edicionVisita !== pendiente || userId != owner) it
+                else it.copy(edicionVisita = error?.let { motivo -> edicion.copy(error = motivo) })
+            }
+        }
     }
 
     fun abrirFormulario() {

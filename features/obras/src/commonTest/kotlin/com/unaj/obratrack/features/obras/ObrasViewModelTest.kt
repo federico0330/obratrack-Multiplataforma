@@ -4,6 +4,7 @@ import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.ObraDraft
 import com.unaj.obratrack.domain.model.Usuario
+import com.unaj.obratrack.domain.repository.ErrorObra
 import com.unaj.obratrack.domain.repository.RepositorioAutenticacion
 import com.unaj.obratrack.domain.repository.RepositorioObras
 import com.unaj.obratrack.domain.repository.ResultadoAcceso
@@ -14,9 +15,13 @@ import com.unaj.obratrack.domain.usecase.CrearObra
 import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
 import com.unaj.obratrack.domain.usecase.EliminarObra
+import com.unaj.obratrack.domain.usecase.ProgramarVisita
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.Dispatchers
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
@@ -29,6 +34,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
 class ObrasViewModelTest {
@@ -39,7 +45,7 @@ class ObrasViewModelTest {
             val repo = ObrasRepoFalso()
             val session = AuthRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
 
@@ -73,7 +79,7 @@ class ObrasViewModelTest {
             repo.obrasPorUsuario["uid-2"] = listOf(obraB)
             val session = AuthRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+                ObservarSesion(session), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
 
@@ -95,7 +101,7 @@ class ObrasViewModelTest {
         try {
             val repo = ObrasRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra("obra-1", "uid-1", "Nombre anterior"))
@@ -119,7 +125,7 @@ class ObrasViewModelTest {
         try {
             val repo = ObrasRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra("obra-1", "uid-1", "Casa"))
@@ -141,7 +147,7 @@ class ObrasViewModelTest {
         try {
             val repo = ObrasRepoFalso()
             val viewModel = ObrasViewModel(
-                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo),
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra("obra-1", "uid-1", "Casa"))
@@ -160,6 +166,85 @@ class ObrasViewModelTest {
             assertFalse(viewModel.state.value.eliminando)
         } finally {
             Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun programaReprogramaYQuitaLaVisitaConFechaUtcYHoraOpcional() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val repo = ObrasRepoFalso()
+            val viewModel = ObrasViewModel(
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo),
+                ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
+            )
+            advanceUntilIdle()
+            val obra = obra("obra-1", "uid-1", "Casa")
+            val primeraFecha = LocalDate(2026, 11, 10)
+            val segundaFecha = LocalDate(2026, 11, 12)
+
+            viewModel.editarVisita(obra)
+            viewModel.guardarVisita(primeraFecha, LocalTime(0, 0))
+            viewModel.guardarVisita(primeraFecha, LocalTime(12, 0))
+            assertTrue(viewModel.state.value.edicionVisita?.guardando == true)
+            advanceUntilIdle()
+            assertNull(viewModel.state.value.edicionVisita)
+            assertEquals(Instant.parse("2026-11-10T00:00:00Z") to 0, repo.visitas.single())
+
+            viewModel.editarVisita(obra)
+            viewModel.guardarVisita(segundaFecha, null)
+            advanceUntilIdle()
+            viewModel.editarVisita(obra)
+            viewModel.guardarVisita(null, LocalTime(23, 59))
+            advanceUntilIdle()
+            assertEquals(
+                listOf(
+                    Instant.parse("2026-11-10T00:00:00Z") to 0,
+                    Instant.parse("2026-11-12T00:00:00Z") to null,
+                    null to null,
+                ),
+                repo.visitas,
+            )
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun mantieneLaEdicionSiFallaLaEscrituraYLimpiaAlCambiarDeSesion() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val repo = ObrasRepoFalso()
+            repo.resultadoVisita = ResultadoObra.Fallo(ErrorObra.RED)
+            val session = AuthRepoFalso()
+            val viewModel = ObrasViewModel(
+                ObservarSesion(session), ObservarObras(repo), CrearObra(repo),
+                ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
+            )
+            advanceUntilIdle()
+
+            val obra = obra("obra-1", "uid-1", "Casa")
+            viewModel.editarVisita(obra)
+            viewModel.guardarVisita(LocalDate(2026, 11, 10), null)
+            advanceUntilIdle()
+            assertEquals(EdicionVisitaUiState(obra, error = ErrorObrasUi.RED), viewModel.state.value.edicionVisita)
+
+            session.usuarioActual.value = Usuario("uid-2", "otra@example.com", null)
+            advanceUntilIdle()
+            assertNull(viewModel.state.value.edicionVisita)
+            viewModel.editarVisita(obra)
+            assertNull(viewModel.state.value.edicionVisita)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun aceptaHorasDeVeinticuatroHorasConMinutosValidos() {
+        assertEquals(LocalTime(0, 0), horaVisitaDesdeTexto("00:00"))
+        assertEquals(LocalTime(23, 59), horaVisitaDesdeTexto("23:59"))
+        for (hora in listOf("", "09", "9:30", "24:00", "12:60", "12:30:00")) {
+            assertNull(horaVisitaDesdeTexto(hora))
         }
     }
 
@@ -194,6 +279,8 @@ private class ObrasRepoFalso : RepositorioObras {
     var updatedState: EstadoObra? = null
     var deletedUserId: String? = null
     var deletedObraId: String? = null
+    val visitas = mutableListOf<Pair<Instant?, Int?>>()
+    var resultadoVisita: ResultadoObra<Unit> = ResultadoObra.Exito(Unit)
     override fun observarPropias(userId: String): Flow<ResultadoObra<List<Obra>>> {
         usuariosConsultados += userId
         return flowOf(ResultadoObra.Exito(obrasPorUsuario[userId].orEmpty()))
@@ -217,6 +304,15 @@ private class ObrasRepoFalso : RepositorioObras {
         updatedObraId = obraId
         updatedState = estado
         return ResultadoObra.Exito(Unit)
+    }
+
+    override suspend fun programarVisita(
+        userId: String, obraId: String, fechaUtc: Instant?, horaMinutos: Int?,
+    ): ResultadoObra<Unit> {
+        assertEquals("uid-1", userId)
+        assertEquals("obra-1", obraId)
+        visitas += fechaUtc to horaMinutos
+        return resultadoVisita
     }
 
     override suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit> {

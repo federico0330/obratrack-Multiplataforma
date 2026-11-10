@@ -33,6 +33,7 @@ interface FirebaseObraDataSource {
     suspend fun crear(dto: ObraDto): FirebaseObraResult<ObraDto>
     suspend fun actualizar(userId: String, obraId: String, fields: ObraUpdateFields): FirebaseObraResult<Unit>
     suspend fun cambiarEstado(userId: String, obraId: String, estado: String): FirebaseObraResult<Unit>
+    suspend fun programarVisita(userId: String, obraId: String, fechaMillis: Long?, horaMinutos: Int?): FirebaseObraResult<Unit>
     suspend fun eliminar(userId: String, obraId: String): FirebaseObraResult<Unit>
 }
 

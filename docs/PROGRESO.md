@@ -186,3 +186,10 @@
 - Se resolvió la verificación conectando el teléfono. La integración comprobó preservación de foto/ubicación/agenda/campos extra, recálculo al mover fechas, eliminación del último y concurrencia. La interfaz comprobó detalle, edición, Atrás, desvinculación, filtros, cancelación y baja hasta lista vacía. Cada prueba limpió su obra, tarea y relevamientos de QA al terminar.
 - La automatización se ajustó para volver a buscar controles después de recomposiciones (referencias obsoletas) y localizar las tarjetas por su identificador al reabrir. Pasaron las dos pruebas de interfaz juntas en unos 64 segundos; la integración de Firebase pasó por separado. Los fallos iniciales de localización no se contaron como verificaciones aprobadas.
 - Estado de entrega: 264 pruebas de host, compilaciones Android y tres pruebas de dispositivo aprobadas antes de integrar el PR #12. El alcance confirmado cierra el ABM; cámara/galería, carga de fotos, selección de ubicación y PDF se implementarán en sus etapas propias. iOS, aislamiento con dos cuentas y offline siguen pendientes.
+
+## Programación de visitas desde Agenda
+
+- Se puede programar una visita, cambiar su fecha u hora y cancelarla con confirmación. El formulario reutiliza el calendario de obras. La agenda se actualiza con la misma suscripción a obras y conserva el orden anterior.
+- `ProgramarVisita` convierte el día a medianoche UTC y la hora opcional a minutos desde la medianoche. El adaptador Firestore verifica el dueño en una transacción y modifica solo `proximaVisita` y `horaVisita` en la obra. Al cancelar elimina ambos campos, igual que el nativo.
+- Pasaron 412 pruebas de host y la compilación Android. Los casos nuevos cubren conversión, validación de la hora, envío duplicado, errores y cambio de sesión.
+- En Android 14 con Firebase local se verificó el alta y edición de un relevamiento desde la nueva pestaña de obra, el aviso de carga de los mapas y el acceso a Agenda. En Agenda se probó programar con hora, reprogramar sin hora y cancelar, con lecturas de servidor para comprobar los campos y la conservación del resto de la obra.

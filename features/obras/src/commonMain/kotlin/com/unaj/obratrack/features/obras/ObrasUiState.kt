@@ -23,6 +23,12 @@ data class FormularioObraUiState(
     val error: ErrorObrasUi? = null,
 )
 
+data class EdicionVisitaUiState(
+    val obra: Obra,
+    val guardando: Boolean = false,
+    val error: ErrorObrasUi? = null,
+)
+
 data class ObrasUiState(
     val lista: ListaObrasUiState = ListaObrasUiState.Cargando,
     val obraSeleccionada: Obra? = null,
@@ -32,4 +38,5 @@ data class ObrasUiState(
     val errorOperacion: ErrorObrasUi? = null,
     val confirmarEliminacion: Boolean = false,
     val eliminando: Boolean = false,
+    val edicionVisita: EdicionVisitaUiState? = null,
 )
