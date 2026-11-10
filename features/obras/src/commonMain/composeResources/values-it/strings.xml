@@ -156,6 +156,7 @@
     <string name="relevamientos_address_unavailable">Impossibile cercare l’indirizzo. Controlla la connessione e riprova.</string>
     <string name="relevamientos_location_title">Posizione</string>
     <string name="relevamientos_location_pick_on_map">Scegli sulla mappa</string>
+    <string name="relevamientos_map_loading">Caricamento mappa…</string>
     <string name="relevamientos_map_description">Mappa con la posizione del sopralluogo</string>
     <string name="relevamientos_map_pick_hint">Sposta la mappa finché il segnaposto indica il luogo del sopralluogo.</string>
     <string name="relevamientos_map_pick_confirm">Usa questo luogo</string>

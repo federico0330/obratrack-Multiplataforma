@@ -92,7 +92,11 @@ fun RelevamientosSection(
         }
     }
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(stringResource(Res.string.relevamientos_title), style = MaterialTheme.typography.titleLarge)
+        Text(
+            stringResource(Res.string.relevamientos_title),
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier.testTag("relevamientos_heading"),
+        )
         state.aEliminar?.let {
             AlertDialog(
                 onDismissRequest = acciones.onCancelDelete,

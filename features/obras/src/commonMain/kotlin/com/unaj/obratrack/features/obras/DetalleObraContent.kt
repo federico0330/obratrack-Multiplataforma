@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -21,12 +23,16 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.features.obras.generated.resources.*
+import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
@@ -39,9 +45,11 @@ internal fun DetalleObraContent(
     onChangeStatus: (EstadoObra) -> Unit,
     onRequestDelete: () -> Unit,
     padding: PaddingValues,
-    detailExtra: @Composable () -> Unit = {},
+    detailExtra: (@Composable (Modifier) -> Unit)?,
 ) {
     val ocupado = state.actualizando || state.eliminando
+    val accesoRelevamientos = remember { BringIntoViewRequester() }
+    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -49,6 +57,15 @@ internal fun DetalleObraContent(
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(obra.nombre, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
             EstadoChip(obra.estado)
+        }
+        if (detailExtra != null) {
+            OutlinedButton(
+                onClick = { scope.launch { accesoRelevamientos.bringIntoView() } },
+                enabled = !ocupado,
+                modifier = Modifier.fillMaxWidth().testTag("obras_go_to_relevamientos"),
+            ) {
+                Text(stringResource(Res.string.relevamientos_title))
+            }
         }
         OutlinedCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -84,7 +101,7 @@ internal fun DetalleObraContent(
         if (obra.estado != EstadoObra.FINALIZADA) {
             AccionEstado(Res.string.obras_finish, !ocupado) { onChangeStatus(EstadoObra.FINALIZADA) }
         }
-        detailExtra()
+        detailExtra?.invoke(Modifier.bringIntoViewRequester(accesoRelevamientos))
         HorizontalDivider()
         OutlinedButton(
             onClick = onRequestDelete,
