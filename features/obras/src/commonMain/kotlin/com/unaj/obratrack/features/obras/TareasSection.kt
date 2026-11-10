@@ -65,6 +65,11 @@ fun TareasSection(state: TareasUiState, acciones: TareasAcciones, modifier: Modi
 
 @Composable
 private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
+    // Arriba, para que "Nueva" no quede al final de una lista larga.
+    Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth()) {
+        IconoBoton(Iconos.Add)
+        Text(stringResource(Res.string.tareas_create))
+    }
     when (val lista = state.lista) {
         ListaTareasUiState.Cargando -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
@@ -97,10 +102,6 @@ private fun ListaTareas(state: TareasUiState, acciones: TareasAcciones) {
     }
     state.errorOperacion?.let { ErrorBlock(mensajeError(it)) }
     if (state.eliminando) LinearProgressIndicator(Modifier.fillMaxWidth())
-    Button(onClick = acciones.onCreate, modifier = Modifier.fillMaxWidth()) {
-        IconoBoton(Iconos.Add)
-        Text(stringResource(Res.string.tareas_create))
-    }
 }
 
 @Composable

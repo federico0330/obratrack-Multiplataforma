@@ -75,6 +75,11 @@ data class RelevamientosAcciones(
 @Composable
 fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcciones, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        // Arriba, para que "Nuevo" no quede al final de una lista larga.
+        Button(onClick = acciones.onCreate, enabled = !state.eliminando, modifier = Modifier.fillMaxWidth().testTag("relevamientos_create")) {
+            IconoBoton(Iconos.Add)
+            Text(stringResource(Res.string.relevamientos_create))
+        }
         state.errorOperacion?.let { ErrorBlock(mensajeRelevamiento(it)) }
         FiltroRelevamientosSelector(state, acciones)
         when (val lista = state.lista) {
@@ -101,10 +106,6 @@ fun RelevamientosSection(state: RelevamientosUiState, acciones: RelevamientosAcc
                     }
                 }
             }
-        }
-        Button(onClick = acciones.onCreate, enabled = !state.eliminando, modifier = Modifier.fillMaxWidth().testTag("relevamientos_create")) {
-            IconoBoton(Iconos.Add)
-            Text(stringResource(Res.string.relevamientos_create))
         }
     }
 }
