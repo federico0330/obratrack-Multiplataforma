@@ -36,6 +36,7 @@ import com.unaj.obratrack.domain.usecase.IniciarSesionConGoogle
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.RegistrarUsuario
+import com.unaj.obratrack.domain.usecase.ProgramarVisita
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroViewModel
@@ -90,6 +91,7 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
         ActualizarObra(obrasRepository),
         CambiarEstadoObra(obrasRepository),
         EliminarObra(obrasRepository),
+        ProgramarVisita(obrasRepository),
     )
 
     fun crearTareasViewModel() = TareasViewModel(

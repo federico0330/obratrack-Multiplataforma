@@ -1,6 +1,5 @@
 package com.unaj.obratrack.features.obras
 
-import com.unaj.obratrack.core.ui.fechaLegible
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,10 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.core.ui.ErrorBlock
+import com.unaj.obratrack.core.ui.fechaLegible
+import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.usecase.CategoriaAgendaVisita
 import com.unaj.obratrack.domain.usecase.agendaVisitas
 import com.unaj.obratrack.features.obras.generated.resources.*
 import kotlinx.coroutines.delay
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -37,7 +40,18 @@ import kotlin.time.Clock
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AgendaVisitasScreen(lista: ListaObrasUiState, onRetry: () -> Unit, clock: Clock = Clock.System) {
+fun AgendaVisitasScreen(
+    lista: ListaObrasUiState,
+    edicion: EdicionVisitaUiState?,
+    onRetry: () -> Unit,
+    onEdit: (Obra) -> Unit,
+    onCloseEditor: () -> Unit,
+    onSave: (LocalDate?, LocalTime?) -> Unit,
+    clock: Clock = Clock.System,
+) {
+    if (edicion != null) {
+        EdicionVisitaDialog(edicion, onCloseEditor, onSave)
+    }
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(Res.string.agenda_title)) }) }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding).testTag("agenda_visitas")) {
             when (lista) {
@@ -76,14 +90,19 @@ fun AgendaVisitasScreen(lista: ListaObrasUiState, onRetry: () -> Unit, clock: Cl
                                             Text(visita.obra.direccion)
                                             val fechaVisita = visita.fecha
                                             if (fechaVisita != null) {
-                                                val hora = visita.horaMinutos?.let {
-                                                    "${(it / 60).toString().padStart(2, '0')}:${(it % 60).toString().padStart(2, '0')}"
-                                                }
+                                                val hora = visita.horaMinutos?.let(::horaVisitaTexto)
                                                 val fecha = fechaLegible(fechaVisita)
                                                 Text(if (hora == null) fecha else stringResource(Res.string.agenda_date_time, fecha, hora))
                                             }
                                             visita.diasSinVisita?.toInt()?.let {
                                                 Text(pluralStringResource(Res.plurals.agenda_days_without_visit, it, it))
+                                            }
+                                            TextButton(
+                                                onClick = { onEdit(visita.obra) },
+                                                modifier = Modifier.testTag("agenda_editar_${visita.obra.id}"),
+                                            ) {
+                                                val accion = if (fechaVisita == null) Res.string.agenda_schedule else Res.string.agenda_reschedule
+                                                Text(stringResource(accion))
                                             }
                                         }
                                     }

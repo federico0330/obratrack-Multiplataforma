@@ -2,6 +2,7 @@ package com.unaj.obratrack.core.firebase.obras
 
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.FirebaseNetworkException
+import dev.gitlive.firebase.firestore.FieldValue
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import dev.gitlive.firebase.firestore.FirebaseFirestoreException
 import dev.gitlive.firebase.firestore.GeoPoint
@@ -64,6 +65,33 @@ class GitLiveFirebaseObraDataSource(
         estado: String,
     ): FirebaseObraResult<Unit> = writeResult {
         ownedDocument(userId, obraId).updateFields { FIELD_ESTADO to estado }
+    }
+
+    override suspend fun programarVisita(
+        userId: String,
+        obraId: String,
+        fechaMillis: Long?,
+        horaMinutos: Int?,
+    ): FirebaseObraResult<Unit> = try {
+        val obra = ownedDocument(userId, obraId)
+        val actualizada = firestore.runTransaction {
+            val snapshot = get(obra)
+            if (!snapshot.exists || snapshot.get<String>(FIELD_USER_ID) != userId) {
+                false
+            } else {
+                updateFields(obra) {
+                    FIELD_PROXIMA_VISITA to (fechaMillis?.let { Timestamp.fromMilliseconds(it.toDouble()) } ?: FieldValue.delete)
+                    FIELD_HORA_VISITA to (horaMinutos ?: FieldValue.delete)
+                }
+                true
+            }
+        }
+        if (actualizada) FirebaseObraResult.Success(Unit)
+        else FirebaseObraResult.Failure(FirebaseObraFailure.PermissionDenied)
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        FirebaseObraResult.Failure(error.toFailure())
     }
 
     override suspend fun eliminar(userId: String, obraId: String): FirebaseObraResult<Unit> {

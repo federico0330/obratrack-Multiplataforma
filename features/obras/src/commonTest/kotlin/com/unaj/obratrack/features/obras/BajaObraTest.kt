@@ -15,6 +15,7 @@ import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
 import com.unaj.obratrack.domain.usecase.CrearObra
 import com.unaj.obratrack.domain.usecase.EliminarObra
+import com.unaj.obratrack.domain.usecase.ProgramarVisita
 import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +56,7 @@ class BajaObraTest {
         try {
             val viewModel = ObrasViewModel(
                 ObservarSesion(SesionDeLaBaja), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo),
-                CambiarEstadoObra(repo), EliminarObra(repo),
+                CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
             )
             advanceUntilIdle()
             viewModel.abrirDetalle(obra)
@@ -130,6 +131,10 @@ private class RepoConListaEnVivo(
     private val lista = MutableStateFlow<ResultadoObra<List<Obra>>>(ResultadoObra.Exito(listOf(obra)))
 
     override fun observarPropias(userId: String): Flow<ResultadoObra<List<Obra>>> = lista
+
+    override suspend fun programarVisita(
+        userId: String, obraId: String, fechaUtc: kotlin.time.Instant?, horaMinutos: Int?,
+    ): ResultadoObra<Unit> = error("Operación no usada en esta prueba")
 
     override suspend fun eliminar(userId: String, obraId: String): ResultadoObra<Unit> {
         if (refrescaAntes) {

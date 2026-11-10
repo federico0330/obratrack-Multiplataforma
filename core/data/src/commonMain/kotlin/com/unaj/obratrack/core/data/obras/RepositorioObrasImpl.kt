@@ -13,6 +13,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlin.time.Instant
 
 class RepositorioObrasImpl(
     private val remote: FirebaseObraDataSource,
@@ -65,6 +66,20 @@ class RepositorioObrasImpl(
         estado: EstadoObra,
     ): ResultadoObra<Unit> = try {
         remote.cambiarEstado(userId, obraId, estado.toFirestoreValue())
+            .toDomainResult()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        ResultadoObra.Fallo(ErrorObra.DESCONOCIDO)
+    }
+
+    override suspend fun programarVisita(
+        userId: String,
+        obraId: String,
+        fechaUtc: Instant?,
+        horaMinutos: Int?,
+    ): ResultadoObra<Unit> = try {
+        remote.programarVisita(userId, obraId, fechaUtc?.toEpochMilliseconds(), horaMinutos)
             .toDomainResult()
     } catch (cancelled: CancellationException) {
         throw cancelled

@@ -173,6 +173,14 @@
     <string name="agenda_unscheduled">Sin programar</string>
     <string name="agenda_empty">Por ahora no hay visitas para mostrar.</string>
     <string name="agenda_date_time">%1$s · %2$s</string>
+    <string name="agenda_schedule">Programar visita</string>
+    <string name="agenda_reschedule">Reprogramar visita</string>
+    <string name="agenda_visit_date">Fecha de visita</string>
+    <string name="agenda_visit_time">Hora (opcional)</string>
+    <string name="agenda_time_format">Ingresá una hora válida en formato HH:mm.</string>
+    <string name="agenda_remove_visit">Cancelar visita</string>
+    <string name="agenda_remove_confirmation">La obra quedará sin próxima visita programada.</string>
+    <string name="agenda_confirm_remove">Confirmar cancelación</string>
     <plurals name="agenda_days_without_visit">
         <item quantity="one">%1$d día sin visita</item>
         <item quantity="other">%1$d días sin visita</item>

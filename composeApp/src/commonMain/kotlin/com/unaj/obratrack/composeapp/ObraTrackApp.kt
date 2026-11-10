@@ -201,7 +201,14 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                     relevamientosContent = { RelevamientosSection(state = relevamientosState, acciones = accionesRelevamientos) },
                                     detalleScroll = scrollDetalleObra,
                                 )
-                                PestanaPrincipal.AGENDA -> AgendaVisitasScreen(obrasState.lista, obrasViewModel::reintentar)
+                                PestanaPrincipal.AGENDA -> AgendaVisitasScreen(
+                                    obrasState.lista,
+                                    obrasState.edicionVisita,
+                                    obrasViewModel::reintentar,
+                                    obrasViewModel::editarVisita,
+                                    obrasViewModel::cerrarEdicionVisita,
+                                    obrasViewModel::guardarVisita,
+                                )
                                 PestanaPrincipal.PERFIL -> {
                                     // Se recolecta solo aquí: la consulta de obras corre mientras Perfil está visible.
                                     val resumen by perfilViewModel.state.collectAsState()

@@ -173,6 +173,14 @@
     <string name="agenda_unscheduled">Unscheduled</string>
     <string name="agenda_empty">There are no visits to show yet.</string>
     <string name="agenda_date_time">%1$s · %2$s</string>
+    <string name="agenda_schedule">Schedule visit</string>
+    <string name="agenda_reschedule">Reschedule visit</string>
+    <string name="agenda_visit_date">Visit date</string>
+    <string name="agenda_visit_time">Time (optional)</string>
+    <string name="agenda_time_format">Enter a valid time in HH:mm format.</string>
+    <string name="agenda_remove_visit">Cancel visit</string>
+    <string name="agenda_remove_confirmation">The work will no longer have a scheduled visit.</string>
+    <string name="agenda_confirm_remove">Confirm cancellation</string>
     <plurals name="agenda_days_without_visit">
         <item quantity="one">%1$d day without a visit</item>
         <item quantity="other">%1$d days without a visit</item>
