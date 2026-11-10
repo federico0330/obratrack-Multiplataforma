@@ -37,6 +37,7 @@ kotlin {
             implementation(project(":core:domain"))
             implementation(project(":core:data"))
             implementation(project(":core:firebase"))
+            implementation(project(":core:ui"))
             implementation(project(":features:auth"))
             implementation(project(":features:obras"))
             implementation(compose.runtime)
