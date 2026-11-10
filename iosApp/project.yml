@@ -15,7 +15,7 @@ targets:
       - path: Sources
     resources:
       - path: GoogleService-Info.plist
-      # Textos del Info.plist traducidos (permiso de cámara) en es, en e it.
+      # Textos del Info.plist traducidos (permisos de cámara y ubicación) en es, en e it, y el catálogo de íconos.
       - path: Resources
     settings:
       base:
@@ -23,6 +23,8 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_CFBundleDisplayName: ObraTrack
         INFOPLIST_KEY_CADisableMinimumFrameDurationOnPhone: YES
+        # Ícono único de 1024 px (Xcode 14 o más): Resources/Assets.xcassets/AppIcon.appiconset.
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         # Sin esta clave iOS cierra la app al abrir la cámara.
         INFOPLIST_KEY_NSCameraUsageDescription: Para sacar fotos de los relevamientos de obra.
         # Sin esta clave iOS cierra la app al pedir la ubicación.
