@@ -3,7 +3,9 @@ package com.unaj.obratrack.features.obras
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -95,26 +97,26 @@ internal fun SelectorFoto(form: FormularioRelevamientoUiState, acciones: Relevam
     val camara = rememberCameraPickerLauncher(onError = { acciones.onCameraError() }) { archivo ->
         if (archivo != null) scope.launch { leerFoto(archivo, temporal = true, acciones) }
     }
-    Text(stringResource(Res.string.relevamientos_photo), style = MaterialTheme.typography.labelMedium)
     when (val foto = form.foto) {
         FotoFormulario.Ninguna -> Unit
         is FotoFormulario.Existente -> FotoRelevamiento(foto.vistaUrl)
         is FotoFormulario.Nueva -> FotoRelevamiento(foto.bytes)
     }
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = { galeria.launch() }, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_photo_pick")) {
+    // Las dos formas de conseguir la foto, lado a lado y del mismo tamaño aunque un texto ocupe dos líneas.
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedButton(onClick = { galeria.launch() }, enabled = !form.guardando, modifier = Modifier.weight(1f).fillMaxHeight().testTag("relevamientos_photo_pick")) {
             IconoBoton(Iconos.AddPhoto)
             Text(stringResource(Res.string.relevamientos_photo_pick))
         }
-        OutlinedButton(onClick = { camara.launch() }, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_photo_camera")) {
+        OutlinedButton(onClick = { camara.launch() }, enabled = !form.guardando, modifier = Modifier.weight(1f).fillMaxHeight().testTag("relevamientos_photo_camera")) {
             IconoBoton(Iconos.Camera)
             Text(stringResource(Res.string.relevamientos_photo_take))
         }
-        if (form.foto != FotoFormulario.Ninguna) {
-            TextButton(onClick = acciones.onRemovePhoto, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_photo_remove")) {
-                IconoBoton(Iconos.Delete)
-                Text(stringResource(Res.string.relevamientos_photo_remove))
-            }
+    }
+    if (form.foto != FotoFormulario.Ninguna) {
+        TextButton(onClick = acciones.onRemovePhoto, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_photo_remove")) {
+            IconoBoton(Iconos.Delete)
+            Text(stringResource(Res.string.relevamientos_photo_remove))
         }
     }
 }

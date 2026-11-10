@@ -50,7 +50,9 @@ import org.maplibre.compose.map.MaplibreMap
 import org.maplibre.compose.map.RenderStats
 import org.maplibre.compose.map.StyleLoadState
 import org.maplibre.compose.map.rememberMapState
+import org.maplibre.compose.overlay.AttributionLinks
 import org.maplibre.compose.overlay.MapOverlay
+import org.maplibre.compose.overlay.attributions
 import org.maplibre.compose.overlay.include
 import org.maplibre.compose.style.BaseStyle
 import org.maplibre.spatialk.geojson.Position
@@ -99,17 +101,26 @@ private fun CargandoMapa(estado: MapState, modifier: Modifier) {
 /**
  * Mapa chico con el pin en la ubicación. No se mueve con los dedos, así la pantalla sigue desplazándose.
  * Si la ubicación cambia (GPS, dirección o mapa) la cámara se mueve sin volver a crear el mapa.
+ *
+ * El crédito de los datos es un requisito de la licencia: se muestra en una línea debajo del mapa, con los textos y los
+ * enlaces reales del estilo. La barra de crédito de la librería no sirve acá: solo se retrae al arrastrar el mapa, y
+ * este no se arrastra, así que taparía una parte del mapa para siempre.
  */
 @Composable
 internal fun MapaVistaPrevia(ubicacion: Ubicacion, modifier: Modifier = Modifier) {
     val estado = rememberMapState(baseStyle = BaseStyle.Uri(ESTILO_MAPA), initialCameraPosition = camaraEn(ubicacion, ZOOM_VISTA_PREVIA))
     LaunchedEffect(ubicacion) { estado.setCameraPosition(camaraEn(ubicacion, ZOOM_VISTA_PREVIA)) }
     val descripcion = stringResource(Res.string.relevamientos_map_description)
-    Box(modifier.fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.medium).semantics { contentDescription = descripcion }.testTag("relevamientos_map_preview")) {
-        // Solo el crédito del mapa: es un requisito de los datos, así que no se saca.
-        MaplibreMap(state = estado, uiOptions = MapUiOptions.None, overlay = { include(MapOverlay.AttributionOnly) })
-        PinDelMapa(Modifier.align(Alignment.Center))
-        CargandoMapa(estado, Modifier.align(Alignment.TopCenter).padding(8.dp))
+    Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Box(Modifier.fillMaxWidth().height(180.dp).clip(MaterialTheme.shapes.medium).semantics { contentDescription = descripcion }.testTag("relevamientos_map_preview")) {
+            MaplibreMap(state = estado, uiOptions = MapUiOptions.None, overlay = {})
+            PinDelMapa(Modifier.align(Alignment.Center))
+            CargandoMapa(estado, Modifier.align(Alignment.TopCenter).padding(8.dp))
+        }
+        AttributionLinks(
+            attributions = estado.style.attributions(),
+            textStyle = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+        )
     }
 }
 

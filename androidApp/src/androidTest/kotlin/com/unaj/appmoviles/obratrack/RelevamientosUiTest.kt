@@ -97,6 +97,7 @@ class RelevamientosUiTest {
                 tarea.set(mapOf("userId" to uid, "titulo" to "TAREA_QA_RELEVAMIENTOS", "estado" to "PENDIENTE"))
                 abrirApp()
                 encontrar(By.text(nombre)).click()
+                encontrar(By.res("obras_tab_relevamientos")).click()
                 crearNota("PRUEBA_QA_SIN_TAREA", false)
                 crearNota("PRUEBA_QA_CON_TAREA", true)
                 val docs = relevamientos.get(Source.SERVER).documents
@@ -105,6 +106,7 @@ class RelevamientosUiTest {
                 assertTrue(docs.any { it.get<String>("nota") == "PRUEBA_QA_CON_TAREA" && it.get<String>("tareaId") == tarea.id })
                 abrirApp()
                 encontrar(By.text(nombre)).click()
+                encontrar(By.res("obras_tab_relevamientos")).click()
                 for (doc in docs) {
                     encontrar(By.res("relevamientos_item_${doc.id}"))
                 }

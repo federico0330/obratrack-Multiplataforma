@@ -46,7 +46,7 @@ fun CampoFecha(
     var abierto by remember { mutableStateOf(false) }
     Box(modifier) {
         OutlinedTextField(
-            value = fechaIso,
+            value = fechaLegible(fechaIso),
             onValueChange = {},
             readOnly = true,
             enabled = enabled,

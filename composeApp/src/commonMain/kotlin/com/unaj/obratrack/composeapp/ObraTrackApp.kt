@@ -1,5 +1,6 @@
 package com.unaj.obratrack.composeapp
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -13,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -31,11 +33,15 @@ import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
 import com.unaj.obratrack.features.obras.AgendaVisitasScreen
+import com.unaj.obratrack.features.obras.ListaRelevamientosUiState
+import com.unaj.obratrack.features.obras.ListaTareasUiState
 import com.unaj.obratrack.features.obras.MisObrasScreen
 import com.unaj.obratrack.features.obras.ObrasViewModel
+import com.unaj.obratrack.features.obras.RelevamientoScreen
 import com.unaj.obratrack.features.obras.RelevamientosAcciones
 import com.unaj.obratrack.features.obras.RelevamientosSection
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
+import com.unaj.obratrack.features.obras.TareaScreen
 import com.unaj.obratrack.features.obras.TareasAcciones
 import com.unaj.obratrack.features.obras.TareasSection
 import com.unaj.obratrack.features.obras.TareasViewModel
@@ -79,6 +85,64 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
         }
     }
 
+    val accionesRelevamientos = remember(relevamientosViewModel) {
+        RelevamientosAcciones(
+            onCreate = relevamientosViewModel::abrirFormulario,
+            onRetry = relevamientosViewModel::reintentar,
+            onRetryTasks = relevamientosViewModel::reintentarTareas,
+            onCloseForm = relevamientosViewModel::cerrarFormulario,
+            onNoteChange = relevamientosViewModel::notaCambiada,
+            onDateChange = relevamientosViewModel::fechaCambiada,
+            onTaskChange = relevamientosViewModel::tareaCambiada,
+            onSave = relevamientosViewModel::guardar,
+            onSelect = relevamientosViewModel::abrirDetalle,
+            onEdit = relevamientosViewModel::editarSeleccionado,
+            onBack = relevamientosViewModel::cerrarDetalle,
+            onRequestDelete = relevamientosViewModel::solicitarEliminacion,
+            onCancelDelete = relevamientosViewModel::cancelarEliminacion,
+            onConfirmDelete = relevamientosViewModel::confirmarEliminacion,
+            onFilterChange = relevamientosViewModel::filtroCambiado,
+            onPhotoPicked = relevamientosViewModel::fotoElegida,
+            onRemovePhoto = relevamientosViewModel::quitarFoto,
+            onPhotoReadError = relevamientosViewModel::fotoNoLeida,
+            onCameraError = relevamientosViewModel::camaraNoDisponible,
+            onLocationCapture = relevamientosViewModel::capturarUbicacion,
+            onLocationCancel = relevamientosViewModel::cancelarCaptura,
+            onLocationRemove = relevamientosViewModel::quitarUbicacion,
+            onAddressSearchOpen = relevamientosViewModel::abrirBusquedaDireccion,
+            onAddressSearchClose = relevamientosViewModel::cerrarBusquedaDireccion,
+            onAddressTextChange = relevamientosViewModel::textoDireccionCambiado,
+            onAddressSearch = relevamientosViewModel::buscarDireccion,
+            onAddressPick = relevamientosViewModel::elegirDireccion,
+            onMapOpen = relevamientosViewModel::abrirMapa,
+            onMapClose = relevamientosViewModel::cerrarMapa,
+            onMapPick = relevamientosViewModel::elegirEnMapa,
+        )
+    }
+    val accionesTareas = remember(tareasViewModel) {
+        TareasAcciones(
+            onCreate = tareasViewModel::abrirFormulario,
+            onRetry = tareasViewModel::reintentar,
+            onEdit = tareasViewModel::editar,
+            onChangeState = tareasViewModel::cambiarEstado,
+            onRequestDelete = tareasViewModel::solicitarEliminacion,
+            onCancelDelete = tareasViewModel::cancelarEliminacion,
+            onConfirmDelete = tareasViewModel::confirmarEliminacion,
+            onLinkedChange = tareasViewModel::vinculadosCambiados,
+            onCloseForm = tareasViewModel::cerrarFormulario,
+            onTitleChange = tareasViewModel::tituloCambiado,
+            onDescriptionChange = tareasViewModel::descripcionCambiada,
+            onCategoryChange = tareasViewModel::categoriaCambiada,
+            onStartChange = tareasViewModel::fechaInicioCambiada,
+            onEndChange = tareasViewModel::fechaFinCambiada,
+            onSave = tareasViewModel::guardar,
+        )
+    }
+    val relevamientoAbierto = relevamientosState.formularioVisible || relevamientosState.seleccionado != null
+    // La obra recuerda hasta dónde estaba desplazada al volver de un relevamiento; al abrir otra obra empieza de arriba.
+    val pestanaDetalle = rememberSaveable(obraAbiertaId) { mutableIntStateOf(0) }
+    val scrollDetalleObra = rememberSaveable(obraAbiertaId, saver = ScrollState.Saver) { ScrollState(0) }
+
     ObraTrackTheme {
         Surface(Modifier.fillMaxSize()) {
             when {
@@ -98,19 +162,22 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                     ) { padding ->
                         Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
                             when (pestana) {
-                                PestanaPrincipal.OBRAS -> MisObrasScreen(
+                                // Un relevamiento abierto (detalle o formulario) es una pantalla propia, no un tramo de la obra.
+                                PestanaPrincipal.OBRAS -> if (tareasState.formularioVisible) TareaScreen(
+                                    state = tareasState,
+                                    acciones = accionesTareas,
+                                ) else if (relevamientoAbierto) RelevamientoScreen(
+                                    state = relevamientosState,
+                                    acciones = accionesRelevamientos,
+                                    nombreObra = obrasState.obraSeleccionada?.nombre,
+                                    ubicacionObra = obrasState.obraSeleccionada?.ubicacion,
+                                ) else MisObrasScreen(
                                     user = authState.user!!,
                                     state = obrasState,
                                     onCreate = obrasViewModel::abrirFormulario,
                                     onRetry = obrasViewModel::reintentar,
                                     onSelectObra = obrasViewModel::abrirDetalle,
-                                    onBackToList = {
-                                        when {
-                                            relevamientosState.formularioVisible -> relevamientosViewModel.cerrarFormulario()
-                                            relevamientosState.seleccionado != null -> relevamientosViewModel.cerrarDetalle()
-                                            else -> obrasViewModel.cerrarDetalle()
-                                        }
-                                    },
+                                    onBackToList = obrasViewModel::cerrarDetalle,
                                     onEditObra = obrasViewModel::editarSeleccionada,
                                     onChangeStatus = obrasViewModel::cambiarEstado,
                                     onRequestDelete = obrasViewModel::solicitarEliminacion,
@@ -123,65 +190,16 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                     onDateChange = obrasViewModel::fechaCambiada,
                                     onPublicChange = obrasViewModel::visibilidadCambiada,
                                     onSave = obrasViewModel::guardar,
-                                    detailExtra = { anclaRelevamientos ->
-                                        TareasSection(
-                                            state = tareasState,
-                                            acciones = TareasAcciones(
-                                                onCreate = tareasViewModel::abrirFormulario,
-                                                onRetry = tareasViewModel::reintentar,
-                                                onEdit = tareasViewModel::editar,
-                                                onChangeState = tareasViewModel::cambiarEstado,
-                                                onRequestDelete = tareasViewModel::solicitarEliminacion,
-                                                onCancelDelete = tareasViewModel::cancelarEliminacion,
-                                                onConfirmDelete = tareasViewModel::confirmarEliminacion,
-                                                onLinkedChange = tareasViewModel::vinculadosCambiados,
-                                                onCloseForm = tareasViewModel::cerrarFormulario,
-                                                onTitleChange = tareasViewModel::tituloCambiado,
-                                                onDescriptionChange = tareasViewModel::descripcionCambiada,
-                                                onCategoryChange = tareasViewModel::categoriaCambiada,
-                                                onStartChange = tareasViewModel::fechaInicioCambiada,
-                                                onEndChange = tareasViewModel::fechaFinCambiada,
-                                                onSave = tareasViewModel::guardar,
-                                            ),
-                                        )
-                                        RelevamientosSection(
-                                            state = relevamientosState,
-                                            acciones = RelevamientosAcciones(
-                                                onCreate = relevamientosViewModel::abrirFormulario,
-                                                onRetry = relevamientosViewModel::reintentar,
-                                                onRetryTasks = relevamientosViewModel::reintentarTareas,
-                                                onCloseForm = relevamientosViewModel::cerrarFormulario,
-                                                onNoteChange = relevamientosViewModel::notaCambiada,
-                                                onDateChange = relevamientosViewModel::fechaCambiada,
-                                                onTaskChange = relevamientosViewModel::tareaCambiada,
-                                                onSave = relevamientosViewModel::guardar,
-                                                onSelect = relevamientosViewModel::abrirDetalle,
-                                                onEdit = relevamientosViewModel::editarSeleccionado,
-                                                onBack = relevamientosViewModel::cerrarDetalle,
-                                                onRequestDelete = relevamientosViewModel::solicitarEliminacion,
-                                                onCancelDelete = relevamientosViewModel::cancelarEliminacion,
-                                                onConfirmDelete = relevamientosViewModel::confirmarEliminacion,
-                                                onFilterChange = relevamientosViewModel::filtroCambiado,
-                                                onPhotoPicked = relevamientosViewModel::fotoElegida,
-                                                onRemovePhoto = relevamientosViewModel::quitarFoto,
-                                                onPhotoReadError = relevamientosViewModel::fotoNoLeida,
-                                                onCameraError = relevamientosViewModel::camaraNoDisponible,
-                                                onLocationCapture = relevamientosViewModel::capturarUbicacion,
-                                                onLocationCancel = relevamientosViewModel::cancelarCaptura,
-                                                onLocationRemove = relevamientosViewModel::quitarUbicacion,
-                                                onAddressSearchOpen = relevamientosViewModel::abrirBusquedaDireccion,
-                                                onAddressSearchClose = relevamientosViewModel::cerrarBusquedaDireccion,
-                                                onAddressTextChange = relevamientosViewModel::textoDireccionCambiado,
-                                                onAddressSearch = relevamientosViewModel::buscarDireccion,
-                                                onAddressPick = relevamientosViewModel::elegirDireccion,
-                                                onMapOpen = relevamientosViewModel::abrirMapa,
-                                                onMapClose = relevamientosViewModel::cerrarMapa,
-                                                onMapPick = relevamientosViewModel::elegirEnMapa,
-                                            ),
-                                            modifier = anclaRelevamientos,
-                                            ubicacionObra = obrasState.obraSeleccionada?.ubicacion,
-                                        )
-                                    },
+                                    pestanaDetalle = pestanaDetalle.intValue,
+                                    onPestanaDetalleChange = { pestanaDetalle.intValue = it },
+                                    onCreateTarea = accionesTareas.onCreate,
+                                    onCreateRelevamiento = accionesRelevamientos.onCreate,
+                                    puedeCrearRelevamiento = !relevamientosState.eliminando,
+                                    cantidadTareas = (tareasState.lista as? ListaTareasUiState.Contenido)?.items?.size,
+                                    cantidadRelevamientos = (relevamientosState.lista as? ListaRelevamientosUiState.Contenido)?.items?.size,
+                                    tareasContent = { TareasSection(state = tareasState, acciones = accionesTareas) },
+                                    relevamientosContent = { RelevamientosSection(state = relevamientosState, acciones = accionesRelevamientos) },
+                                    detalleScroll = scrollDetalleObra,
                                 )
                                 PestanaPrincipal.AGENDA -> AgendaVisitasScreen(obrasState.lista, obrasViewModel::reintentar)
                                 PestanaPrincipal.PERFIL -> {

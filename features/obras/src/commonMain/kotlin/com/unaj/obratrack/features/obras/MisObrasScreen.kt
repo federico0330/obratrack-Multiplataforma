@@ -1,8 +1,10 @@
 package com.unaj.obratrack.features.obras
 
 import com.unaj.obratrack.core.ui.Iconos
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -17,10 +19,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.compose.ui.platform.testTag
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
 import com.unaj.obratrack.features.obras.generated.resources.*
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -49,7 +53,18 @@ fun MisObrasScreen(
     onDateChange: (String) -> Unit,
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
-    detailExtra: (@Composable (Modifier) -> Unit)? = null,
+    pestanaDetalle: Int = PESTANA_RESUMEN,
+    onPestanaDetalleChange: (Int) -> Unit = {},
+    onCreateTarea: () -> Unit = {},
+    onCreateRelevamiento: () -> Unit = {},
+    /** El botón de crear relevamiento se oculta mientras se borra uno, igual que antes se deshabilitaba. */
+    puedeCrearRelevamiento: Boolean = true,
+    cantidadTareas: Int? = null,
+    cantidadRelevamientos: Int? = null,
+    tareasContent: @Composable () -> Unit = {},
+    relevamientosContent: @Composable () -> Unit = {},
+    /** Quien llama lo guarda para que, al volver de un relevamiento, la obra siga donde estaba. */
+    detalleScroll: ScrollState = rememberScrollState(),
 ) {
     val obra = state.obraSeleccionada
     val enFormulario = state.formularioVisible
@@ -98,6 +113,17 @@ fun MisObrasScreen(
                             }
                         }
                     },
+                    actions = {
+                        if (enDetalle) {
+                            IconButton(
+                                onClick = onEditObra,
+                                enabled = !state.actualizando && !state.eliminando,
+                                modifier = Modifier.testTag("obras_edit"),
+                            ) {
+                                Icon(painter = painterResource(Iconos.Edit), contentDescription = stringResource(Res.string.obras_edit))
+                            }
+                        }
+                    },
                 )
                 if (state.actualizando || state.eliminando) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -105,12 +131,13 @@ fun MisObrasScreen(
             }
         },
         floatingActionButton = {
-            if (!enFormulario && !enDetalle) {
-                ExtendedFloatingActionButton(
-                    onClick = onCreate,
-                    icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
-                    text = { Text(stringResource(Res.string.obras_create)) },
-                )
+            // Crear es la acción principal de cada pantalla; en el detalle cambia según la pestaña y no aparece en Resumen.
+            when {
+                enFormulario -> Unit
+                !enDetalle -> BotonCrear(Res.string.obras_create, onCreate)
+                pestanaDetalle == PESTANA_TAREAS -> BotonCrear(Res.string.tareas_create, onCreateTarea)
+                pestanaDetalle == PESTANA_RELEVAMIENTOS && puedeCrearRelevamiento ->
+                    BotonCrear(Res.string.relevamientos_create, onCreateRelevamiento, Modifier.testTag("relevamientos_create"))
             }
         },
     ) { padding ->
@@ -129,11 +156,16 @@ fun MisObrasScreen(
             obra != null -> DetalleObraContent(
                 obra = obra,
                 state = state,
-                onEditObra = onEditObra,
                 onChangeStatus = onChangeStatus,
                 onRequestDelete = onRequestDelete,
                 padding = padding,
-                detailExtra = detailExtra,
+                scrollState = detalleScroll,
+                pestana = pestanaDetalle,
+                onPestanaChange = onPestanaDetalleChange,
+                cantidadTareas = cantidadTareas,
+                cantidadRelevamientos = cantidadRelevamientos,
+                tareasContent = tareasContent,
+                relevamientosContent = relevamientosContent,
             )
             else -> ListaObrasContent(
                 user = user,
@@ -145,4 +177,14 @@ fun MisObrasScreen(
             )
         }
     }
+}
+
+@Composable
+private fun BotonCrear(texto: StringResource, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    ExtendedFloatingActionButton(
+        onClick = onClick,
+        icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
+        text = { Text(stringResource(texto)) },
+        modifier = modifier,
+    )
 }

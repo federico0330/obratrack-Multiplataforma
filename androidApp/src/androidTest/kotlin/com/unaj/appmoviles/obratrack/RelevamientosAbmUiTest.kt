@@ -92,6 +92,7 @@ class RelevamientosAbmUiTest {
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK))
                 assertTrue(device.wait(Until.hasObject(By.text(Pattern.compile("My works|Mis obras|I miei lavori"))), 15_000))
                 tocar(By.text(nombre))
+                pulsar("obras_tab_relevamientos")
                 pulsar("relevamientos_item_editar")
                 pulsar("relevamientos_edit")
                 // Atrás cierra el formulario y mantiene el detalle del relevamiento abierto.
