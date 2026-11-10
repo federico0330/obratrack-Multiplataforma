@@ -84,9 +84,10 @@ internal fun DetalleObraContent(
         PrimaryTabRow(selectedTabIndex = pestana) {
             val titulos = listOf(
                 stringResource(Res.string.obras_tab_summary),
-                conCantidad(stringResource(Res.string.tareas_title), cantidadTareas),
-                conCantidad(stringResource(Res.string.relevamientos_title), cantidadRelevamientos),
+                stringResource(Res.string.tareas_title),
+                stringResource(Res.string.relevamientos_title),
             )
+            val cantidades = listOf(null, cantidadTareas, cantidadRelevamientos)
             val tags = listOf("obras_tab_summary", "obras_tab_tareas", "obras_tab_relevamientos")
             titulos.forEachIndexed { i, titulo ->
                 Tab(
@@ -97,7 +98,7 @@ internal fun DetalleObraContent(
                             scope.launch { scrollState.scrollTo(0) }
                         }
                     },
-                    text = { Text(titulo, maxLines = 1) },
+                    text = { TituloPestana(titulo, cantidades[i]) },
                     modifier = Modifier.testTag(tags[i]),
                 )
             }
@@ -115,7 +116,14 @@ internal fun DetalleObraContent(
     }
 }
 
-private fun conCantidad(titulo: String, cantidad: Int?): String = if (cantidad == null) titulo else "$titulo ($cantidad)"
+/** El número va arriba del nombre: "Relevamientos (5)" en una sola línea no entra en un tercio del ancho. */
+@Composable
+private fun TituloPestana(titulo: String, cantidad: Int?) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        if (cantidad != null) Text(cantidad.toString(), style = MaterialTheme.typography.titleSmall)
+        Text(titulo, style = MaterialTheme.typography.labelMedium, maxLines = 1)
+    }
+}
 
 @Composable
 private fun ResumenObra(
