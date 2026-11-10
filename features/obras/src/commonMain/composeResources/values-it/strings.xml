@@ -118,19 +118,16 @@
     <string name="relevamientos_delete_confirmation">Questo rilievo verrà eliminato. L’attività collegata e gli altri rilievi verranno conservati.</string>
     <string name="relevamientos_confirm_delete">Conferma eliminazione</string>
     <string name="relevamientos_edit">Modifica rilievo</string>
-    <string name="relevamientos_detail">Dettaglio del rilievo</string>
-    <string name="relevamientos_back">Torna all’elenco</string>
     <string name="relevamientos_error_not_found">Questo rilievo non è più disponibile. Aggiorna l’elenco.</string>
     <string name="relevamientos_filter_all">Tutti i rilievi</string>
     <string name="relevamientos_filter">Mostra: %1$s</string>
     <string name="relevamientos_filter_empty">Nessun rilievo corrisponde a questo filtro.</string>
-    <string name="relevamientos_next_visit">Prossima visita: %1$s</string>
     <string name="relevamientos_photo_error">Impossibile caricare la foto.</string>
     <string name="relevamientos_photo">Foto (facoltativa)</string>
     <string name="relevamientos_photo_description">Foto del sopralluogo</string>
-    <string name="relevamientos_photo_pick">Scegli dalla galleria</string>
+    <string name="relevamientos_photo_pick">Galleria</string>
     <string name="relevamientos_photo_remove">Rimuovi foto</string>
-    <string name="relevamientos_photo_take">Scatta foto</string>
+    <string name="relevamientos_photo_take">Fotocamera</string>
     <string name="relevamientos_error_photo_network">Impossibile caricare la foto senza connessione. I dati sono conservati: controlla la connessione e salva di nuovo.</string>
     <string name="relevamientos_error_photo_too_large">La foto è ancora troppo pesante dopo il ridimensionamento. Scegline un’altra.</string>
     <string name="relevamientos_error_photo_upload">Impossibile caricare la foto. Riprova o scegline un’altra.</string>
@@ -160,5 +157,10 @@
     <string name="relevamientos_map_pick_hint">Sposta la mappa finché il segnaposto indica il luogo del sopralluogo.</string>
     <string name="relevamientos_map_pick_confirm">Usa questo luogo</string>
     <string name="relevamientos_map_pick_cancel">Annulla</string>
+    <string name="relevamientos_screen_title">Rilievo</string>
+    <string name="relevamientos_work_name">Lavoro: %1$s</string>
+    <string name="relevamientos_task_label">Attività</string>
+    <string name="relevamientos_next_visit_label">Prossima visita</string>
+    <string name="relevamientos_section_data">Dati</string>
     <string name="relevamientos_error_location_invalid">La posizione non è valida. Acquisiscila di nuovo.</string>
 </resources>

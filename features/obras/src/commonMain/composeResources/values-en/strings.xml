@@ -118,19 +118,16 @@
     <string name="relevamientos_delete_confirmation">This survey will be deleted. The linked task and other surveys will be kept.</string>
     <string name="relevamientos_confirm_delete">Confirm deletion</string>
     <string name="relevamientos_edit">Edit survey</string>
-    <string name="relevamientos_detail">Survey details</string>
-    <string name="relevamientos_back">Back to surveys</string>
     <string name="relevamientos_error_not_found">This survey is no longer available. Refresh the list.</string>
     <string name="relevamientos_filter_all">All surveys</string>
     <string name="relevamientos_filter">Show: %1$s</string>
     <string name="relevamientos_filter_empty">No surveys match this filter.</string>
-    <string name="relevamientos_next_visit">Next visit: %1$s</string>
     <string name="relevamientos_photo_error">Could not load the photo.</string>
     <string name="relevamientos_photo">Photo (optional)</string>
     <string name="relevamientos_photo_description">Survey photo</string>
-    <string name="relevamientos_photo_pick">Choose from gallery</string>
+    <string name="relevamientos_photo_pick">Gallery</string>
     <string name="relevamientos_photo_remove">Remove photo</string>
-    <string name="relevamientos_photo_take">Take photo</string>
+    <string name="relevamientos_photo_take">Camera</string>
     <string name="relevamientos_error_photo_network">Could not upload the photo while offline. Your data is kept: check your connection and save again.</string>
     <string name="relevamientos_error_photo_too_large">The photo is still too large after resizing. Choose another one.</string>
     <string name="relevamientos_error_photo_upload">Could not upload the photo. Try again or choose another one.</string>
@@ -160,5 +157,10 @@
     <string name="relevamientos_map_pick_hint">Move the map until the pin is on the survey location.</string>
     <string name="relevamientos_map_pick_confirm">Use this place</string>
     <string name="relevamientos_map_pick_cancel">Cancel</string>
+    <string name="relevamientos_screen_title">Survey</string>
+    <string name="relevamientos_work_name">Work: %1$s</string>
+    <string name="relevamientos_task_label">Task</string>
+    <string name="relevamientos_next_visit_label">Next visit</string>
+    <string name="relevamientos_section_data">Details</string>
     <string name="relevamientos_error_location_invalid">The location is not valid. Capture it again.</string>
 </resources>

@@ -118,19 +118,16 @@
     <string name="relevamientos_delete_confirmation">Se eliminará este relevamiento. La tarea vinculada y los demás relevamientos se conservan.</string>
     <string name="relevamientos_confirm_delete">Confirmar eliminación</string>
     <string name="relevamientos_edit">Editar relevamiento</string>
-    <string name="relevamientos_detail">Detalle del relevamiento</string>
-    <string name="relevamientos_back">Volver al listado</string>
     <string name="relevamientos_error_not_found">Este relevamiento ya no está disponible. Actualizá el listado.</string>
     <string name="relevamientos_filter_all">Todos los relevamientos</string>
     <string name="relevamientos_filter">Mostrar: %1$s</string>
     <string name="relevamientos_filter_empty">No hay relevamientos para este filtro.</string>
-    <string name="relevamientos_next_visit">Próxima visita: %1$s</string>
     <string name="relevamientos_photo_error">No pudimos cargar la foto.</string>
     <string name="relevamientos_photo">Foto (opcional)</string>
     <string name="relevamientos_photo_description">Foto del relevamiento</string>
-    <string name="relevamientos_photo_pick">Elegir de la galería</string>
+    <string name="relevamientos_photo_pick">Galería</string>
     <string name="relevamientos_photo_remove">Quitar foto</string>
-    <string name="relevamientos_photo_take">Sacar foto</string>
+    <string name="relevamientos_photo_take">Cámara</string>
     <string name="relevamientos_error_photo_network">No pudimos subir la foto sin conexión. Tus datos se conservan: revisá la conexión y volvé a guardar.</string>
     <string name="relevamientos_error_photo_too_large">La foto es demasiado pesada aun después de achicarla. Elegí otra.</string>
     <string name="relevamientos_error_photo_upload">No pudimos subir la foto. Intentá de nuevo o elegí otra.</string>
@@ -160,5 +157,10 @@
     <string name="relevamientos_map_pick_hint">Mové el mapa hasta que el pin quede en el lugar del relevamiento.</string>
     <string name="relevamientos_map_pick_confirm">Usar este lugar</string>
     <string name="relevamientos_map_pick_cancel">Cancelar</string>
+    <string name="relevamientos_screen_title">Relevamiento</string>
+    <string name="relevamientos_work_name">Obra: %1$s</string>
+    <string name="relevamientos_task_label">Tarea</string>
+    <string name="relevamientos_next_visit_label">Próxima visita</string>
+    <string name="relevamientos_section_data">Datos</string>
     <string name="relevamientos_error_location_invalid">La ubicación no es válida. Volvé a capturarla.</string>
 </resources>

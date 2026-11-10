@@ -1,8 +1,10 @@
 package com.unaj.obratrack.features.obras
 
 import com.unaj.obratrack.core.ui.Iconos
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -50,6 +52,8 @@ fun MisObrasScreen(
     onPublicChange: (Boolean) -> Unit,
     onSave: () -> Unit,
     detailExtra: @Composable () -> Unit = {},
+    /** Quien llama lo guarda para que, al volver de un relevamiento, la obra siga donde estaba. */
+    detalleScroll: ScrollState = rememberScrollState(),
 ) {
     val obra = state.obraSeleccionada
     val enFormulario = state.formularioVisible
@@ -133,6 +137,7 @@ fun MisObrasScreen(
                 onChangeStatus = onChangeStatus,
                 onRequestDelete = onRequestDelete,
                 padding = padding,
+                scrollState = detalleScroll,
                 detailExtra = detailExtra,
             )
             else -> ListaObrasContent(

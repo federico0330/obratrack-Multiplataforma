@@ -2,9 +2,11 @@ package com.unaj.obratrack.features.obras
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardActions
@@ -50,12 +52,12 @@ internal fun formatearGrados(valor: Double, decimales: Int): String {
 }
 
 /**
- * Ubicación del formulario: el mapa muestra dónde queda, y se puede capturar con el GPS, elegir en el mapa o buscar
- * una dirección. El ViewModel hace el trabajo; acá solo se muestran el estado y las acciones.
+ * Contenido del bloque Ubicación del formulario: el mapa muestra dónde queda, y se puede capturar con el GPS, elegir
+ * en el mapa o buscar una dirección. El título del bloque lo pone [SeccionFormulario]. El ViewModel hace el trabajo;
+ * acá solo se muestran el estado y las acciones.
  */
 @Composable
 internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: RelevamientosAcciones) {
-    Text(stringResource(Res.string.relevamientos_location_optional), style = MaterialTheme.typography.labelMedium)
     form.ubicacion?.let { MapaVistaPrevia(it) }
     if (form.capturandoUbicacion) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -66,24 +68,25 @@ internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: Re
             }
         }
     } else {
-        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = acciones.onLocationCapture, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_location_capture")) {
+        // Las dos formas de ubicarse, lado a lado y del mismo tamaño aunque un texto ocupe dos líneas.
+        Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = acciones.onLocationCapture, enabled = !form.guardando, modifier = Modifier.weight(1f).fillMaxHeight().testTag("relevamientos_location_capture")) {
                 IconoBoton(Iconos.MyLocation)
                 Text(stringResource(if (form.ubicacion == null) Res.string.relevamientos_location_use else Res.string.relevamientos_location_update))
             }
-            OutlinedButton(onClick = acciones.onMapOpen, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_map_open")) {
+            OutlinedButton(onClick = acciones.onMapOpen, enabled = !form.guardando, modifier = Modifier.weight(1f).fillMaxHeight().testTag("relevamientos_map_open")) {
                 IconoBoton(Iconos.Map)
                 Text(stringResource(Res.string.relevamientos_location_pick_on_map))
-            }
-            if (form.ubicacion != null) {
-                TextButton(onClick = acciones.onLocationRemove, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_location_remove")) {
-                    IconoBoton(Iconos.Delete)
-                    Text(stringResource(Res.string.relevamientos_location_remove))
-                }
             }
         }
         // Sin geocodificador en el dispositivo el buscador no se ofrece.
         if (form.busqueda.disponible) BuscadorDireccion(form.busqueda, form.guardando, acciones)
+        if (form.ubicacion != null) {
+            TextButton(onClick = acciones.onLocationRemove, enabled = !form.guardando, modifier = Modifier.testTag("relevamientos_location_remove")) {
+                IconoBoton(Iconos.Delete)
+                Text(stringResource(Res.string.relevamientos_location_remove))
+            }
+        }
     }
 }
 
@@ -91,7 +94,7 @@ internal fun SelectorUbicacion(form: FormularioRelevamientoUiState, acciones: Re
 @Composable
 private fun BuscadorDireccion(busqueda: BusquedaDireccionUiState, deshabilitado: Boolean, acciones: RelevamientosAcciones) {
     if (!busqueda.abierta) {
-        OutlinedButton(onClick = acciones.onAddressSearchOpen, enabled = !deshabilitado, modifier = Modifier.testTag("relevamientos_address_open")) {
+        OutlinedButton(onClick = acciones.onAddressSearchOpen, enabled = !deshabilitado, modifier = Modifier.fillMaxWidth().testTag("relevamientos_address_open")) {
             IconoBoton(Iconos.Search)
             Text(stringResource(Res.string.relevamientos_address_search))
         }
@@ -135,30 +138,34 @@ private fun BuscadorDireccion(busqueda: BusquedaDireccionUiState, deshabilitado:
 @Composable
 internal fun UbicacionDetalle(ubicacion: Ubicacion, direccion: DireccionUiState) {
     val uriHandler = LocalUriHandler.current
-    Text(stringResource(Res.string.relevamientos_location_title), style = MaterialTheme.typography.labelMedium)
-    MapaVistaPrevia(ubicacion)
-    // Si la dirección no está disponible no se muestra nada: el mapa ya dice dónde es y no es un error.
-    when (direccion) {
-        DireccionUiState.Cargando -> Text(
-            stringResource(Res.string.relevamientos_address_loading), style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("relevamientos_address_loading"),
-        )
-        is DireccionUiState.Disponible -> Text(
-            stringResource(Res.string.relevamientos_address, direccion.texto), modifier = Modifier.testTag("relevamientos_address_value"),
-        )
-        DireccionUiState.Ninguna, DireccionUiState.NoDisponible -> Unit
-    }
-    OutlinedButton(
-        onClick = {
-            try {
-                uriHandler.openUri(enlaceMapa(ubicacion))
-            } catch (_: Exception) {
-                // Sin navegador ni app de mapas no hay otra forma de abrirlo; el mapa de la pantalla sigue a la vista.
+    CampoDetalle(stringResource(Res.string.relevamientos_location_title)) {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            MapaVistaPrevia(ubicacion)
+            // Si la dirección no está disponible no se muestra nada: el mapa ya dice dónde es y no es un error.
+            when (direccion) {
+                DireccionUiState.Cargando -> Text(
+                    stringResource(Res.string.relevamientos_address_loading), style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.testTag("relevamientos_address_loading"),
+                )
+                is DireccionUiState.Disponible -> Text(
+                    stringResource(Res.string.relevamientos_address, direccion.texto),
+                    style = MaterialTheme.typography.bodyLarge, modifier = Modifier.testTag("relevamientos_address_value"),
+                )
+                DireccionUiState.Ninguna, DireccionUiState.NoDisponible -> Unit
             }
-        },
-        modifier = Modifier.testTag("relevamientos_location_open_map"),
-    ) {
-        IconoBoton(Iconos.OpenInNew)
-        Text(stringResource(Res.string.relevamientos_location_open_map))
+            OutlinedButton(
+                onClick = {
+                    try {
+                        uriHandler.openUri(enlaceMapa(ubicacion))
+                    } catch (_: Exception) {
+                        // Sin navegador ni app de mapas no hay otra forma de abrirlo; el mapa de la pantalla sigue a la vista.
+                    }
+                },
+                modifier = Modifier.fillMaxWidth().testTag("relevamientos_location_open_map"),
+            ) {
+                IconoBoton(Iconos.OpenInNew)
+                Text(stringResource(Res.string.relevamientos_location_open_map))
+            }
+        }
     }
 }
