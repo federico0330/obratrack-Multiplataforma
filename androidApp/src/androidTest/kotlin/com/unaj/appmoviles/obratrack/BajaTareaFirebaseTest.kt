@@ -1,6 +1,9 @@
 package com.unaj.appmoviles.obratrack
 
 import androidx.test.platform.app.InstrumentationRegistry
+import com.unaj.obratrack.core.firebase.relevamientos.FirebaseRelevamientoResult
+import com.unaj.obratrack.core.firebase.relevamientos.GitLiveFirebaseRelevamientoDataSource
+import com.unaj.obratrack.core.firebase.relevamientos.RelevamientoDto
 import com.unaj.obratrack.core.firebase.tareas.FirebaseTareaResult
 import com.unaj.obratrack.core.firebase.tareas.GitLiveFirebaseTareaDataSource
 import dev.gitlive.firebase.Firebase
@@ -11,6 +14,8 @@ import dev.gitlive.firebase.firestore.firestore
 import dev.gitlive.firebase.firestore.fromMilliseconds
 import dev.gitlive.firebase.firestore.toMilliseconds
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
@@ -20,6 +25,55 @@ import org.junit.Test
 
 /** Requiere activar firebaseIntegration y tener una sesión abierta en la app del dispositivo. */
 class BajaTareaFirebaseTest {
+    @Test
+    fun bajaConcurrenteConAltaConservaLaUltimaVisitaDelConjunto() = runBlocking {
+        assumeTrue(InstrumentationRegistry.getArguments().getString("firebaseIntegration") == "true")
+        val uid = requireNotNull(Firebase.auth.currentUser?.uid)
+        val db = Firebase.firestore
+        val tareas = GitLiveFirebaseTareaDataSource(db)
+        val relevamientos = GitLiveFirebaseRelevamientoDataSource(db)
+        withTimeout(120_000) {
+            repeat(5) {
+                val obra = db.collection("obras").document
+                val tarea = obra.collection("tareas").document("retirar")
+                val registros = obra.collection("relevamientos")
+                try {
+                    obra.set(mapOf(
+                        "userId" to uid, "nombre" to "Prueba de concurrencia", "cliente" to "Integración",
+                        "direccion" to "Prueba local", "publica" to false, "estado" to "activa",
+                        "fechaInicio" to Timestamp.fromMilliseconds(1.0),
+                        "ultimaVisita" to Timestamp.fromMilliseconds(30.0),
+                    ))
+                    tarea.set(mapOf("userId" to uid, "titulo" to "Retirar", "estado" to "PENDIENTE"))
+                    registros.document("anterior").set(mapOf(
+                        "userId" to uid, "fecha" to Timestamp.fromMilliseconds(10.0), "nota" to "Anterior",
+                    ))
+                    registros.document("vinculado").set(mapOf(
+                        "userId" to uid, "fecha" to Timestamp.fromMilliseconds(30.0),
+                        "nota" to "Vinculado", "tareaId" to tarea.id,
+                    ))
+                    coroutineScope {
+                        val baja = async { tareas.eliminar(uid, obra.id, tarea.id, true) }
+                        val alta = async { relevamientos.crear(RelevamientoDto("", obra.id, uid, 20, "Nuevo")) }
+                        assertTrue(baja.await() is FirebaseTareaResult.Success)
+                        assertTrue(alta.await() is FirebaseRelevamientoResult.Success)
+                    }
+                    assertEquals(20L, obra.get(Source.SERVER).get<Timestamp>("ultimaVisita").toMilliseconds().toLong())
+                    assertEquals(2, registros.get(Source.SERVER).documents.size)
+                    assertFalse(tarea.get(Source.SERVER).exists)
+                } finally {
+                    withContext(NonCancellable) {
+                        withTimeout(20_000) {
+                            for (doc in registros.get(Source.SERVER).documents) doc.reference.delete()
+                            tarea.delete()
+                            obra.delete()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     @Test
     fun bajaYDesvinculacionConservanLaUltimaVisitaEnServidor() = runBlocking {
         assumeTrue(InstrumentationRegistry.getArguments().getString("firebaseIntegration") == "true")

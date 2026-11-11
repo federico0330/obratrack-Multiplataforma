@@ -20,6 +20,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import com.unaj.obratrack.domain.model.EstadoObra
 import com.unaj.obratrack.domain.model.Obra
 import com.unaj.obratrack.domain.model.Usuario
@@ -120,7 +122,7 @@ fun MisObrasScreen(
                                 enabled = !state.actualizando && !state.eliminando,
                                 modifier = Modifier.testTag("obras_edit"),
                             ) {
-                                Icon(painter = painterResource(Iconos.Edit), contentDescription = stringResource(Res.string.obras_edit))
+                                Icon(painter = painterResource(Iconos.Edit), contentDescription = stringResource(Res.string.obras_edit_title))
                             }
                         }
                     },
@@ -181,10 +183,11 @@ fun MisObrasScreen(
 
 @Composable
 private fun BotonCrear(texto: StringResource, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    val etiqueta = stringResource(texto)
     ExtendedFloatingActionButton(
         onClick = onClick,
         icon = { Icon(painterResource(Iconos.Add), contentDescription = null) },
-        text = { Text(stringResource(texto)) },
-        modifier = modifier,
+        text = { Text(etiqueta) },
+        modifier = modifier.semantics(mergeDescendants = true) { contentDescription = etiqueta },
     )
 }

@@ -6,4 +6,4 @@ Para compilar la app, colocá `GoogleService-Info.plist` en esta carpeta. El arc
 
 Para "Continuar con Google", el `GoogleService-Info.plist` tiene que descargarse después de habilitar Google en Firebase Authentication, así trae `CLIENT_ID` y `REVERSED_CLIENT_ID`. La app lee `CLIENT_ID` en tiempo de ejecución y un script de compilación (definido en `project.yml`) registra `REVERSED_CLIENT_ID` como URL scheme; no hay que cargar nada a mano en Xcode. Después de cambiar el `Podfile`, corré `pod install`.
 
-No hace falta un iPhone: en una Mac, abrí `ObraTrackIOS.xcworkspace` y ejecutá `ObraTrackIOS` con un simulador. Desde Windows, el workflow de GitHub Actions compila y recorre login/registro en un simulador alojado en macOS.
+No hace falta un iPhone: en una Mac, abrí `ObraTrackIOS.xcworkspace` y ejecutá `ObraTrackIOS` con un simulador. El workflow de GitHub Actions está deshabilitado manualmente. En una etapa anterior compiló y recorrió login/registro en un simulador macOS con configuración ficticia. Las instrucciones para preparar la Mac y ejecutar en simulador o iPhone están en el [README principal](../README.md#ios-desde-una-mac).

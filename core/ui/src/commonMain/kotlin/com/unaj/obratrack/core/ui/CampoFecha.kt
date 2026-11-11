@@ -18,6 +18,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.semantics.semantics
 import com.unaj.obratrack.core.ui.generated.resources.*
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -44,9 +47,10 @@ fun CampoFecha(
     enabled: Boolean = true,
 ) {
     var abierto by remember { mutableStateOf(false) }
+    val fechaTexto = fechaLegible(fechaIso)
     Box(modifier) {
         OutlinedTextField(
-            value = fechaLegible(fechaIso),
+            value = fechaTexto,
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
@@ -61,7 +65,14 @@ fun CampoFecha(
             modifier = Modifier.fillMaxWidth(),
         )
         // El campo de solo lectura no recibe toques de forma confiable: una capa transparente los captura.
-        Box(Modifier.matchParentSize().clickable(enabled = enabled) { abierto = true })
+        Box(
+            Modifier.matchParentSize()
+                .semantics {
+                    contentDescription = label
+                    stateDescription = fechaTexto
+                }
+                .clickable(enabled = enabled) { abierto = true },
+        )
     }
     if (abierto && enabled) {
         val estado = rememberDatePickerState(

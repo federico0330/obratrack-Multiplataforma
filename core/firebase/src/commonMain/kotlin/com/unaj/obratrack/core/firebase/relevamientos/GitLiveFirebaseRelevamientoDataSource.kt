@@ -54,7 +54,11 @@ class GitLiveFirebaseRelevamientoDataSource(
                 }
                 override fun guardar(dto: RelevamientoDto, ultimaVisitaMillis: Long) {
                     transaction.set(ref, dto.camposAlta())
-                    transaction.update(obra, "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble()))
+                    transaction.update(
+                        obra,
+                        "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble()),
+                        "revisionRelevamientos" to FieldValue.increment(1),
+                    )
                 }
             })
         }
@@ -94,8 +98,8 @@ class GitLiveFirebaseRelevamientoDataSource(
                     return if (snapshot.exists) snapshot.get("userId") else null
                 }
                 override suspend fun leerFechas(): Map<String, Long> =
-                    // Se vuelve a consultar en cada intento. Las mutaciones de ambos clientes
-                    // escriben la obra leída por la transacción y fuerzan reintento si cambia.
+                    // La revisión de la obra cambia en cada mutación, incluso si ultimaVisita queda igual.
+                    // Eso invalida una consulta anterior cuando hay altas o bajas concurrentes.
                     relevamientos.get(Source.SERVER).documents.mapNotNull { doc ->
                         doc.timestampMillis("fecha")?.let { doc.id to it }
                     }.toMap()
@@ -118,6 +122,7 @@ class GitLiveFirebaseRelevamientoDataSource(
                     }
                     transaction.updateFields(obra) {
                         "ultimaVisita" to Timestamp.fromMilliseconds(ultimaVisitaMillis.toDouble())
+                        "revisionRelevamientos" to FieldValue.increment(1)
                     }
                 }
                 override fun eliminar(ultimaVisitaMillis: Long?) {
@@ -126,6 +131,7 @@ class GitLiveFirebaseRelevamientoDataSource(
                         "ultimaVisita" to (ultimaVisitaMillis?.let {
                             Timestamp.fromMilliseconds(it.toDouble())
                         } ?: FieldValue.delete)
+                        "revisionRelevamientos" to FieldValue.increment(1)
                     }
                 }
             }
