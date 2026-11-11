@@ -125,7 +125,10 @@ class ObrasViewModel(
     }
 
     fun reintentar() {
-        userId?.let(::observeWorks)
+        val owner = userId ?: return
+        listaJob?.cancel()
+        listaJob = null
+        observeWorks(owner)
     }
 
     fun editarVisita(obra: Obra) {

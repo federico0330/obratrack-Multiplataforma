@@ -158,7 +158,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                 IconButton(onClick = { acciones.onEdit(tarea) }, enabled = !ocupada) {
                     Icon(
                         painter = painterResource(Iconos.Edit),
-                        contentDescription = stringResource(Res.string.tareas_edit),
+                        contentDescription = stringResource(Res.string.tareas_edit_title),
                     )
                 }
                 IconButton(
@@ -168,7 +168,7 @@ private fun FilaTarea(item: TareaItem, state: TareasUiState, acciones: TareasAcc
                 ) {
                     Icon(
                         painter = painterResource(Iconos.Delete),
-                        contentDescription = stringResource(Res.string.tareas_delete),
+                        contentDescription = stringResource(Res.string.tareas_delete_title),
                     )
                 }
             }

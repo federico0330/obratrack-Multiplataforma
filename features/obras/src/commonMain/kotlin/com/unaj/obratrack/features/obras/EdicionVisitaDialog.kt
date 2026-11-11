@@ -14,8 +14,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.unaj.obratrack.core.ui.CampoFecha
 import com.unaj.obratrack.core.ui.ErrorBlock
@@ -89,7 +87,6 @@ internal fun EdicionVisitaDialog(
                         fechaIso = fecha,
                         label = etiquetaFecha,
                         onDateChange = { fecha = it },
-                        modifier = Modifier.semantics { contentDescription = etiquetaFecha },
                         enabled = habilitado,
                     )
                     OutlinedTextField(

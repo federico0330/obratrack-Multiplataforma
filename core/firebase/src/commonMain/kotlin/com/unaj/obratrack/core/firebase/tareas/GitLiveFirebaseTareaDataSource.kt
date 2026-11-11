@@ -81,36 +81,39 @@ class GitLiveFirebaseTareaDataSource(
     ): FirebaseTareaResult<Unit> = writeResult {
         val obra = firestore.collection(COLLECTION_OBRAS).document(obraId)
         val relevamientos = obra.collection(SUBCOLLECTION_RELEVAMIENTOS)
-        ejecutarBajaTarea(object : AlmacenBajaTarea {
-            override suspend fun leerVinculados(): List<String> = relevamientos
-                .where { FIELD_TAREA_ID equalTo tareaId }
-                .get(Source.SERVER).documents.map { it.id }
+        firestore.runTransaction {
+            val transaction = this
+            transaction.get(obra)
+            ejecutarBajaTarea(object : AlmacenBajaTarea {
+                override suspend fun leerVinculados(): List<String> = relevamientos
+                    .where { FIELD_TAREA_ID equalTo tareaId }
+                    .get(Source.SERVER).documents.map { it.id }
 
-            override suspend fun leerFechas(): Map<String, Long> = relevamientos
-                .get(Source.SERVER).documents.mapNotNull { doc ->
-                    if (!doc.contains(FIELD_FECHA)) return@mapNotNull null
-                    doc.get<Timestamp?>(FIELD_FECHA)?.let { doc.id to it.toMilliseconds().toLong() }
-                }.toMap()
+                override suspend fun leerFechas(): Map<String, Long> = relevamientos
+                    .get(Source.SERVER).documents.mapNotNull { doc ->
+                        if (!doc.contains(FIELD_FECHA)) return@mapNotNull null
+                        doc.get<Timestamp?>(FIELD_FECHA)?.let { doc.id to it.toMilliseconds().toLong() }
+                    }.toMap()
 
-            override suspend fun aplicar(plan: PlanBajaTarea) {
-                val batch = firestore.batch()
-                plan.relevamientos.forEach { id ->
-                    val ref = relevamientos.document(id)
-                    if (plan.eliminarRelevamientos) batch.delete(ref)
-                    else batch.update(ref, FIELD_TAREA_ID to FieldValue.delete)
+                override suspend fun aplicar(plan: PlanBajaTarea) {
+                    plan.relevamientos.forEach { id ->
+                        val ref = relevamientos.document(id)
+                        if (plan.eliminarRelevamientos) transaction.delete(ref)
+                        else transaction.update(ref, FIELD_TAREA_ID to FieldValue.delete)
+                    }
+                    transaction.delete(tareas(obraId).document(tareaId))
+                    if (plan.actualizarUltimaVisita) {
+                        transaction.update(
+                            obra,
+                            FIELD_ULTIMA_VISITA to (plan.ultimaVisitaMillis?.let {
+                                Timestamp.fromMilliseconds(it.toDouble())
+                            } ?: FieldValue.delete),
+                            "revisionRelevamientos" to FieldValue.increment(1),
+                        )
+                    }
                 }
-                batch.delete(tareas(obraId).document(tareaId))
-                if (plan.actualizarUltimaVisita) {
-                    batch.update(
-                        obra,
-                        FIELD_ULTIMA_VISITA to (plan.ultimaVisitaMillis?.let {
-                            Timestamp.fromMilliseconds(it.toDouble())
-                        } ?: FieldValue.delete),
-                    )
-                }
-                batch.commit()
-            }
-        }, eliminarRelevamientos)
+            }, eliminarRelevamientos)
+        }
     }
 
     private fun tareas(obraId: String) =

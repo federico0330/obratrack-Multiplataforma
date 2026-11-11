@@ -1,6 +1,26 @@
 # Progreso de ObraTrack Multiplataforma
 
-## Hecho y verificado
+## Revisión del 10/11/2026
+
+- [x] Revisados los recorridos de acceso, obras, tareas, relevamientos, Agenda y perfil en un teléfono Android 15.
+- [x] Aprobadas 413 pruebas de host, la compilación Android y cuatro recorridos de dispositivo con Firebase local.
+- [x] Corregido Reintentar en Obras y Agenda. Una suscripción que seguía activa podía impedir abrir una consulta nueva después de un error.
+- [x] Corregida la última visita ante altas y ediciones simultáneas. Firestore puede conservar la versión de un documento si se escribe el mismo valor. Ahora cada mutación incrementa `revisionRelevamientos`, aunque `ultimaVisita` no cambie.
+- [x] La baja de tareas y sus relevamientos utiliza una transacción que lee la obra antes de calcular el plan. Si otra operación cambia sus relevamientos, se vuelve a consultar y calcular la fecha. Se conserva el límite de escrituras y la opción de desvincular.
+- [x] La prueba de integración verifica tres rondas de alta/edición simultáneas y cinco rondas de alta/baja de tarea simultáneas, con lecturas del servidor.
+- [x] Agregadas descripciones de accesibilidad a creación, edición de obras y acciones de tareas. El selector de fecha expone su etiqueta y valor.
+- [x] Corregido el contraste del reloj y los íconos del sistema al cambiar entre tema claro y oscuro en Android.
+- [x] Preparada una cuenta de demostración separada, con 3 obras privadas, 8 tareas y 5 relevamientos. Dos fotografías se subieron a Cloudinary mediante el caso de uso de creación de relevamientos. La cuenta se abre desde la app habitual.
+- [x] Verificadas la persistencia de la sesión después de detener y abrir la app y las pantallas de la demostración con Firebase real.
+- [x] Abiertas y canceladas la galería y la cámara del sistema. Los archivos personales del dispositivo no se usaron para las fotos de la demostración. Se comprobó que el mapa termina de cargar.
+- [x] Retiradas del teléfono las instalaciones y la instrumentación de pruebas. Quedó la app ObraTrack con sesión de demostración, en español.
+- [x] README actualizado con alcance, checklist, recorrido, preparación Android/iOS y pendientes.
+
+El contador es un campo interno adicional de la obra. Los documentos anteriores pueden incorporarlo al modificarse y el cliente nativo puede seguir leyendo los datos. La comprobación de concurrencia cubre operaciones de este cliente. Las escrituras simultáneas desde el cliente nativo anterior requieren una revisión propia porque aquel no incrementa el contador.
+
+La captura de una foto de 50 MP y el GPS físico con precisión aproximada siguen pendientes. El flujo real de Firebase, cámara y ubicación en iOS continúa pendiente. El workflow de simulador está deshabilitado. Las credenciales y la configuración de la demostración se entregan por privado. Los scripts, imágenes y capturas de esta revisión quedan en `pruebas/revision-10-11/`, fuera de Git.
+
+## Base inicial
 - Gradle configurado; app ejecutada en teléfono Android físico.
 - Login Firebase probado con una cuenta existente; registro implementado.
 - Capas separadas: `core/domain`, `core/data`, `core/firebase`, features Android y `androidApp`.
@@ -42,7 +62,7 @@
 2. Completar la comprobación real de Firebase en iOS cuando haya una Mac o CI disponible. El workflow figura deshabilitado manualmente.
 3. ABM de relevamientos validado en Android. Fotos/cámara, ubicación y PDF conservan sus etapas propias en la guía, según el alcance confirmado.
 
-## Interfaz compartida y host iOS (rama `codex/ios-access-obras`)
+## Interfaz compartida y host iOS
 - Login, registro, sesión y Mis obras se movieron a `commonMain`, junto con sus textos español/inglés/italiano.
 - `composeApp` contiene el punto de composición de dependencias y navegación común; Android e iOS llaman a la misma interfaz.
 - Se agregó el host SwiftUI de iOS y una prueba de interfaz que recorre login → registro → login sin inicializar Firebase ni escribir datos.
@@ -83,7 +103,7 @@
 - Perfil y Mis obras son dos suscripciones a la misma consulta de obras; se espera que el SDK de Firestore las agrupe, pero no está verificado. Pasan los tests de `core:domain` y `features:auth`; falta la revisión visual y el CI de iOS.
 
 ## Continuar con Google (rama `feat/login-google`, sobre `main` con relevamientos)
-- Hecho a mano, sin KMPAuth: su módulo de Firebase arrastra GitLive 3.0.0-alpha01. En el dominio, `IniciarSesionConGoogle` usa los puertos `ProveedorTokenGoogle` (uno por plataforma: Credential Manager en `androidApp`; Google Sign-In en Swift, que responde por callback a `composeApp/iosMain`) y `RepositorioAccesoGoogle`. Este último está separado de `RepositorioAutenticacion` para no romper los fakes de otras ramas. Cancelar no muestra error.
+- Integración directa con los SDK. Se evitó KMPAuth porque su módulo de Firebase depende de GitLive 3.0.0-alpha01. En el dominio, `IniciarSesionConGoogle` usa los puertos `ProveedorTokenGoogle` (uno por plataforma: Credential Manager en `androidApp`; Google Sign-In en Swift, que responde por callback a `composeApp/iosMain`) y `RepositorioAccesoGoogle`. Este último está separado de `RepositorioAutenticacion` para no romper los fakes de otras ramas. Cancelar no muestra error.
 - Pasan los tests de todos los módulos (incluidos los relevamientos) y se probó en un dispositivo Android. Falta: el CI de iOS (`pod install` con GoogleSignIn y el script del URL scheme) y probarlo en iOS con el plist real.
 
 ## Fotos de relevamientos, PR 1 (rama `feat/fotos-cloudinary`)
@@ -146,7 +166,7 @@
 - Esta intervención actualiza planificación y seguimiento. No se ejecutaron pruebas, compilaciones ni escrituras en Firebase; los resultados de pruebas anteriores siguen siendo los registrados en cada sección.
 
 
-## Consistencia de tareas (rama `codex/tareas-consistencia`)
+## Consistencia de tareas
 - Al guardar una tarea y cambiar de obra antes de recibir la respuesta, el guardado anterior podía cerrar el formulario nuevo. Una edición fallida podía mostrar su error al reabrir la misma obra; una operación de estado o baja anterior podía apagar la carga de otra operación o mostrar errores en otra sesión.
 - `TareasViewModel` cancela los trabajos al cambiar el contexto y comprueba una revisión de la apertura antes de aplicar resultados, errores o limpieza final. El formulario tiene su propia revisión para distinguir cerrar y volver a abrirlo en la misma obra. Cancelar la espera no revierte una escritura ya enviada a Firebase.
 - Al eliminar una tarea con relevamientos se recalcula `ultimaVisita` con la fecha máxima de los que quedan; si no queda ninguno con fecha, se quita el campo. Desvincular conserva los relevamientos y no modifica esa fecha.
@@ -160,7 +180,7 @@
 - iOS no se volvió a ejecutar: el workflow `iOS Simulator` figura `disabled_manually`. Esta verificación es Android; no acredita el flujo real de Firebase en iOS ni aislamiento entre dos cuentas.
 
 
-## Relevamientos: alta y listado (rama `codex/relevamientos-alta-listado`)
+## Relevamientos: alta y listado
 - Se agregó una sección en el detalle de obra para listar relevamientos y crear uno con fecha, nota y tarea opcional. La fecha usa el calendario compartido; la nota se valida y normaliza en el dominio. La lista ordena por fecha descendente y muestra el vínculo con la tarea. El detalle de obra muestra el último relevamiento.
 - `core:domain` define modelo, draft, contrato y casos de uso; `core:data` mapea DTO y errores; `core:firebase` contiene el adaptador GitLive y la transacción. `RelevamientosViewModel` coordina sesión, consultas y formulario; los composables reciben estado y acciones. Las dependencias se construyen en `AppGraph`.
 - Se conserva `obras/{id}/relevamientos`, `userId`, `fecha` como Timestamp, `nota` y `tareaId` opcional. La lectura contempla documentos nativos con foto, ubicación y próxima visita; este formulario crea únicamente fecha, nota y vínculo. No se cambiaron reglas ni índices de Firestore.
@@ -173,7 +193,7 @@
 - Se revisó visualmente el formulario y la fecha del último relevamiento en modo oscuro durante el recorrido. iOS sigue sin una ejecución nueva, por el workflow deshabilitado. Edición, baja, historial de cambios, captura de fotos y ubicación quedan para cortes posteriores; tampoco se acredita aún aislamiento con dos cuentas ni funcionamiento sin conexión.
 
 
-## Cierre del ABM de relevamientos (rama `codex/relevamientos-abm`)
+## Cierre del ABM de relevamientos
 - Código implementado: detalle, edición de fecha/nota/vínculo, baja con confirmación y filtros para todos los relevamientos, sin tarea o de una tarea. Atrás y cancelar edición regresan al detalle; la baja conserva la tarea y los demás relevamientos.
 - La edición escribe únicamente `fecha`, `nota` y `tareaId` (se elimina este campo al desvincular). Conserva dueño, foto, ubicación, próxima visita, hora y cualquier campo adicional del cliente nativo. El detalle muestra los datos existentes y permite abrir una foto ya guardada mediante el visor del sistema; no incorpora captura ni carga de fotos.
 - Dominio: se comparten las validaciones de alta/edición y se agregan casos de uso de actualización y baja, más un filtro puro. Data traduce DTO y errores. Firebase adapta la transacción; los ViewModels siguen recibiendo casos de uso por constructor desde `AppGraph`.

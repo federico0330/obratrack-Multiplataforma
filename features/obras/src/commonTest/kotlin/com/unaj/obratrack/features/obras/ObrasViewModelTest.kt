@@ -248,6 +248,28 @@ class ObrasViewModelTest {
         }
     }
 
+    @Test
+    fun reintentarReabreLaSuscripcionAunqueLaAnteriorSigaActiva() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val repo = ObrasRepoFalso()
+            repo.flujoObras = MutableStateFlow(ResultadoObra.Fallo(ErrorObra.RED))
+            val viewModel = ObrasViewModel(
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo),
+                ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
+            )
+            advanceUntilIdle()
+            assertEquals(ListaObrasUiState.Error(ErrorObrasUi.RED), viewModel.state.value.lista)
+
+            viewModel.reintentar()
+            advanceUntilIdle()
+
+            assertEquals(listOf("uid-1", "uid-1"), repo.usuariosConsultados)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private fun obra(id: String, userId: String, nombre: String) = Obra(
         id = id,
         userId = userId,
@@ -281,9 +303,10 @@ private class ObrasRepoFalso : RepositorioObras {
     var deletedObraId: String? = null
     val visitas = mutableListOf<Pair<Instant?, Int?>>()
     var resultadoVisita: ResultadoObra<Unit> = ResultadoObra.Exito(Unit)
+    var flujoObras: Flow<ResultadoObra<List<Obra>>>? = null
     override fun observarPropias(userId: String): Flow<ResultadoObra<List<Obra>>> {
         usuariosConsultados += userId
-        return flowOf(ResultadoObra.Exito(obrasPorUsuario[userId].orEmpty()))
+        return flujoObras ?: flowOf(ResultadoObra.Exito(obrasPorUsuario[userId].orEmpty()))
     }
     override suspend fun crear(userId: String, draft: ObraDraft, estado: EstadoObra): ResultadoObra<Obra> {
         createdUserId = userId

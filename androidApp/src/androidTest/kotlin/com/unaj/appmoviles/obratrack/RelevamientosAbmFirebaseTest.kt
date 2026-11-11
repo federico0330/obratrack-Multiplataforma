@@ -79,7 +79,9 @@ class RelevamientosAbmFirebaseTest {
                         assertTrue(editar.await() is FirebaseRelevamientoResult.Success)
                         assertTrue(crear.await() is FirebaseRelevamientoResult.Success)
                     }
-                    assertEquals(20L, obra.get(Source.SERVER).get<Timestamp>("ultimaVisita").toMilliseconds().toLong())
+                    val obraActualizada = obra.get(Source.SERVER)
+                    assertEquals(20L, obraActualizada.get<Timestamp>("ultimaVisita").toMilliseconds().toLong())
+                    assertEquals(4L + vuelta * 2, obraActualizada.get<Long>("revisionRelevamientos"))
                     for (doc in relevamientos.get(Source.SERVER).documents) doc.reference.delete()
                 }
             } finally {
