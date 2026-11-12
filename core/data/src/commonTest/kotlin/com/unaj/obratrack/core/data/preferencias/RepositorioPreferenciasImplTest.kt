@@ -1,6 +1,7 @@
 package com.unaj.obratrack.core.data.preferencias
 
 import com.russhwolf.settings.MapSettings
+import com.unaj.obratrack.domain.model.IdiomaApp
 import com.unaj.obratrack.domain.model.TemaApp
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -26,8 +27,36 @@ class RepositorioPreferenciasImplTest {
 
     @Test
     fun valorDesconocidoVuelveAlSistema() = runTest {
-        val settings = MapSettings("tema" to "SEPIA")
+        val settings = MapSettings("tema" to "SEPIA", "idioma" to "KLINGON")
+        val repositorio = RepositorioPreferenciasImpl(settings)
 
-        assertEquals(TemaApp.SISTEMA, RepositorioPreferenciasImpl(settings).tema.first())
+        assertEquals(TemaApp.SISTEMA, repositorio.tema.first())
+        assertEquals(IdiomaApp.SISTEMA, repositorio.idioma.first())
+    }
+
+    @Test
+    fun idiomaSinNadaGuardadoSigueAlSistema() = runTest {
+        assertEquals(IdiomaApp.SISTEMA, RepositorioPreferenciasImpl(MapSettings()).idioma.value)
+    }
+
+    @Test
+    fun guardarIdiomaPersisteAntesDeEmitir() = runTest {
+        val settings = MapSettings()
+        val repositorio = RepositorioPreferenciasImpl(settings)
+
+        repositorio.guardarIdioma(IdiomaApp.ITALIANO)
+
+        assertEquals(IdiomaApp.ITALIANO, repositorio.idioma.value)
+        assertEquals("ITALIANO", settings.getStringOrNull("idioma"))
+        assertEquals(IdiomaApp.ITALIANO, RepositorioPreferenciasImpl(settings).idioma.value)
+    }
+
+    @Test
+    fun elIdiomaYElTemaSonIndependientes() = runTest {
+        val repositorio = RepositorioPreferenciasImpl(MapSettings())
+
+        repositorio.guardarIdioma(IdiomaApp.INGLES)
+
+        assertEquals(TemaApp.SISTEMA, repositorio.tema.value)
     }
 }

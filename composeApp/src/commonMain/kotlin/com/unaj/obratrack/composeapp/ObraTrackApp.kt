@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
+import com.unaj.obratrack.domain.model.IdiomaApp
 import com.unaj.obratrack.domain.model.TemaApp
 import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
 import com.unaj.obratrack.features.auth.AuthViewModel
@@ -60,6 +61,8 @@ fun ObraTrackApp(
     uiTesting: Boolean = false,
     // La plataforma ajusta el color de los íconos de las barras del sistema al tema que se aplica.
     alAplicarTema: (oscuro: Boolean) -> Unit = {},
+    // La plataforma cambia el idioma de la aplicación al elegido (Android reinicia la pantalla).
+    alAplicarIdioma: (IdiomaApp) -> Unit = {},
 ) {
     if (uiTesting) {
         AccessFlowPreview()
@@ -82,6 +85,7 @@ fun ObraTrackApp(
     val relevamientosState by relevamientosViewModel.state.collectAsState()
     val cuentaState by cuentaViewModel.state.collectAsState()
     val tema by preferenciasViewModel.tema.collectAsState()
+    val idioma by preferenciasViewModel.idioma.collectAsState()
     val sistemaOscuro = isSystemInDarkTheme()
     val oscuro = when (tema) {
         TemaApp.SISTEMA -> sistemaOscuro
@@ -89,6 +93,7 @@ fun ObraTrackApp(
         TemaApp.OSCURO -> true
     }
     LaunchedEffect(oscuro) { alAplicarTema(oscuro) }
+    LaunchedEffect(idioma) { alAplicarIdioma(idioma) }
     var enRegistro by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(authState.user) {
@@ -239,11 +244,13 @@ fun ObraTrackApp(
                                         resumen = resumen,
                                         errorMessage = authState.error?.message(),
                                         tema = tema,
+                                        idioma = idioma,
                                         onRetry = perfilViewModel::reintentar,
                                         onEditName = {
                                             cuentaViewModel.abrirEdicionNombre(authState.user?.nombre.orEmpty())
                                         },
                                         onThemeChange = preferenciasViewModel::elegirTema,
+                                        onLanguageChange = preferenciasViewModel::elegirIdioma,
                                         onSignOut = authViewModel::signOut,
                                     )
                                 }

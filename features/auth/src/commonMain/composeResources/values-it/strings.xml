@@ -60,4 +60,9 @@
     <string name="perfil_theme_system">Sistema</string>
     <string name="perfil_theme_light">Chiaro</string>
     <string name="perfil_theme_dark">Scuro</string>
+    <string name="perfil_language_title">Lingua</string>
+    <string name="perfil_language_system">Sistema</string>
+    <string name="perfil_language_es">Español</string>
+    <string name="perfil_language_en">English</string>
+    <string name="perfil_language_it">Italiano</string>
 </resources>

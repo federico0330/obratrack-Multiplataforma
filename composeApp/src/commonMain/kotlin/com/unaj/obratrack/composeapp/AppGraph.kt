@@ -18,7 +18,9 @@ import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
 import com.unaj.obratrack.core.data.auth.RepositorioCuentaImpl
 import com.unaj.obratrack.core.data.preferencias.crearRepositorioPreferencias
 import com.unaj.obratrack.domain.usecase.ActualizarNombreUsuario
+import com.unaj.obratrack.domain.usecase.CambiarIdioma
 import com.unaj.obratrack.domain.usecase.CambiarTema
+import com.unaj.obratrack.domain.usecase.ObservarIdioma
 import com.unaj.obratrack.domain.usecase.ObservarTema
 import com.unaj.obratrack.domain.usecase.RecuperarContrasena
 import com.unaj.obratrack.features.auth.CuentaViewModel
@@ -98,6 +100,8 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
     fun crearPreferenciasViewModel() = PreferenciasViewModel(
         ObservarTema(preferenciasRepository),
         CambiarTema(preferenciasRepository),
+        ObservarIdioma(preferenciasRepository),
+        CambiarIdioma(preferenciasRepository),
     )
 
     fun crearPerfilViewModel() = PerfilViewModel(
