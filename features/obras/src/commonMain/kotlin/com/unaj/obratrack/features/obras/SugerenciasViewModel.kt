@@ -12,6 +12,8 @@ import com.unaj.obratrack.domain.usecase.CrearTareasSugeridas
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.ResultadoCrearSugeridas
 import com.unaj.obratrack.domain.usecase.SugerirTareas
+import com.unaj.obratrack.domain.usecase.SugerirTareasConIa
+import com.unaj.obratrack.domain.validation.ValidadorDescripcionObra
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,8 +30,10 @@ class SugerenciasViewModel(
     private val observarSesion: ObservarSesion,
     private val sugerirTareas: SugerirTareas,
     private val crearTareasSugeridas: CrearTareasSugeridas,
+    /** Null cuando no hay un servicio de IA configurado: la pantalla solo ofrece las plantillas. */
+    private val sugerirTareasConIa: SugerirTareasConIa? = null,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(SugerenciasUiState())
+    private val _state = MutableStateFlow(estadoInicial())
     val state = _state.asStateFlow()
 
     private var userId: String? = null
@@ -51,7 +55,7 @@ class SugerenciasViewModel(
     fun abrir(obraId: String) {
         cancelarTrabajos()
         this.obraId = obraId
-        _state.value = SugerenciasUiState(visible = true)
+        _state.value = estadoInicial().copy(visible = true)
     }
 
     fun cerrar() {
@@ -61,8 +65,10 @@ class SugerenciasViewModel(
 
     private fun reiniciar() {
         obraId = null
-        _state.value = SugerenciasUiState()
+        _state.value = estadoInicial()
     }
+
+    private fun estadoInicial() = SugerenciasUiState(iaDisponible = sugerirTareasConIa != null)
 
     fun elegirTipo(tipo: TipoObra) {
         if (_state.value.creando) return
@@ -72,6 +78,26 @@ class SugerenciasViewModel(
             when (val resultado = sugerirTareas(tipo)) {
                 is ResultadoSugerir.Exito -> _state.update {
                     it.copy(cargando = false, sugerencias = resultado.sugerencias, seleccionadas = resultado.sugerencias.toSet())
+                }
+                is ResultadoSugerir.Fallo -> _state.update { it.copy(cargando = false, error = resultado.error.toUi()) }
+            }
+        }
+    }
+
+    fun descripcionCambiada(texto: String) = _state.update {
+        if (it.creando) it else it.copy(descripcion = texto.take(ValidadorDescripcionObra.LARGO_MAXIMO), error = null)
+    }
+
+    /** Si falla, la lista que ya hubiera en pantalla (p. ej. la de una plantilla) se conserva. */
+    fun sugerirConIa() {
+        val ia = sugerirTareasConIa ?: return
+        val descripcion = _state.value.takeIf { it.puedeSugerirConIa }?.descripcion ?: return
+        sugerirJob?.cancel()
+        _state.update { it.copy(cargando = true, error = null, creadasAntesDelError = 0) }
+        sugerirJob = viewModelScope.launch {
+            when (val resultado = ia(descripcion)) {
+                is ResultadoSugerir.Exito -> _state.update {
+                    it.copy(cargando = false, tipo = null, sugerencias = resultado.sugerencias, seleccionadas = resultado.sugerencias.toSet())
                 }
                 is ResultadoSugerir.Fallo -> _state.update { it.copy(cargando = false, error = resultado.error.toUi()) }
             }
@@ -128,6 +154,7 @@ class SugerenciasViewModel(
         ErrorSugerir.SIN_CONEXION -> ErrorSugerenciasUi.RED
         ErrorSugerir.LIMITE_ALCANZADO -> ErrorSugerenciasUi.LIMITE
         ErrorSugerir.RESPUESTA_INVALIDA -> ErrorSugerenciasUi.RESPUESTA
+        ErrorSugerir.DESCRIPCION_INVALIDA -> ErrorSugerenciasUi.DESCRIPCION
         ErrorSugerir.DESCONOCIDO -> ErrorSugerenciasUi.DESCONOCIDO
     }
 

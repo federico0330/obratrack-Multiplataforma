@@ -26,6 +26,8 @@ import com.unaj.obratrack.domain.usecase.CrearTarea
 import com.unaj.obratrack.domain.usecase.CrearTareasSugeridas
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.SugerirTareas
+import com.unaj.obratrack.domain.usecase.SugerirTareasConIa
+import com.unaj.obratrack.domain.repository.SugeridorConIA
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,6 +52,7 @@ class SugerenciasViewModelTest {
         repo: TareasQueGuardan = TareasQueGuardan(),
         sugeridor: SugeridorFalso = SugeridorFalso(),
         usuario: Usuario? = Usuario("uid-1", "a@b.com", null),
+        ia: IaFalsa? = null,
         bloque: suspend TestScope.(SugerenciasViewModel, TareasQueGuardan) -> Unit,
     ) = runTest {
         Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
@@ -57,6 +60,7 @@ class SugerenciasViewModelTest {
             ObservarSesion(SesionDeSugerencias(usuario)),
             SugerirTareas(sugeridor),
             CrearTareasSugeridas(CrearTarea(repo)),
+            ia?.let { SugerirTareasConIa(it) },
         )
         try {
             bloque(viewModel, repo)
@@ -220,6 +224,133 @@ class SugerenciasViewModelTest {
         assertTrue(repo.titulos.isEmpty())
     }
 
+    private val deLaIa = listOf(
+        SugerenciaTarea(TituloSugerido.Libre("Tendido de cañerías"), CategoriaTarea.PLOMERIA),
+        SugerenciaTarea(TituloSugerido.Libre("Pintura de muros"), CategoriaTarea.PINTURA),
+    )
+
+    @Test
+    fun sinServicioDeIaNoSeOfreceNiHaceNada() = conViewModel { vm, _ ->
+        vm.abrir("obra-1")
+        vm.descripcionCambiada("Casa de dos plantas")
+
+        vm.sugerirConIa()
+
+        assertFalse(vm.state.value.iaDisponible)
+        assertFalse(vm.state.value.puedeSugerirConIa)
+        assertTrue(vm.state.value.sugerencias.isEmpty())
+    }
+
+    @Test
+    fun conServicioDeIaSeOfreceDesdeElPrincipio() = conViewModel(ia = IaFalsa()) { vm, _ ->
+        assertTrue(vm.state.value.iaDisponible)
+        vm.abrir("obra-1")
+        assertTrue(vm.state.value.iaDisponible)
+        vm.cerrar()
+        assertTrue(vm.state.value.iaDisponible)
+    }
+
+    @Test
+    fun laDescripcionSeLimitaAlLargoMaximo() = conViewModel(ia = IaFalsa()) { vm, _ ->
+        vm.abrir("obra-1")
+
+        vm.descripcionCambiada("a".repeat(600))
+
+        assertEquals(500, vm.state.value.descripcion.length)
+    }
+
+    @Test
+    fun sinDescripcionNoSePuedeSugerirConIa() = conViewModel(ia = IaFalsa()) { vm, _ ->
+        vm.abrir("obra-1")
+        vm.descripcionCambiada("   ")
+
+        vm.sugerirConIa()
+
+        assertFalse(vm.state.value.puedeSugerirConIa)
+        assertTrue(vm.state.value.sugerencias.isEmpty())
+    }
+
+    @Test
+    fun laIaReemplazaLaListaYQuedanTodasElegidas() {
+        val ia = IaFalsa(ResultadoSugerir.Exito(deLaIa))
+        conViewModel(ia = ia) { vm, _ ->
+            vm.abrir("obra-1")
+            vm.elegirTipo(TipoObra.PINTURA)
+            vm.descripcionCambiada("  Baño con pileta  ")
+
+            vm.sugerirConIa()
+
+            val estado = vm.state.value
+            assertEquals(deLaIa, estado.sugerencias)
+            assertEquals(deLaIa.toSet(), estado.seleccionadas)
+            assertNull(estado.tipo)
+            assertFalse(estado.cargando)
+            assertEquals("Baño con pileta", ia.ultimaDescripcion)
+        }
+    }
+
+    @Test
+    fun siFallaLaIaSeConservaLaListaDeLaPlantilla() = conViewModel(
+        ia = IaFalsa(ResultadoSugerir.Fallo(ErrorSugerir.SIN_CONEXION)),
+    ) { vm, _ ->
+        vm.abrir("obra-1")
+        vm.elegirTipo(TipoObra.PINTURA)
+        vm.descripcionCambiada("Baño con pileta")
+
+        vm.sugerirConIa()
+
+        val estado = vm.state.value
+        assertEquals(ErrorSugerenciasUi.RED, estado.error)
+        assertEquals(casa, estado.sugerencias)
+        assertEquals(TipoObra.PINTURA, estado.tipo)
+        assertFalse(estado.cargando)
+    }
+
+    @Test
+    fun elLimiteDeUsoSeInforma() = conViewModel(
+        ia = IaFalsa(ResultadoSugerir.Fallo(ErrorSugerir.LIMITE_ALCANZADO)),
+    ) { vm, _ ->
+        vm.abrir("obra-1")
+        vm.descripcionCambiada("Baño")
+
+        vm.sugerirConIa()
+
+        assertEquals(ErrorSugerenciasUi.LIMITE, vm.state.value.error)
+    }
+
+    @Test
+    fun lasTareasDeLaIaSeCreanConSuTituloYCategoria() {
+        val ia = IaFalsa(ResultadoSugerir.Exito(deLaIa))
+        conViewModel(ia = ia) { vm, repo ->
+            vm.abrir("obra-1")
+            vm.descripcionCambiada("Baño")
+            vm.sugerirConIa()
+
+            vm.crear(vm.state.value.sugerencias.associateWith { (it.titulo as TituloSugerido.Libre).texto })
+
+            assertEquals(listOf("Tendido de cañerías", "Pintura de muros"), repo.titulos)
+            assertEquals(listOf(CategoriaTarea.PLOMERIA, CategoriaTarea.PINTURA), repo.categorias)
+            assertFalse(vm.state.value.visible)
+        }
+    }
+
+    @Test
+    fun noSeSugiereConIaMientrasSeGuarda() {
+        val compuerta = CompletableDeferred<Unit>()
+        val ia = IaFalsa()
+        conViewModel(repo = TareasQueGuardan(espera = compuerta), ia = ia) { vm, _ ->
+            vm.abrir("obra-1")
+            vm.elegirTipo(TipoObra.PINTURA)
+            vm.crear(titulosDe(vm.state.value.sugerencias))
+            vm.descripcionCambiada("Baño")
+
+            vm.sugerirConIa()
+
+            assertEquals(0, ia.llamadas)
+            compuerta.complete(Unit)
+        }
+    }
+
     @Test
     fun cerrarDescartaTodo() = conViewModel { vm, _ ->
         vm.abrir("obra-1")
@@ -288,4 +419,15 @@ private class TareasQueGuardan(
         unsupported()
 
     private fun unsupported(): Nothing = error("no se usa")
+}
+
+internal class IaFalsa(private val resultado: ResultadoSugerir = ResultadoSugerir.Exito(emptyList())) : SugeridorConIA {
+    var llamadas = 0
+    var ultimaDescripcion: String? = null
+
+    override suspend fun sugerir(descripcion: String): ResultadoSugerir {
+        llamadas++
+        ultimaDescripcion = descripcion
+        return resultado
+    }
 }

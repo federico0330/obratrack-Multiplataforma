@@ -8,6 +8,7 @@ enum class ErrorSugerir {
     SIN_CONEXION,
     LIMITE_ALCANZADO,
     RESPUESTA_INVALIDA,
+    DESCRIPCION_INVALIDA,
     DESCONOCIDO,
 }
 
@@ -19,4 +20,9 @@ sealed interface ResultadoSugerir {
 /** Puerto de salida del dominio: quién propone las tareas (plantillas locales, un modelo de lenguaje, etc.). */
 interface SugeridorDeTareas {
     suspend fun sugerir(tipo: TipoObra): ResultadoSugerir
+}
+
+/** Puerto de un servicio externo (modelo de lenguaje) que propone tareas a partir de la descripción libre de la obra. */
+interface SugeridorConIA {
+    suspend fun sugerir(descripcion: String): ResultadoSugerir
 }

@@ -66,13 +66,16 @@ fun ObraTrackApp(
     alAplicarTema: (oscuro: Boolean) -> Unit = {},
     // La plataforma cambia el idioma de la aplicación al elegido (Android reinicia la pantalla).
     alAplicarIdioma: (IdiomaApp) -> Unit = {},
+    // Clave y modelo de Gemini; sin clave no hay sugerencias con IA. Nunca se versionan.
+    claveGemini: String = "",
+    modeloGemini: String = "",
 ) {
     if (uiTesting) {
         AccessFlowPreview()
         return
     }
 
-    val graph = remember { AppGraph(proveedorTokenGoogle) }
+    val graph = remember { AppGraph(proveedorTokenGoogle, claveGemini, modeloGemini) }
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
@@ -155,6 +158,8 @@ fun ObraTrackApp(
     val accionesSugerencias = remember(sugerenciasViewModel) {
         SugerenciasAcciones(
             onTipo = sugerenciasViewModel::elegirTipo,
+            onDescripcion = sugerenciasViewModel::descripcionCambiada,
+            onSugerirIa = sugerenciasViewModel::sugerirConIa,
             onAlternar = sugerenciasViewModel::alternar,
             onSeleccionarTodas = sugerenciasViewModel::seleccionarTodas,
             onCrear = sugerenciasViewModel::crear,

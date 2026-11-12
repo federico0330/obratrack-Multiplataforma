@@ -234,4 +234,9 @@
     <string name="plantilla_retiro_de_escombros">Debris removal</string>
     <string name="plantilla_limpieza_final">Final site cleaning</string>
     <string name="plantilla_recepcion_y_entrega">Final inspection and handover</string>
+    <string name="sugerencias_ia_label">Describe the work</string>
+    <string name="sugerencias_ia_placeholder">E.g. two-storey house, 120 m², with a barbecue area</string>
+    <string name="sugerencias_ia_button">Suggest with AI</string>
+    <string name="sugerencias_ia_privacy">Only this text is sent to Google Gemini to generate the suggestions.</string>
+    <string name="sugerencias_error_description">Write a description of up to 500 characters.</string>
 </resources>

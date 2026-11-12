@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -19,6 +20,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -42,6 +44,8 @@ import org.jetbrains.compose.resources.stringResource
 /** Acciones de la pantalla de sugerencias; la pantalla no conoce al ViewModel. */
 class SugerenciasAcciones(
     val onTipo: (TipoObra) -> Unit,
+    val onDescripcion: (String) -> Unit,
+    val onSugerirIa: () -> Unit,
     val onAlternar: (SugerenciaTarea) -> Unit,
     val onSeleccionarTodas: (Boolean) -> Unit,
     /** Recibe el título ya traducido de cada sugerencia: el ViewModel no conoce textos. */
@@ -102,9 +106,34 @@ fun SugerenciasTareasScreen(state: SugerenciasUiState, acciones: SugerenciasAcci
                     )
                 }
             }
+            if (state.iaDisponible) SugerirConIa(state, acciones)
             if (state.cargando) CircularProgressIndicator(Modifier.align(Alignment.CenterHorizontally))
             if (state.sugerencias.isNotEmpty()) ListaSugerencias(state, titulos, acciones)
         }
+    }
+}
+
+@Composable
+private fun SugerirConIa(state: SugerenciasUiState, acciones: SugerenciasAcciones) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        OutlinedTextField(
+            value = state.descripcion,
+            onValueChange = acciones.onDescripcion,
+            label = { Text(stringResource(Res.string.sugerencias_ia_label)) },
+            placeholder = { Text(stringResource(Res.string.sugerencias_ia_placeholder)) },
+            enabled = !state.creando && !state.cargando,
+            minLines = 2,
+            maxLines = 5,
+            modifier = Modifier.fillMaxWidth(),
+        )
+        Button(onClick = acciones.onSugerirIa, enabled = state.puedeSugerirConIa, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(Res.string.sugerencias_ia_button))
+        }
+        Text(
+            stringResource(Res.string.sugerencias_ia_privacy),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 
@@ -161,6 +190,7 @@ private fun mensajeSugerencias(error: ErrorSugerenciasUi): String = stringResour
         ErrorSugerenciasUi.RED -> Res.string.sugerencias_error_network
         ErrorSugerenciasUi.LIMITE -> Res.string.sugerencias_error_limit
         ErrorSugerenciasUi.RESPUESTA -> Res.string.sugerencias_error_response
+        ErrorSugerenciasUi.DESCRIPCION -> Res.string.sugerencias_error_description
         ErrorSugerenciasUi.DESCONOCIDO -> Res.string.sugerencias_error_generic
     },
 )

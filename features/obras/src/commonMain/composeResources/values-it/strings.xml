@@ -234,4 +234,9 @@
     <string name="plantilla_retiro_de_escombros">Rimozione delle macerie</string>
     <string name="plantilla_limpieza_final">Pulizia finale del cantiere</string>
     <string name="plantilla_recepcion_y_entrega">Collaudo finale e consegna</string>
+    <string name="sugerencias_ia_label">Descrivi il lavoro</string>
+    <string name="sugerencias_ia_placeholder">Es.: casa a due piani di 120 m² con zona barbecue</string>
+    <string name="sugerencias_ia_button">Suggerisci con l’IA</string>
+    <string name="sugerencias_ia_privacy">Solo questo testo viene inviato a Google Gemini per generare i suggerimenti.</string>
+    <string name="sugerencias_error_description">Scrivi una descrizione di massimo 500 caratteri.</string>
 </resources>

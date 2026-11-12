@@ -234,4 +234,9 @@
     <string name="plantilla_retiro_de_escombros">Retiro de escombros</string>
     <string name="plantilla_limpieza_final">Limpieza final de obra</string>
     <string name="plantilla_recepcion_y_entrega">Inspección final y entrega</string>
+    <string name="sugerencias_ia_label">Describí la obra</string>
+    <string name="sugerencias_ia_placeholder">Ej.: casa de dos plantas de 120 m² con quincho</string>
+    <string name="sugerencias_ia_button">Sugerir con IA</string>
+    <string name="sugerencias_ia_privacy">Solo se envía este texto a Google Gemini para generar las sugerencias.</string>
+    <string name="sugerencias_error_description">Escribí una descripción de hasta 500 caracteres.</string>
 </resources>
