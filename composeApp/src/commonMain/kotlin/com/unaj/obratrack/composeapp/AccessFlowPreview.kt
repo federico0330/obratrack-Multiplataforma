@@ -38,6 +38,7 @@ fun AccessFlowPreview() {
                     onSignIn = {},
                     onSignInWithGoogle = {},
                     onGoToRegister = { enRegistro = true },
+                    onForgotPassword = {},
                 )
             }
         }

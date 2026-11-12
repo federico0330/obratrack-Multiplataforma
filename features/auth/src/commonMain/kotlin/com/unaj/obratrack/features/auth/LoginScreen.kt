@@ -28,6 +28,7 @@ fun LoginScreen(
     onSignIn: () -> Unit,
     onSignInWithGoogle: () -> Unit,
     onGoToRegister: () -> Unit,
+    onForgotPassword: () -> Unit,
 ) {
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
     val focus = LocalFocusManager.current
@@ -54,6 +55,9 @@ fun LoginScreen(
             passwordVisible = passwordVisible,
             onTogglePasswordVisibility = { passwordVisible = !passwordVisible },
         )
+        TextButton(onClick = onForgotPassword, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(Res.string.auth_forgot_password))
+        }
         state.error?.let { ErrorBlock(it.message()) }
         AuthSubmitButton(
             text = stringResource(Res.string.auth_sign_in),

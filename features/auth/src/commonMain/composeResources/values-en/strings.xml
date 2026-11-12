@@ -42,4 +42,27 @@
     <string name="perfil_resumen_error_network">Could not connect. Check your connection and try again.</string>
     <string name="perfil_resumen_error_permissions">You do not have permission to view your works. Please sign in again.</string>
     <string name="perfil_resumen_error_generic">The summary could not be loaded. Please try again.</string>
+    <string name="auth_forgot_password">Forgot your password?</string>
+    <string name="recuperar_title">Reset password</string>
+    <string name="recuperar_body">Enter your email and we will send you a link to create a new password.</string>
+    <string name="recuperar_send">Send link</string>
+    <string name="recuperar_sent">If an account exists for %1$s, we sent an email with the link. Check your spam folder too.</string>
+    <string name="recuperar_close">Close</string>
+    <string name="recuperar_error_invalid_email">The email address is not valid.</string>
+    <string name="recuperar_error_unexpected">We couldn't send the email. Please try again.</string>
+    <string name="perfil_edit_name">Edit name</string>
+    <string name="perfil_save">Save</string>
+    <string name="perfil_name_error_invalid">The name can't be empty or longer than 60 characters.</string>
+    <string name="perfil_name_error_session">Your session expired. Please sign in again.</string>
+    <string name="perfil_name_error_unexpected">We couldn't save the name. Please try again.</string>
+    <string name="perfil_preferencias_title">Preferences</string>
+    <string name="perfil_theme_title">Theme</string>
+    <string name="perfil_theme_system">System</string>
+    <string name="perfil_theme_light">Light</string>
+    <string name="perfil_theme_dark">Dark</string>
+    <string name="perfil_language_title">Language</string>
+    <string name="perfil_language_system">System</string>
+    <string name="perfil_language_es">Español</string>
+    <string name="perfil_language_en">English</string>
+    <string name="perfil_language_it">Italiano</string>
 </resources>

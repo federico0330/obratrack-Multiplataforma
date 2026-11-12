@@ -8,5 +8,7 @@ import platform.UIKit.UIViewController
 fun MainViewController(uiTesting: Boolean, selectorGoogle: SelectorCuentaGoogle): UIViewController {
     if (!uiTesting) Firebase.initialize()
     val proveedorTokenGoogle = ProveedorTokenGoogleIos(selectorGoogle)
-    return ComposeUIViewController { ObraTrackApp(proveedorTokenGoogle, uiTesting = uiTesting) }
+    return ComposeUIViewController {
+        ObraTrackApp(proveedorTokenGoogle, uiTesting = uiTesting, alAplicarIdioma = ::aplicarIdiomaIos)
+    }
 }

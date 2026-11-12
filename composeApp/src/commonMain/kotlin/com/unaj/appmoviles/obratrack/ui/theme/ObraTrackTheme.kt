@@ -89,9 +89,9 @@ private val ObraTrackShapes = Shapes(
 )
 
 @Composable
-fun ObraTrackTheme(content: @Composable () -> Unit) {
+fun ObraTrackTheme(oscuro: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
+        colorScheme = if (oscuro) DarkColors else LightColors,
         typography = ObraTrackTypography,
         shapes = ObraTrackShapes,
         content = content,

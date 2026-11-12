@@ -43,4 +43,27 @@
     <string name="perfil_resumen_error_network">No se pudo conectar. Revisá tu conexión e intentá de nuevo.</string>
     <string name="perfil_resumen_error_permissions">No tenés permiso para ver tus obras. Iniciá sesión nuevamente.</string>
     <string name="perfil_resumen_error_generic">No se pudo cargar el resumen. Intentá de nuevo.</string>
+    <string name="auth_forgot_password">¿Olvidaste tu contraseña?</string>
+    <string name="recuperar_title">Recuperar contraseña</string>
+    <string name="recuperar_body">Ingresá tu correo y te enviamos un enlace para crear una contraseña nueva.</string>
+    <string name="recuperar_send">Enviar enlace</string>
+    <string name="recuperar_sent">Si existe una cuenta con %1$s, te enviamos un correo con el enlace. Revisá también la carpeta de spam.</string>
+    <string name="recuperar_close">Cerrar</string>
+    <string name="recuperar_error_invalid_email">El correo no es válido.</string>
+    <string name="recuperar_error_unexpected">No pudimos enviar el correo. Intentá de nuevo.</string>
+    <string name="perfil_edit_name">Editar nombre</string>
+    <string name="perfil_save">Guardar</string>
+    <string name="perfil_name_error_invalid">El nombre no puede estar vacío ni tener más de 60 caracteres.</string>
+    <string name="perfil_name_error_session">Tu sesión venció. Iniciá sesión nuevamente.</string>
+    <string name="perfil_name_error_unexpected">No pudimos guardar el nombre. Intentá de nuevo.</string>
+    <string name="perfil_preferencias_title">Preferencias</string>
+    <string name="perfil_theme_title">Tema</string>
+    <string name="perfil_theme_system">Sistema</string>
+    <string name="perfil_theme_light">Claro</string>
+    <string name="perfil_theme_dark">Oscuro</string>
+    <string name="perfil_language_title">Idioma</string>
+    <string name="perfil_language_system">Sistema</string>
+    <string name="perfil_language_es">Español</string>
+    <string name="perfil_language_en">English</string>
+    <string name="perfil_language_it">Italiano</string>
 </resources>

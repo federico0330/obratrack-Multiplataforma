@@ -1,6 +1,7 @@
 package com.unaj.obratrack.composeapp
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -24,11 +25,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
+import com.unaj.obratrack.domain.model.IdiomaApp
+import com.unaj.obratrack.domain.model.TemaApp
 import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
 import com.unaj.obratrack.features.auth.AuthViewModel
+import com.unaj.obratrack.features.auth.CuentaViewModel
+import com.unaj.obratrack.features.auth.EditarNombreDialog
 import com.unaj.obratrack.features.auth.LoginScreen
 import com.unaj.obratrack.features.auth.PerfilScreen
 import com.unaj.obratrack.features.auth.PerfilViewModel
+import com.unaj.obratrack.features.auth.PreferenciasViewModel
+import com.unaj.obratrack.features.auth.RecuperarContrasenaDialog
 import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
@@ -49,7 +56,14 @@ import com.unaj.obratrack.features.obras.TareasViewModel
 /** Punto de entrada común para Android y SwiftUI. */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean = false) {
+fun ObraTrackApp(
+    proveedorTokenGoogle: ProveedorTokenGoogle,
+    uiTesting: Boolean = false,
+    // La plataforma ajusta el color de los íconos de las barras del sistema al tema que se aplica.
+    alAplicarTema: (oscuro: Boolean) -> Unit = {},
+    // La plataforma cambia el idioma de la aplicación al elegido (Android reinicia la pantalla).
+    alAplicarIdioma: (IdiomaApp) -> Unit = {},
+) {
     if (uiTesting) {
         AccessFlowPreview()
         return
@@ -62,11 +76,24 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
     val tareasViewModel: TareasViewModel = viewModel { graph.crearTareasViewModel() }
     val relevamientosViewModel: RelevamientosViewModel = viewModel { graph.crearRelevamientosViewModel() }
     val perfilViewModel: PerfilViewModel = viewModel { graph.crearPerfilViewModel() }
+    val cuentaViewModel: CuentaViewModel = viewModel { graph.crearCuentaViewModel() }
+    val preferenciasViewModel: PreferenciasViewModel = viewModel { graph.crearPreferenciasViewModel() }
     val authState by authViewModel.state.collectAsState()
     val registroState by registroViewModel.state.collectAsState()
     val obrasState by obrasViewModel.state.collectAsState()
     val tareasState by tareasViewModel.state.collectAsState()
     val relevamientosState by relevamientosViewModel.state.collectAsState()
+    val cuentaState by cuentaViewModel.state.collectAsState()
+    val tema by preferenciasViewModel.tema.collectAsState()
+    val idioma by preferenciasViewModel.idioma.collectAsState()
+    val sistemaOscuro = isSystemInDarkTheme()
+    val oscuro = when (tema) {
+        TemaApp.SISTEMA -> sistemaOscuro
+        TemaApp.CLARO -> false
+        TemaApp.OSCURO -> true
+    }
+    LaunchedEffect(oscuro) { alAplicarTema(oscuro) }
+    LaunchedEffect(idioma) { alAplicarIdioma(idioma) }
     var enRegistro by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(authState.user) {
@@ -143,7 +170,7 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
     val pestanaDetalle = rememberSaveable(obraAbiertaId) { mutableIntStateOf(0) }
     val scrollDetalleObra = rememberSaveable(obraAbiertaId, saver = ScrollState.Saver) { ScrollState(0) }
 
-    ObraTrackTheme {
+    ObraTrackTheme(oscuro = oscuro) {
         Surface(Modifier.fillMaxSize()) {
             when {
                 !authState.sessionChecked -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -216,7 +243,14 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                                         user = authState.user!!,
                                         resumen = resumen,
                                         errorMessage = authState.error?.message(),
+                                        tema = tema,
+                                        idioma = idioma,
                                         onRetry = perfilViewModel::reintentar,
+                                        onEditName = {
+                                            cuentaViewModel.abrirEdicionNombre(authState.user?.nombre.orEmpty())
+                                        },
+                                        onThemeChange = preferenciasViewModel::elegirTema,
+                                        onLanguageChange = preferenciasViewModel::elegirIdioma,
                                         onSignOut = authViewModel::signOut,
                                     )
                                 }
@@ -239,8 +273,25 @@ fun ObraTrackApp(proveedorTokenGoogle: ProveedorTokenGoogle, uiTesting: Boolean 
                     onSignIn = authViewModel::signIn,
                     onSignInWithGoogle = authViewModel::signInWithGoogle,
                     onGoToRegister = { enRegistro = true },
+                    onForgotPassword = { cuentaViewModel.abrirRecuperacion(authState.email) },
                 )
             }
+        }
+        cuentaState.recuperacion?.let {
+            RecuperarContrasenaDialog(
+                state = it,
+                onEmailChange = cuentaViewModel::emailRecuperacionCambiado,
+                onSend = cuentaViewModel::enviarRecuperacion,
+                onDismiss = cuentaViewModel::cerrarRecuperacion,
+            )
+        }
+        cuentaState.edicionNombre?.let {
+            EditarNombreDialog(
+                state = it,
+                onNameChange = cuentaViewModel::nombreCambiado,
+                onSave = cuentaViewModel::guardarNombre,
+                onDismiss = cuentaViewModel::cerrarEdicionNombre,
+            )
         }
     }
 }
