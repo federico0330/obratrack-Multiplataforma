@@ -42,4 +42,22 @@
     <string name="perfil_resumen_error_network">Impossibile connettersi. Controlla la connessione e riprova.</string>
     <string name="perfil_resumen_error_permissions">Non hai l’autorizzazione per vedere i tuoi lavori. Accedi di nuovo.</string>
     <string name="perfil_resumen_error_generic">Non è stato possibile caricare il riepilogo. Riprova.</string>
+    <string name="auth_forgot_password">Hai dimenticato la password?</string>
+    <string name="recuperar_title">Recupera la password</string>
+    <string name="recuperar_body">Inserisci la tua email e ti invieremo un link per creare una nuova password.</string>
+    <string name="recuperar_send">Invia il link</string>
+    <string name="recuperar_sent">Se esiste un account per %1$s, abbiamo inviato un’email con il link. Controlla anche la cartella dello spam.</string>
+    <string name="recuperar_close">Chiudi</string>
+    <string name="recuperar_error_invalid_email">L’indirizzo email non è valido.</string>
+    <string name="recuperar_error_unexpected">Non è stato possibile inviare l’email. Riprova.</string>
+    <string name="perfil_edit_name">Modifica il nome</string>
+    <string name="perfil_save">Salva</string>
+    <string name="perfil_name_error_invalid">Il nome non può essere vuoto né superare i 60 caratteri.</string>
+    <string name="perfil_name_error_session">La sessione è scaduta. Accedi di nuovo.</string>
+    <string name="perfil_name_error_unexpected">Non è stato possibile salvare il nome. Riprova.</string>
+    <string name="perfil_preferencias_title">Preferenze</string>
+    <string name="perfil_theme_title">Tema</string>
+    <string name="perfil_theme_system">Sistema</string>
+    <string name="perfil_theme_light">Chiaro</string>
+    <string name="perfil_theme_dark">Scuro</string>
 </resources>

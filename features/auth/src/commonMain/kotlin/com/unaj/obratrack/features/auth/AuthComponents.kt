@@ -3,7 +3,6 @@ package com.unaj.obratrack.features.auth
 import com.unaj.obratrack.core.ui.Iconos
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -120,7 +120,8 @@ internal fun AuthTextField(
  */
 @Composable
 internal fun GoogleSignInButton(text: String, enabled: Boolean, loading: Boolean, onClick: () -> Unit) {
-    val dark = isSystemInDarkTheme()
+    // Sigue el tema de la app, que puede estar forzado y no coincidir con el del sistema.
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
     val container = if (dark) Color(0xFF131314) else Color(0xFFFFFFFF)
     val content = if (dark) Color(0xFFE3E3E3) else Color(0xFF1F1F1F)
     OutlinedButton(

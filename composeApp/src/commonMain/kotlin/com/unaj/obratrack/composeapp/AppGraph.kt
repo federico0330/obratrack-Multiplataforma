@@ -15,6 +15,14 @@ import com.unaj.obratrack.domain.usecase.ObtenerDireccion
 import com.unaj.obratrack.domain.usecase.ObtenerUbicacionActual
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
+import com.unaj.obratrack.core.data.auth.RepositorioCuentaImpl
+import com.unaj.obratrack.core.data.preferencias.crearRepositorioPreferencias
+import com.unaj.obratrack.domain.usecase.ActualizarNombreUsuario
+import com.unaj.obratrack.domain.usecase.CambiarTema
+import com.unaj.obratrack.domain.usecase.ObservarTema
+import com.unaj.obratrack.domain.usecase.RecuperarContrasena
+import com.unaj.obratrack.features.auth.CuentaViewModel
+import com.unaj.obratrack.features.auth.PreferenciasViewModel
 import com.unaj.obratrack.core.data.obras.RepositorioObrasImpl
 import com.unaj.obratrack.core.data.tareas.RepositorioTareasImpl
 import com.unaj.obratrack.core.firebase.auth.GitLiveFirebaseAuthDataSource
@@ -48,7 +56,10 @@ import com.unaj.obratrack.features.obras.TareasViewModel
  * aporta su implementación de [ProveedorTokenGoogle].
  */
 class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
-    private val authRepository = RepositorioAutenticacionImpl(GitLiveFirebaseAuthDataSource())
+    private val authDataSource = GitLiveFirebaseAuthDataSource()
+    private val authRepository = RepositorioAutenticacionImpl(authDataSource)
+    private val cuentaRepository = RepositorioCuentaImpl(authDataSource)
+    private val preferenciasRepository = crearRepositorioPreferencias()
     private val obrasRepository = RepositorioObrasImpl(GitLiveFirebaseObraDataSource())
     private val tareasRepository = RepositorioTareasImpl(GitLiveFirebaseTareaDataSource())
 
@@ -78,6 +89,16 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
     )
 
     fun crearRegistroViewModel() = RegistroViewModel(RegistrarUsuario(authRepository))
+
+    fun crearCuentaViewModel() = CuentaViewModel(
+        RecuperarContrasena(cuentaRepository),
+        ActualizarNombreUsuario(cuentaRepository),
+    )
+
+    fun crearPreferenciasViewModel() = PreferenciasViewModel(
+        ObservarTema(preferenciasRepository),
+        CambiarTema(preferenciasRepository),
+    )
 
     fun crearPerfilViewModel() = PerfilViewModel(
         ObservarSesion(authRepository),
