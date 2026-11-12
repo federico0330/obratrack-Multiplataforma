@@ -14,13 +14,21 @@ import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.auth.auth
 import dev.gitlive.firebase.auth.code
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.merge
 
 /** Adaptador de infraestructura. Firebase se inicializa en el host de cada plataforma. */
 class GitLiveFirebaseAuthDataSource(
     private val auth: FirebaseAuth = Firebase.auth,
-) : FirebaseAuthDataSource {
-    override val currentUser = auth.authStateChanged.map { it?.toDto() }
+) : FirebaseAuthDataSource, FirebaseAccountDataSource {
+    // authStateChanged no avisa cuando cambia el perfil (el nombre), así que se avisa a mano.
+    private val perfilActualizado = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+
+    override val currentUser = merge(
+        auth.authStateChanged,
+        perfilActualizado.map { auth.currentUser },
+    ).map { it?.toDto() }
 
     override suspend fun signIn(email: String, password: String): AuthResult<AuthUserDto> = try {
         val user = auth.signInWithEmailAndPassword(email, password).user
@@ -61,6 +69,34 @@ class GitLiveFirebaseAuthDataSource(
         throw cancelled
     } catch (error: Exception) {
         RegistrationResult.Failure(classifyRegistrationFailure(error.toThrowableKind(), error.authCode()))
+    }
+
+    override suspend fun sendPasswordReset(email: String): AccountResult = try {
+        auth.sendPasswordResetEmail(email)
+        AccountResult.Success
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        if (isUnknownAccountOnReset(error.authCode())) {
+            AccountResult.Success
+        } else {
+            AccountResult.Failure(classifyAccountFailure(error.toThrowableKind(), error.authCode()))
+        }
+    }
+
+    override suspend fun updateDisplayName(name: String): AccountResult = try {
+        val user = auth.currentUser
+        if (user == null) {
+            AccountResult.Failure(AccountFailure.NoSession)
+        } else {
+            user.updateProfile(displayName = name)
+            perfilActualizado.emit(Unit)
+            AccountResult.Success
+        }
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (error: Exception) {
+        AccountResult.Failure(classifyAccountFailure(error.toThrowableKind(), error.authCode()))
     }
 
     private fun Exception.toAuthFailure(): AuthFailure =

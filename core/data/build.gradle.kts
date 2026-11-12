@@ -18,6 +18,7 @@ kotlin {
             implementation(kotlin("test"))
             implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
             implementation("io.ktor:ktor-client-mock:3.6.0")
+            implementation("com.russhwolf:multiplatform-settings-test:1.3.0")
         }
         commonMain.dependencies {
             implementation(project(":core:domain"))
@@ -27,6 +28,7 @@ kotlin {
             implementation("io.ktor:ktor-client-core:3.6.0")
             implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.12.0")
             implementation("io.github.vinceglb:filekit-core:0.16.0")
+            implementation("com.russhwolf:multiplatform-settings-no-arg:1.3.0")
             // Compass no expone geolocation ni permissions a la compilación desde geolocation-mobile.
             implementation("dev.jordond.compass:geolocation:4.0.1")
             implementation("dev.jordond.compass:geolocation-mobile:4.0.1")
