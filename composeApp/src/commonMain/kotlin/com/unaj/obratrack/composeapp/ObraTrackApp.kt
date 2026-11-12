@@ -48,6 +48,9 @@ import com.unaj.obratrack.features.obras.RelevamientoScreen
 import com.unaj.obratrack.features.obras.RelevamientosAcciones
 import com.unaj.obratrack.features.obras.RelevamientosSection
 import com.unaj.obratrack.features.obras.RelevamientosViewModel
+import com.unaj.obratrack.features.obras.SugerenciasAcciones
+import com.unaj.obratrack.features.obras.SugerenciasTareasScreen
+import com.unaj.obratrack.features.obras.SugerenciasViewModel
 import com.unaj.obratrack.features.obras.TareaScreen
 import com.unaj.obratrack.features.obras.TareasAcciones
 import com.unaj.obratrack.features.obras.TareasSection
@@ -74,6 +77,7 @@ fun ObraTrackApp(
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
     val tareasViewModel: TareasViewModel = viewModel { graph.crearTareasViewModel() }
+    val sugerenciasViewModel: SugerenciasViewModel = viewModel { graph.crearSugerenciasViewModel() }
     val relevamientosViewModel: RelevamientosViewModel = viewModel { graph.crearRelevamientosViewModel() }
     val perfilViewModel: PerfilViewModel = viewModel { graph.crearPerfilViewModel() }
     val cuentaViewModel: CuentaViewModel = viewModel { graph.crearCuentaViewModel() }
@@ -82,6 +86,7 @@ fun ObraTrackApp(
     val registroState by registroViewModel.state.collectAsState()
     val obrasState by obrasViewModel.state.collectAsState()
     val tareasState by tareasViewModel.state.collectAsState()
+    val sugerenciasState by sugerenciasViewModel.state.collectAsState()
     val relevamientosState by relevamientosViewModel.state.collectAsState()
     val cuentaState by cuentaViewModel.state.collectAsState()
     val tema by preferenciasViewModel.tema.collectAsState()
@@ -109,6 +114,7 @@ fun ObraTrackApp(
         } else {
             tareasViewModel.cerrarObra()
             relevamientosViewModel.cerrarObra()
+            sugerenciasViewModel.cerrar()
         }
     }
 
@@ -146,9 +152,19 @@ fun ObraTrackApp(
             onMapPick = relevamientosViewModel::elegirEnMapa,
         )
     }
-    val accionesTareas = remember(tareasViewModel) {
+    val accionesSugerencias = remember(sugerenciasViewModel) {
+        SugerenciasAcciones(
+            onTipo = sugerenciasViewModel::elegirTipo,
+            onAlternar = sugerenciasViewModel::alternar,
+            onSeleccionarTodas = sugerenciasViewModel::seleccionarTodas,
+            onCrear = sugerenciasViewModel::crear,
+            onClose = sugerenciasViewModel::cerrar,
+        )
+    }
+    val accionesTareas = remember(tareasViewModel, sugerenciasViewModel, obraAbiertaId) {
         TareasAcciones(
             onCreate = tareasViewModel::abrirFormulario,
+            onSuggest = { obraAbiertaId?.let(sugerenciasViewModel::abrir) },
             onRetry = tareasViewModel::reintentar,
             onEdit = tareasViewModel::editar,
             onChangeState = tareasViewModel::cambiarEstado,
@@ -193,6 +209,9 @@ fun ObraTrackApp(
                                 PestanaPrincipal.OBRAS -> if (tareasState.formularioVisible) TareaScreen(
                                     state = tareasState,
                                     acciones = accionesTareas,
+                                ) else if (sugerenciasState.visible) SugerenciasTareasScreen(
+                                    state = sugerenciasState,
+                                    acciones = accionesSugerencias,
                                 ) else if (relevamientoAbierto) RelevamientoScreen(
                                     state = relevamientosState,
                                     acciones = accionesRelevamientos,

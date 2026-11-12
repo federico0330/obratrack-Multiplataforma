@@ -17,6 +17,10 @@ import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
 import com.unaj.obratrack.core.data.auth.RepositorioCuentaImpl
 import com.unaj.obratrack.core.data.preferencias.crearRepositorioPreferencias
+import com.unaj.obratrack.core.data.sugerencias.SugeridorPorPlantillas
+import com.unaj.obratrack.domain.usecase.CrearTareasSugeridas
+import com.unaj.obratrack.domain.usecase.SugerirTareas
+import com.unaj.obratrack.features.obras.SugerenciasViewModel
 import com.unaj.obratrack.domain.usecase.ActualizarNombreUsuario
 import com.unaj.obratrack.domain.usecase.CambiarIdioma
 import com.unaj.obratrack.domain.usecase.CambiarTema
@@ -62,6 +66,7 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
     private val authRepository = RepositorioAutenticacionImpl(authDataSource)
     private val cuentaRepository = RepositorioCuentaImpl(authDataSource)
     private val preferenciasRepository = crearRepositorioPreferencias()
+    private val sugeridorTareas = SugeridorPorPlantillas()
     private val obrasRepository = RepositorioObrasImpl(GitLiveFirebaseObraDataSource())
     private val tareasRepository = RepositorioTareasImpl(GitLiveFirebaseTareaDataSource())
 
@@ -117,6 +122,12 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
         CambiarEstadoObra(obrasRepository),
         EliminarObra(obrasRepository),
         ProgramarVisita(obrasRepository),
+    )
+
+    fun crearSugerenciasViewModel() = SugerenciasViewModel(
+        ObservarSesion(authRepository),
+        SugerirTareas(sugeridorTareas),
+        CrearTareasSugeridas(CrearTarea(tareasRepository)),
     )
 
     fun crearTareasViewModel() = TareasViewModel(
