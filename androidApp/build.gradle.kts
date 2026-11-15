@@ -1,3 +1,4 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -6,6 +7,13 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.google.gms.google-services")
 }
+
+// Claves locales (no versionadas): local.properties está en .gitignore.
+val propiedadesLocales = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use { load(it) }
+}
+
+fun propiedadLocal(nombre: String) = propiedadesLocales.getProperty(nombre, "").trim().replace("\"", "")
 
 android {
     namespace = "com.unaj.appmoviles.obratrack"
@@ -18,12 +26,18 @@ android {
         versionCode = 1
         versionName = "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Vacías si no están en local.properties: entonces la app funciona solo con plantillas.
+        buildConfigField("String", "GEMINI_API_KEY", "\"${propiedadLocal("GEMINI_API_KEY")}\"")
+        buildConfigField("String", "GEMINI_MODEL", "\"${propiedadLocal("GEMINI_MODEL")}\"")
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
     }
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+        buildConfig = true
+    }
 }
 
 kotlin {

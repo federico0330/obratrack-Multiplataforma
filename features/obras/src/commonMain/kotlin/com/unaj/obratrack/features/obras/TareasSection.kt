@@ -39,6 +39,7 @@ import org.jetbrains.compose.resources.stringResource
 /** Acciones de la sección de tareas; la pantalla no conoce al ViewModel. */
 class TareasAcciones(
     val onCreate: () -> Unit,
+    val onSuggest: () -> Unit,
     val onRetry: () -> Unit,
     val onEdit: (Tarea) -> Unit,
     val onChangeState: (Tarea, EstadoTarea) -> Unit,
@@ -59,6 +60,11 @@ class TareasAcciones(
 fun TareasSection(state: TareasUiState, acciones: TareasAcciones, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.tareaAEliminar?.let { DialogoEliminarTarea(it, state.vinculados, acciones) }
+        if (state.lista is ListaTareasUiState.Vacia || state.lista is ListaTareasUiState.Contenido) {
+            OutlinedButton(onClick = acciones.onSuggest, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(Res.string.sugerencias_open))
+            }
+        }
         ListaTareas(state, acciones)
     }
 }

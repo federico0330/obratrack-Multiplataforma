@@ -40,6 +40,8 @@ class MainActivity : ComponentActivity() {
                     proveedorTokenGoogle,
                     alAplicarTema = ::aplicarBarrasDelSistema,
                     alAplicarIdioma = ::aplicarIdioma,
+                    claveGemini = BuildConfig.GEMINI_API_KEY,
+                    modeloGemini = BuildConfig.GEMINI_MODEL,
                 )
             }
         }

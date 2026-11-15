@@ -17,6 +17,13 @@ import com.unaj.obratrack.features.obras.RelevamientosViewModel
 import com.unaj.obratrack.core.data.auth.RepositorioAutenticacionImpl
 import com.unaj.obratrack.core.data.auth.RepositorioCuentaImpl
 import com.unaj.obratrack.core.data.preferencias.crearRepositorioPreferencias
+import com.unaj.obratrack.core.data.sugerencias.GeminiConfig
+import com.unaj.obratrack.core.data.sugerencias.SugeridorPorPlantillas
+import com.unaj.obratrack.core.data.sugerencias.crearSugeridorConGemini
+import com.unaj.obratrack.domain.usecase.CrearTareasSugeridas
+import com.unaj.obratrack.domain.usecase.SugerirTareas
+import com.unaj.obratrack.domain.usecase.SugerirTareasConIa
+import com.unaj.obratrack.features.obras.SugerenciasViewModel
 import com.unaj.obratrack.domain.usecase.ActualizarNombreUsuario
 import com.unaj.obratrack.domain.usecase.CambiarIdioma
 import com.unaj.obratrack.domain.usecase.CambiarTema
@@ -57,11 +64,21 @@ import com.unaj.obratrack.features.obras.TareasViewModel
  * Composition root compartido; cada plataforma inicializa Firebase antes de crear este grafo y
  * aporta su implementación de [ProveedorTokenGoogle].
  */
-class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
+class AppGraph(
+    private val proveedorTokenGoogle: ProveedorTokenGoogle,
+    claveGemini: String = "",
+    modeloGemini: String = "",
+) {
     private val authDataSource = GitLiveFirebaseAuthDataSource()
     private val authRepository = RepositorioAutenticacionImpl(authDataSource)
     private val cuentaRepository = RepositorioCuentaImpl(authDataSource)
     private val preferenciasRepository = crearRepositorioPreferencias()
+    private val sugeridorTareas = SugeridorPorPlantillas()
+
+    // Sin clave no hay sugerencias con IA: la pantalla ofrece solo las plantillas.
+    private val sugeridorIa = claveGemini.takeIf { it.isNotBlank() }?.let {
+        crearSugeridorConGemini(GeminiConfig(it, modeloGemini.ifBlank { GeminiConfig.MODELO_POR_DEFECTO }))
+    }
     private val obrasRepository = RepositorioObrasImpl(GitLiveFirebaseObraDataSource())
     private val tareasRepository = RepositorioTareasImpl(GitLiveFirebaseTareaDataSource())
 
@@ -117,6 +134,13 @@ class AppGraph(private val proveedorTokenGoogle: ProveedorTokenGoogle) {
         CambiarEstadoObra(obrasRepository),
         EliminarObra(obrasRepository),
         ProgramarVisita(obrasRepository),
+    )
+
+    fun crearSugerenciasViewModel() = SugerenciasViewModel(
+        ObservarSesion(authRepository),
+        SugerirTareas(sugeridorTareas),
+        CrearTareasSugeridas(CrearTarea(tareasRepository)),
+        sugeridorIa?.let { SugerirTareasConIa(it) },
     )
 
     fun crearTareasViewModel() = TareasViewModel(
