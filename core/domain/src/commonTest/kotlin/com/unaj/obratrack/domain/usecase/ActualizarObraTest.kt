@@ -28,6 +28,17 @@ class ActualizarObraTest {
     }
 
     @Test
+    fun permiteQuitarClienteYDireccion() = runTest {
+        val repository = ActualizarObraRepositoryFake()
+        val draft = ObraDraft(" Casa ", "  ", null, true, Instant.fromEpochMilliseconds(0))
+
+        val result = ActualizarObra(repository)("uid-1", "obra-2", draft)
+
+        assertEquals(ResultadoObra.Exito(Unit), result)
+        assertEquals(draft.copy(nombre = "Casa", cliente = null, direccion = null), repository.draft)
+    }
+
+    @Test
     fun entradasInvalidasNoLlamanAlRepositorio() = runTest {
         val repository = ActualizarObraRepositoryFake()
         val result = ActualizarObra(repository)(

@@ -8,8 +8,6 @@ import kotlin.time.Instant
 
 enum class ErrorObra {
     NOMBRE_VACIO,
-    CLIENTE_VACIO,
-    DIRECCION_VACIA,
     NO_AUTORIZADA,
     FALLO_PARCIAL,
     RED,

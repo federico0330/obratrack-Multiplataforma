@@ -29,18 +29,36 @@ class CrearObraTest {
     }
 
     @Test
-    fun camposObligatoriosInvalidosNoLlamanAlRepo() = runTest {
+    fun creaConSoloElNombre() = runTest {
         val repo = RepositorioObrasFalso()
         val fecha = Instant.parse("2026-11-01T00:00:00Z")
-        val cases = listOf(
-            ObraDraft(" ", "C", "D", false, fecha) to ErrorObra.NOMBRE_VACIO,
-            ObraDraft("N", " ", "D", false, fecha) to ErrorObra.CLIENTE_VACIO,
-            ObraDraft("N", "C", " ", false, fecha) to ErrorObra.DIRECCION_VACIA,
-        )
 
-        cases.forEach { (draft, error) ->
-            assertEquals(ResultadoObra.Fallo(error), CrearObra(repo)("uid-1", draft))
-        }
+        val result = CrearObra(repo)("uid-1", ObraDraft(nombre = " Escuela ", publica = false, fechaInicio = fecha))
+
+        val expected = Obra("generado-1", "uid-1", "Escuela", null, null, false, EstadoObra.ACTIVA, fecha)
+        assertEquals(ResultadoObra.Exito(expected), result)
+        assertEquals(1, repo.createCalls)
+    }
+
+    @Test
+    fun clienteYDireccionEnBlancoSeGuardanComoNulos() = runTest {
+        val repo = RepositorioObrasFalso()
+        val fecha = Instant.parse("2026-11-01T00:00:00Z")
+
+        CrearObra(repo)("uid-1", ObraDraft("Escuela", "  ", "", false, fecha))
+
+        assertEquals(null, repo.created?.cliente)
+        assertEquals(null, repo.created?.direccion)
+    }
+
+    @Test
+    fun nombreVacioNoLlamaAlRepo() = runTest {
+        val repo = RepositorioObrasFalso()
+        val fecha = Instant.parse("2026-11-01T00:00:00Z")
+
+        val result = CrearObra(repo)("uid-1", ObraDraft(" ", "C", "D", false, fecha))
+
+        assertEquals(ResultadoObra.Fallo(ErrorObra.NOMBRE_VACIO), result)
         assertEquals(0, repo.createCalls)
     }
 

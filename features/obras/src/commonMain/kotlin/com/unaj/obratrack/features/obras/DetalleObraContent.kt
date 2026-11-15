@@ -76,12 +76,14 @@ internal fun DetalleObraContent(
                 Text(obra.nombre, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
                 EstadoChip(obra.estado)
             }
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Icon(
-                    painterResource(Iconos.Place), contentDescription = null, modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(obra.direccion, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            obra.direccion?.let { direccion ->
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Icon(
+                        painterResource(Iconos.Place), contentDescription = null, modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Text(direccion, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
             }
         }
         PrimaryTabRow(selectedTabIndex = pestana) {
@@ -141,7 +143,7 @@ private fun ResumenObra(
     OutlinedCard(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Dato(stringResource(Res.string.obras_client), obra.cliente, Modifier.weight(1f))
+                obra.cliente?.let { cliente -> Dato(stringResource(Res.string.obras_client), cliente, Modifier.weight(1f)) }
                 Dato(
                     stringResource(Res.string.obras_start_date),
                     fechaLegible(obra.fechaInicio.toLocalDateTime(TimeZone.UTC).date),

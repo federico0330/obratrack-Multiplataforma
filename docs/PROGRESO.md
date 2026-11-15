@@ -243,3 +243,8 @@ La captura de una foto de 50 MP y el GPS físico con precisión aproximada sigue
 
 - Al guardar una obra nueva se abre la pantalla de sugerencias de tareas para esa obra, con "Omitir" en lugar de "Cancelar"; al editar una obra no pasa. `ObrasUiState.obraCreadaId` es un aviso de un solo uso que completa `ObrasViewModel.guardar` con el id de `CrearObra` y que `ObraTrackApp` atiende con `obraCreadaAtendida()`. Sin cambios en dominio, Firestore ni esquema: la obra ya existe cuando se crean las tareas, así que un fallo deja la obra guardada y se reintenta desde la pestaña Tareas.
 - Pasan los tests de `features:obras` (dos casos nuevos) y `:androidApp:assembleDebug`. Probado en un teléfono Android con conexión: crear la obra, ver la pantalla, Omitir y crear tareas de verdad. Sin probar: el error sin red a mitad de la creación y los otros idiomas.
+
+## Cliente y dirección opcionales de la obra
+
+- Solo el nombre es obligatorio. `Obra` y `ObraDraft` llevan `cliente` y `direccion` como `String?`; `CrearObra` y `ActualizarObra` validan solo el nombre y normalizan (`trim`, vacío = null). Se quitaron `CLIENTE_VACIO`, `DIRECCION_VACIA` y sus errores de UI y textos. El formulario dice "(opcional)" en es/en/it y la lista, el detalle y la agenda no muestran lo que falta.
+- Firestore: sin valor se escribe `""` y al leer un campo ausente, nulo o vacío es null, para no cambiar lo que lee la app nativa sobre las mismas obras. No hay base local ni PDF todavía, así que no hubo migración; el PDF tendrá que omitir estas filas cuando exista.

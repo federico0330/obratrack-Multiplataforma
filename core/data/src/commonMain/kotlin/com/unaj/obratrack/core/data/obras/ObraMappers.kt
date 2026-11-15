@@ -12,8 +12,8 @@ internal fun ObraDto.toDomain(): Obra = Obra(
     id = id,
     userId = userId,
     nombre = nombre,
-    cliente = cliente,
-    direccion = direccion,
+    cliente = cliente?.takeIf { it.isNotBlank() },
+    direccion = direccion?.takeIf { it.isNotBlank() },
     publica = publica,
     estado = when (estado) {
         "activa" -> EstadoObra.ACTIVA
