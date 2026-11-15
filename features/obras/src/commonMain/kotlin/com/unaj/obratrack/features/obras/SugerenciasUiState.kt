@@ -8,6 +8,8 @@ enum class ErrorSugerenciasUi { SESION, RED, LIMITE, RESPUESTA, DESCRIPCION, DES
 
 data class SugerenciasUiState(
     val visible: Boolean = false,
+    /** Se abrió justo después de crear la obra: salir es "Omitir", no cancelar algo. */
+    val altaDeObra: Boolean = false,
     val tipo: TipoObra? = null,
     /** Texto libre para sugerir con IA; solo se usa si [iaDisponible]. */
     val descripcion: String = "",

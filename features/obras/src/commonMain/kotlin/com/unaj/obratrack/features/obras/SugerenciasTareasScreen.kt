@@ -85,7 +85,7 @@ fun SugerenciasTareasScreen(state: SugerenciasUiState, acciones: SugerenciasAcci
                 guardando = state.creando,
                 puedeGuardar = state.puedeCrear,
                 textoGuardar = stringResource(Res.string.sugerencias_create, state.seleccionadas.size),
-                textoCancelar = stringResource(Res.string.obras_cancel),
+                textoCancelar = stringResource(if (state.altaDeObra) Res.string.sugerencias_skip else Res.string.obras_cancel),
                 onGuardar = { acciones.onCrear(titulos) },
                 onCancelar = acciones.onClose,
             )
