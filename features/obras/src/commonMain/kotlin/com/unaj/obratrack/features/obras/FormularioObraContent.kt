@@ -52,8 +52,8 @@ internal fun FormularioObraContent(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         CampoTexto(form.nombre, onNameChange, stringResource(Res.string.obras_name), siguiente)
-        CampoTexto(form.cliente, onClientChange, stringResource(Res.string.obras_client), siguiente)
-        CampoTexto(form.direccion, onAddressChange, stringResource(Res.string.obras_address), siguiente)
+        CampoTexto(form.cliente, onClientChange, stringResource(Res.string.obras_client_optional), siguiente)
+        CampoTexto(form.direccion, onAddressChange, stringResource(Res.string.obras_address_optional), siguiente)
         CampoFecha(form.fechaInicio, stringResource(Res.string.obras_start_date), onDateChange)
         Text(stringResource(Res.string.obras_visibility), style = MaterialTheme.typography.labelLarge)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

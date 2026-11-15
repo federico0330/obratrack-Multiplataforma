@@ -17,14 +17,7 @@ class ActualizarObra(
         when (validacion) {
             ValidacionObra.Valida -> Unit
             ValidacionObra.NombreVacio -> return ResultadoObra.Fallo(ErrorObra.NOMBRE_VACIO)
-            ValidacionObra.ClienteVacio -> return ResultadoObra.Fallo(ErrorObra.CLIENTE_VACIO)
-            ValidacionObra.DireccionVacia -> return ResultadoObra.Fallo(ErrorObra.DIRECCION_VACIA)
         }
-        val normalizado = draft.copy(
-            nombre = draft.nombre.trim(),
-            cliente = draft.cliente.trim(),
-            direccion = draft.direccion.trim(),
-        )
-        return repositorio.actualizar(userId, obraId, normalizado)
+        return repositorio.actualizar(userId, obraId, draft.normalizado())
     }
 }

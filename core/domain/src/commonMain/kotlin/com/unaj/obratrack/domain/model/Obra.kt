@@ -8,8 +8,10 @@ data class Obra(
     val id: String,
     val userId: String,
     val nombre: String,
-    val cliente: String,
-    val direccion: String,
+    /** Opcional: null cuando la obra no tiene cliente cargado. */
+    val cliente: String? = null,
+    /** Opcional: null cuando la obra no tiene dirección cargada. */
+    val direccion: String? = null,
     val publica: Boolean,
     val estado: EstadoObra,
     val fechaInicio: Instant,
@@ -24,8 +26,8 @@ data class Ubicacion(val latitud: Double, val longitud: Double)
 
 data class ObraDraft(
     val nombre: String,
-    val cliente: String,
-    val direccion: String,
+    val cliente: String? = null,
+    val direccion: String? = null,
     val publica: Boolean,
     val fechaInicio: Instant,
 )

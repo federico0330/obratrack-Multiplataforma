@@ -7,7 +7,6 @@
     <string name="obras_create_title">New work</string>
     <string name="obras_name">Name</string>
     <string name="obras_client">Client</string>
-    <string name="obras_address">Address</string>
     <string name="obras_start_date">Start date</string>
     <string name="obras_private">Private</string>
     <string name="obras_public">Public</string>
@@ -17,8 +16,8 @@
     <string name="obras_client_value">Client: %1$s</string>
     <string name="obras_error_session">Your session is unavailable. Sign in again.</string>
     <string name="obras_error_name">Enter the work name.</string>
-    <string name="obras_error_client">Enter the client name.</string>
-    <string name="obras_error_address">Enter the address.</string>
+    <string name="obras_client_optional">Client (optional)</string>
+    <string name="obras_address_optional">Address (optional)</string>
     <string name="obras_error_date">Enter a valid date in YYYY-MM-DD format.</string>
     <string name="obras_error_network">Could not connect. Check your connection and try again.</string>
     <string name="obras_error_generic">The operation could not be completed. Try again.</string>

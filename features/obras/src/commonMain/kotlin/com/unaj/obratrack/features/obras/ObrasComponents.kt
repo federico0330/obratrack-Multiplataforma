@@ -44,16 +44,20 @@ internal fun ObraCard(obra: Obra, onClick: (Obra) -> Unit, modifier: Modifier = 
                 Text(obra.nombre, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
                 EstadoChip(obra.estado)
             }
-            Text(
-                stringResource(Res.string.obras_client_value, obra.cliente),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                obra.direccion,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            obra.cliente?.let { cliente ->
+                Text(
+                    stringResource(Res.string.obras_client_value, cliente),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            obra.direccion?.let { direccion ->
+                Text(
+                    direccion,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
@@ -72,8 +76,6 @@ internal fun errorMessage(error: ErrorObrasUi): String = stringResource(
     when (error) {
         ErrorObrasUi.SESION, ErrorObrasUi.PERMISOS -> Res.string.obras_error_session
         ErrorObrasUi.NOMBRE -> Res.string.obras_error_name
-        ErrorObrasUi.CLIENTE -> Res.string.obras_error_client
-        ErrorObrasUi.DIRECCION -> Res.string.obras_error_address
         ErrorObrasUi.FECHA -> Res.string.obras_error_date
         ErrorObrasUi.RED -> Res.string.obras_error_network
         ErrorObrasUi.BAJA_PARCIAL -> Res.string.obras_error_partial_delete

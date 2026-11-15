@@ -87,7 +87,7 @@ fun AgendaVisitasScreen(
                                     OutlinedCard(Modifier.fillMaxWidth().testTag("agenda_obra_${visita.obra.id}")) {
                                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                             Text(visita.obra.nombre, style = MaterialTheme.typography.titleMedium)
-                                            Text(visita.obra.direccion)
+                                            visita.obra.direccion?.let { Text(it) }
                                             val fechaVisita = visita.fecha
                                             if (fechaVisita != null) {
                                                 val hora = visita.horaMinutos?.let(::horaVisitaTexto)

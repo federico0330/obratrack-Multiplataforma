@@ -182,8 +182,8 @@ class ObrasViewModel(
                 formulario = FormularioObraUiState(
                     obraId = obra.id,
                     nombre = obra.nombre,
-                    cliente = obra.cliente,
-                    direccion = obra.direccion,
+                    cliente = obra.cliente.orEmpty(),
+                    direccion = obra.direccion.orEmpty(),
                     fechaInicio = fecha,
                     publica = obra.publica,
                 ),
@@ -297,8 +297,6 @@ class ObrasViewModel(
 
     private fun ErrorObra.toUiError() = when (this) {
         ErrorObra.NOMBRE_VACIO -> ErrorObrasUi.NOMBRE
-        ErrorObra.CLIENTE_VACIO -> ErrorObrasUi.CLIENTE
-        ErrorObra.DIRECCION_VACIA -> ErrorObrasUi.DIRECCION
         ErrorObra.NO_AUTORIZADA -> ErrorObrasUi.PERMISOS
         ErrorObra.RED -> ErrorObrasUi.RED
         ErrorObra.FALLO_PARCIAL -> ErrorObrasUi.BAJA_PARCIAL

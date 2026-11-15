@@ -4,8 +4,8 @@ data class ObraDto(
     val id: String,
     val userId: String,
     val nombre: String,
-    val cliente: String,
-    val direccion: String,
+    val cliente: String? = null,
+    val direccion: String? = null,
     val publica: Boolean,
     val estado: String,
     val fechaInicioMillis: Long,
@@ -39,8 +39,8 @@ interface FirebaseObraDataSource {
 
 data class ObraUpdateFields(
     val nombre: String,
-    val cliente: String,
-    val direccion: String,
+    val cliente: String? = null,
+    val direccion: String? = null,
     val publica: Boolean,
     val fechaInicioMillis: Long,
 )

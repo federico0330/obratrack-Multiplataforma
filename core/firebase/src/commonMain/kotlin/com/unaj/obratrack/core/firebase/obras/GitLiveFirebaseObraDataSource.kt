@@ -52,8 +52,8 @@ class GitLiveFirebaseObraDataSource(
     ): FirebaseObraResult<Unit> = writeResult {
         ownedDocument(userId, obraId).updateFields {
             FIELD_NOMBRE to fields.nombre
-            FIELD_CLIENTE to fields.cliente
-            FIELD_DIRECCION to fields.direccion
+            FIELD_CLIENTE to fields.cliente.orEmpty()
+            FIELD_DIRECCION to fields.direccion.orEmpty()
             FIELD_PUBLICA to fields.publica
             FIELD_FECHA_INICIO to Timestamp.fromMilliseconds(fields.fechaInicioMillis.toDouble())
         }
@@ -154,8 +154,8 @@ class GitLiveFirebaseObraDataSource(
             id = id,
             userId = get(FIELD_USER_ID),
             nombre = get(FIELD_NOMBRE),
-            cliente = get(FIELD_CLIENTE),
-            direccion = get(FIELD_DIRECCION),
+            cliente = textoOpcional(FIELD_CLIENTE),
+            direccion = textoOpcional(FIELD_DIRECCION),
             publica = get(FIELD_PUBLICA),
             estado = get(FIELD_ESTADO),
             fechaInicioMillis = get<Timestamp>(FIELD_FECHA_INICIO).toMilliseconds().toLong(),
@@ -167,11 +167,16 @@ class GitLiveFirebaseObraDataSource(
         )
     }
 
+    /** Campo de texto que puede faltar, ser null o estar vacío (obras sin cliente o dirección): en esos casos es null. */
+    private fun dev.gitlive.firebase.firestore.DocumentSnapshot.textoOpcional(campo: String): String? =
+        if (contains(campo)) get<String?>(campo)?.takeIf { it.isNotBlank() } else null
+
     private fun ObraDto.toFirestoreMap(): Map<String, Any> = buildMap {
         put(FIELD_USER_ID, userId)
         put(FIELD_NOMBRE, nombre)
-        put(FIELD_CLIENTE, cliente)
-        put(FIELD_DIRECCION, direccion)
+        // Sin valor se guarda "": el cliente nativo los lee como texto y la lectura de acá los trata como ausentes.
+        put(FIELD_CLIENTE, cliente.orEmpty())
+        put(FIELD_DIRECCION, direccion.orEmpty())
         put(FIELD_PUBLICA, publica)
         put(FIELD_ESTADO, estado)
         put(FIELD_FECHA_INICIO, Timestamp.fromMilliseconds(fechaInicioMillis.toDouble()))
