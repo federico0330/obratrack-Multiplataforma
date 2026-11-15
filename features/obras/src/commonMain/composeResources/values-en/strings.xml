@@ -187,6 +187,7 @@
     </plurals>
     <string name="sugerencias_open">Suggest tasks</string>
     <string name="sugerencias_title">Suggest tasks</string>
+    <string name="sugerencias_skip">Skip</string>
     <string name="sugerencias_type_prompt">What kind of work is it?</string>
     <string name="sugerencias_select_prompt">Choose the tasks you want to create</string>
     <string name="sugerencias_select_all">Select all</string>

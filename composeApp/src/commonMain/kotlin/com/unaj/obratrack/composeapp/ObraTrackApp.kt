@@ -121,6 +121,15 @@ fun ObraTrackApp(
         }
     }
 
+    // Al crear una obra se ofrece sugerir tareas antes de volver a la lista; "Omitir" cierra la pantalla.
+    val obraCreadaId = obrasState.obraCreadaId
+    LaunchedEffect(obraCreadaId) {
+        if (obraCreadaId != null) {
+            sugerenciasViewModel.abrir(obraCreadaId, altaDeObra = true)
+            obrasViewModel.obraCreadaAtendida()
+        }
+    }
+
     val accionesRelevamientos = remember(relevamientosViewModel) {
         RelevamientosAcciones(
             onCreate = relevamientosViewModel::abrirFormulario,

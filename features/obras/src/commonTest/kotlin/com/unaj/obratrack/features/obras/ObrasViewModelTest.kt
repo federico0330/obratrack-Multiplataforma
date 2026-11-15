@@ -69,6 +69,39 @@ class ObrasViewModelTest {
     }
 
     @Test
+    fun alCrearUnaObraAvisaSuIdUnaSolaVezYAlEditarNoAvisa() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val repo = ObrasRepoFalso()
+            val existente = obra("obra-1", "uid-1", "Escuela")
+            repo.obrasPorUsuario["uid-1"] = listOf(existente)
+            val viewModel = ObrasViewModel(
+                ObservarSesion(AuthRepoFalso()), ObservarObras(repo), CrearObra(repo), ActualizarObra(repo), CambiarEstadoObra(repo), EliminarObra(repo), ProgramarVisita(repo),
+            )
+            advanceUntilIdle()
+
+            viewModel.abrirDetalle(existente)
+            viewModel.editarSeleccionada()
+            viewModel.guardar()
+            advanceUntilIdle()
+            assertNull(viewModel.state.value.obraCreadaId)
+
+            viewModel.abrirFormulario()
+            viewModel.nombreCambiado("Nueva")
+            viewModel.clienteCambiado("Municipio")
+            viewModel.direccionCambiada("Calle 2")
+            viewModel.guardar()
+            advanceUntilIdle()
+            assertEquals("remote-id", viewModel.state.value.obraCreadaId)
+
+            viewModel.obraCreadaAtendida()
+            assertNull(viewModel.state.value.obraCreadaId)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
     fun cambiaLaConsultaAlCambiarLaSesionYDescartaElDetalleAnterior() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {

@@ -187,6 +187,7 @@
     </plurals>
     <string name="sugerencias_open">Sugerir tareas</string>
     <string name="sugerencias_title">Sugerir tareas</string>
+    <string name="sugerencias_skip">Omitir</string>
     <string name="sugerencias_type_prompt">¿Qué tipo de obra es?</string>
     <string name="sugerencias_select_prompt">Elegí las tareas que querés crear</string>
     <string name="sugerencias_select_all">Seleccionar todas</string>

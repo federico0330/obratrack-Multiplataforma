@@ -39,4 +39,6 @@ data class ObrasUiState(
     val confirmarEliminacion: Boolean = false,
     val eliminando: Boolean = false,
     val edicionVisita: EdicionVisitaUiState? = null,
+    /** Aviso de un solo uso: la obra que se acaba de crear. Quien lo atiende llama a `obraCreadaAtendida`. */
+    val obraCreadaId: String? = null,
 )

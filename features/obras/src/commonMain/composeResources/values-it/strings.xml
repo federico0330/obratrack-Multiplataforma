@@ -187,6 +187,7 @@
     </plurals>
     <string name="sugerencias_open">Suggerisci attività</string>
     <string name="sugerencias_title">Suggerisci attività</string>
+    <string name="sugerencias_skip">Salta</string>
     <string name="sugerencias_type_prompt">Che tipo di lavoro è?</string>
     <string name="sugerencias_select_prompt">Scegli le attività da creare</string>
     <string name="sugerencias_select_all">Seleziona tutte</string>

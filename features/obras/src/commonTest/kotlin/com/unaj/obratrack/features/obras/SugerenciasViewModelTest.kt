@@ -86,6 +86,18 @@ class SugerenciasViewModelTest {
     }
 
     @Test
+    fun abrirDesdeLaAltaDeObraSeMarcaYAlReabrirDesdeLaObraNo() = conViewModel { vm, _ ->
+        vm.abrir("obra-1", altaDeObra = true)
+        assertTrue(vm.state.value.altaDeObra)
+
+        vm.cerrar()
+        assertFalse(vm.state.value.altaDeObra)
+
+        vm.abrir("obra-1")
+        assertFalse(vm.state.value.altaDeObra)
+    }
+
+    @Test
     fun alElegirUnTipoSeListanTodasLasSugerenciasYQuedanElegidas() = conViewModel { vm, _ ->
         vm.abrir("obra-1")
 

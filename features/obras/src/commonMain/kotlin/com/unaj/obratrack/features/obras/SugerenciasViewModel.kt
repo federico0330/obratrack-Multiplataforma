@@ -52,10 +52,10 @@ class SugerenciasViewModel(
         }
     }
 
-    fun abrir(obraId: String) {
+    fun abrir(obraId: String, altaDeObra: Boolean = false) {
         cancelarTrabajos()
         this.obraId = obraId
-        _state.value = estadoInicial().copy(visible = true)
+        _state.value = estadoInicial().copy(visible = true, altaDeObra = altaDeObra)
     }
 
     fun cerrar() {

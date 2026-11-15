@@ -93,6 +93,7 @@ class ObrasViewModel(
             it.copy(
                 lista = ListaObrasUiState.Cargando,
                 obraSeleccionada = null,
+                obraCreadaId = null,
                 formularioVisible = false,
                 formulario = FormularioObraUiState(),
                 errorOperacion = null,
@@ -191,6 +192,9 @@ class ObrasViewModel(
     }
 
     fun cerrarFormulario() = _state.update { it.copy(formularioVisible = false) }
+
+    fun obraCreadaAtendida() = _state.update { it.copy(obraCreadaId = null) }
+
     fun nombreCambiado(value: String) = updateForm { copy(nombre = value, error = null) }
     fun clienteCambiado(value: String) = updateForm { copy(cliente = value, error = null) }
     fun direccionCambiada(value: String) = updateForm { copy(direccion = value, error = null) }
@@ -221,6 +225,7 @@ class ObrasViewModel(
                             formularioVisible = false,
                             formulario = FormularioObraUiState(),
                             obraSeleccionada = if (obraId == null) null else it.obraSeleccionada,
+                            obraCreadaId = if (obraId == null) (result.dato as? Obra)?.id else it.obraCreadaId,
                         )
                     }
                     is ResultadoObra.Fallo -> updateForm { copy(guardando = false, error = result.error.toUiError()) }
