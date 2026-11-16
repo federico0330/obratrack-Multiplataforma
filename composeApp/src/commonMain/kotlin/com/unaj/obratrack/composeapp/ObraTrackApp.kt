@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -135,7 +137,9 @@ fun ObraTrackApp(
             onCreate = relevamientosViewModel::abrirFormulario,
             onRetry = relevamientosViewModel::reintentar,
             onRetryTasks = relevamientosViewModel::reintentarTareas,
-            onCloseForm = relevamientosViewModel::cerrarFormulario,
+            onCloseForm = relevamientosViewModel::solicitarCerrarFormulario,
+            onKeepEditing = relevamientosViewModel::seguirEditando,
+            onDiscardChanges = relevamientosViewModel::cerrarFormulario,
             onNoteChange = relevamientosViewModel::notaCambiada,
             onDateChange = relevamientosViewModel::fechaCambiada,
             onTaskChange = relevamientosViewModel::tareaCambiada,
@@ -210,6 +214,7 @@ fun ObraTrackApp(
                     var pestana by rememberSaveable(stateSaver = PestanaPrincipalSaver) {
                         mutableStateOf(PestanaPrincipal.OBRAS)
                     }
+                    val scrollAgenda = key(authState.user?.id) { rememberLazyListState() }
                     val mostrarObras = pestana == PestanaPrincipal.OBRAS ||
                         (pestana == PestanaPrincipal.AGENDA && obraAbiertaId != null)
                     val enRaiz = !mostrarObras ||
@@ -271,6 +276,7 @@ fun ObraTrackApp(
                                     obrasViewModel::editarVisita,
                                     obrasViewModel::cerrarEdicionVisita,
                                     obrasViewModel::guardarVisita,
+                                    scroll = scrollAgenda,
                                 )
                                 PestanaPrincipal.PERFIL -> {
                                     // Se recolecta solo aquí: la consulta de obras corre mientras Perfil está visible.

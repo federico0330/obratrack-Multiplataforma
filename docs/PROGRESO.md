@@ -255,3 +255,9 @@ La captura de una foto de 50 MP y el GPS físico con precisión aproximada sigue
 - Al aplicar dos veces Pintura y terminaciones en la misma obra, Firestore local quedaba con ocho tareas para cuatro títulos. `CrearTareasSugeridas` ahora consulta las tareas de la obra y omite títulos existentes al guardar. Al repetir el recorrido quedaron cuatro.
 - Agenda muestra «Ver obra» en cada tarjeta. Abre el detalle compartido y vuelve a Agenda con la flecha o Atrás. Se verificaron las dos formas de volver en el emulador.
 - Compiló la app Android y pasaron las 272 pruebas de dominio y obras. Se reutilizó la prueba del caso de uso para cubrir una segunda selección con una tarea repetida y una nueva.
+
+## Descartar un relevamiento y retomar Agenda
+
+- Atrás, la flecha y Cancelar piden confirmación si cambió la nota, la fecha, la tarea, la foto o la ubicación. Es posible seguir editando o salir descartando. Un formulario sin cambios se cierra directamente.
+- Agenda conserva la tarjeta visible y el desplazamiento al entrar a una obra y volver. El estado de la lista se conserva en `ObraTrackApp` y se lo pasa a la pantalla.
+- Android compiló y pasaron 125 pruebas de host de obras. En el emulador se comprobó el descarte de alta y edición, la conservación de la nota al seguir editando y la posición exacta de Agenda al volver con Atrás y la flecha.

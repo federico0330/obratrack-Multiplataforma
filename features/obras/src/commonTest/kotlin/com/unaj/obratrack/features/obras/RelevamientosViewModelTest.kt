@@ -213,6 +213,22 @@ class RelevamientosViewModelTest {
     }
 
     @Test
+    fun permiteSeguirEditandoYDetectaSiSeDeshizoElCambio() = conVm { vm, _ ->
+        vm.abrirFormulario()
+        vm.notaCambiada("Medidas de la abertura")
+        vm.solicitarCerrarFormulario()
+        assertTrue(vm.state.value.formulario.confirmarDescarte)
+
+        vm.seguirEditando()
+        assertFalse(vm.state.value.formulario.confirmarDescarte)
+        assertEquals("Medidas de la abertura", vm.state.value.formulario.nota)
+
+        vm.notaCambiada("")
+        vm.solicitarCerrarFormulario()
+        assertFalse(vm.state.value.formularioVisible)
+    }
+
+    @Test
     fun noPermiteEditarElBorradorMientrasSeGuarda() = conVm { vm, repo ->
         val espera = CompletableDeferred<Unit>()
         repo.espera = espera
@@ -221,7 +237,8 @@ class RelevamientosViewModelTest {
         vm.guardar()
         advanceUntilIdle()
         vm.notaCambiada("Otra")
-        vm.cerrarFormulario()
+        vm.solicitarCerrarFormulario()
+        assertFalse(vm.state.value.formulario.confirmarDescarte)
         assertEquals("Nota enviada", vm.state.value.formulario.nota)
         assertTrue(vm.state.value.formularioVisible)
         espera.complete(Unit)

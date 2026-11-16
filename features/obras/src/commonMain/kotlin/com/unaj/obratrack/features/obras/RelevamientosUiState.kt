@@ -75,6 +75,7 @@ data class FormularioRelevamientoUiState(
     val mapaAbierto: Boolean = false,
     val busqueda: BusquedaDireccionUiState = BusquedaDireccionUiState(),
     val guardando: Boolean = false,
+    val confirmarDescarte: Boolean = false,
     val error: ErrorRelevamientosUi? = null,
 )
 
