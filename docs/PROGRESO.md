@@ -248,3 +248,10 @@ La captura de una foto de 50 MP y el GPS físico con precisión aproximada sigue
 
 - Solo el nombre es obligatorio. `Obra` y `ObraDraft` llevan `cliente` y `direccion` como `String?`; `CrearObra` y `ActualizarObra` validan solo el nombre y normalizan (`trim`, vacío = null). Se quitaron `CLIENTE_VACIO`, `DIRECCION_VACIA` y sus errores de UI y textos. El formulario dice "(opcional)" en es/en/it y la lista, el detalle y la agenda no muestran lo que falta.
 - Firestore: sin valor se escribe `""` y al leer un campo ausente, nulo o vacío es null, para no cambiar lo que lee la app nativa sobre las mismas obras. No hay base local ni PDF todavía, así que no hubo migración; el PDF tendrá que omitir estas filas cuando exista.
+
+
+## Sugerencias repetidas y acceso desde Agenda
+
+- Al aplicar dos veces Pintura y terminaciones en la misma obra, Firestore local quedaba con ocho tareas para cuatro títulos. `CrearTareasSugeridas` ahora consulta las tareas de la obra y omite títulos existentes al guardar. Al repetir el recorrido quedaron cuatro.
+- Agenda muestra «Ver obra» en cada tarjeta. Abre el detalle compartido y vuelve a Agenda con la flecha o Atrás. Se verificaron las dos formas de volver en el emulador.
+- Compiló la app Android y pasaron las 272 pruebas de dominio y obras. Se reutilizó la prueba del caso de uso para cubrir una segunda selección con una tarea repetida y una nueva.

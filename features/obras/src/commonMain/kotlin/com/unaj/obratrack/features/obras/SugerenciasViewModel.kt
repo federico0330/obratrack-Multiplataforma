@@ -130,12 +130,12 @@ class SugerenciasViewModel(
             when (val resultado = crearTareasSugeridas(uid, obra, drafts)) {
                 is ResultadoCrearSugeridas.Exito -> reiniciar()
                 is ResultadoCrearSugeridas.Fallo -> {
-                    val guardadas = elegidas.take(resultado.creadas).toSet()
+                    val resueltas = elegidas.take(resultado.creadas + resultado.omitidas).toSet()
                     _state.update {
                         it.copy(
                             creando = false,
-                            sugerencias = it.sugerencias - guardadas,
-                            seleccionadas = it.seleccionadas - guardadas,
+                            sugerencias = it.sugerencias - resueltas,
+                            seleccionadas = it.seleccionadas - resueltas,
                             creadasAntesDelError = resultado.creadas,
                             error = resultado.error.toUi(),
                         )

@@ -172,6 +172,7 @@
     <string name="agenda_unscheduled">Da programmare</string>
     <string name="agenda_empty">Non ci sono ancora visite da mostrare.</string>
     <string name="agenda_date_time">%1$s · %2$s</string>
+    <string name="agenda_open_work">Vedi lavoro</string>
     <string name="agenda_schedule">Pianifica visita</string>
     <string name="agenda_reschedule">Riprogramma visita</string>
     <string name="agenda_visit_date">Data della visita</string>
@@ -192,7 +193,7 @@
     <string name="sugerencias_select_all">Seleziona tutte</string>
     <string name="sugerencias_select_none">Deseleziona tutte</string>
     <string name="sugerencias_create">Crea attività (%1$s)</string>
-    <string name="sugerencias_hint">Vengono create come da fare e senza date; poi puoi modificarle.</string>
+    <string name="sugerencias_hint">Le attività vengono create come da fare e senza date. I titoli già presenti nel lavoro vengono saltati.</string>
     <string name="sugerencias_error_session">La sessione è scaduta. Accedi di nuovo.</string>
     <string name="sugerencias_error_network">Nessuna connessione. Controlla internet e riprova.</string>
     <string name="sugerencias_error_limit">Limite di utilizzo raggiunto. Riprova più tardi.</string>

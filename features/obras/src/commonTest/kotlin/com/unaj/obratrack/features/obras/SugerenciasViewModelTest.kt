@@ -25,6 +25,7 @@ import com.unaj.obratrack.domain.repository.SugeridorDeTareas
 import com.unaj.obratrack.domain.usecase.CrearTarea
 import com.unaj.obratrack.domain.usecase.CrearTareasSugeridas
 import com.unaj.obratrack.domain.usecase.ObservarSesion
+import com.unaj.obratrack.domain.usecase.ObservarTareas
 import com.unaj.obratrack.domain.usecase.SugerirTareas
 import com.unaj.obratrack.domain.usecase.SugerirTareasConIa
 import com.unaj.obratrack.domain.repository.SugeridorConIA
@@ -34,7 +35,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -59,7 +60,7 @@ class SugerenciasViewModelTest {
         val viewModel = SugerenciasViewModel(
             ObservarSesion(SesionDeSugerencias(usuario)),
             SugerirTareas(sugeridor),
-            CrearTareasSugeridas(CrearTarea(repo)),
+            CrearTareasSugeridas(CrearTarea(repo), ObservarTareas(repo)),
             ia?.let { SugerirTareasConIa(it) },
         )
         try {
@@ -407,7 +408,8 @@ private class TareasQueGuardan(
     var fallarEnLaLlamada: Int? = null,
     private val espera: CompletableDeferred<Unit>? = null,
 ) : RepositorioTareas {
-    val titulos = mutableListOf<String>()
+    private val tareas = mutableListOf<Tarea>()
+    val titulos get() = tareas.map { it.titulo }
     val categorias = mutableListOf<CategoriaTarea>()
     var userId: String? = null
     var obraId: String? = null
@@ -419,12 +421,14 @@ private class TareasQueGuardan(
         if (fallarEnLaLlamada != null && llamadas >= fallarEnLaLlamada!!) return ResultadoTarea.Fallo(ErrorTarea.RED)
         this.userId = userId
         this.obraId = obraId
-        titulos += draft.titulo
+        val tarea = Tarea("t$llamadas", obraId, userId, draft.titulo, categoria = draft.categoria)
+        tareas += tarea
         categorias += draft.categoria
-        return ResultadoTarea.Exito(Tarea("t$llamadas", obraId, userId, draft.titulo, categoria = draft.categoria))
+        return ResultadoTarea.Exito(tarea)
     }
 
-    override fun observarDeObra(userId: String, obraId: String): Flow<ResultadoTarea<List<Tarea>>> = emptyFlow()
+    override fun observarDeObra(userId: String, obraId: String): Flow<ResultadoTarea<List<Tarea>>> =
+        flowOf(ResultadoTarea.Exito(tareas.filter { it.userId == userId && it.obraId == obraId }))
     override suspend fun actualizar(userId: String, obraId: String, tareaId: String, draft: TareaDraft) = unsupported()
     override suspend fun cambiarEstado(userId: String, obraId: String, tareaId: String, estado: EstadoTarea) = unsupported()
     override suspend fun eliminar(userId: String, obraId: String, tareaId: String, vinculados: RelevamientosVinculados) =
