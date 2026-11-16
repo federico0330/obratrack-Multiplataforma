@@ -151,6 +151,12 @@ private fun ListaSugerencias(state: SugerenciasUiState, titulos: Map<SugerenciaT
                 Text(stringResource(if (todas) Res.string.sugerencias_select_none else Res.string.sugerencias_select_all))
             }
         }
+        Text(
+            stringResource(Res.string.sugerencias_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 8.dp),
+        )
         state.sugerencias.forEach { sugerencia ->
             Row(
                 Modifier.fillMaxWidth().clickable(enabled = !state.creando) { acciones.onAlternar(sugerencia) },
@@ -168,12 +174,6 @@ private fun ListaSugerencias(state: SugerenciasUiState, titulos: Map<SugerenciaT
                 }
             }
         }
-        Text(
-            stringResource(Res.string.sugerencias_hint),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 8.dp),
-        )
     }
 }
 

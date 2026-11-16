@@ -210,15 +210,17 @@ fun ObraTrackApp(
                     var pestana by rememberSaveable(stateSaver = PestanaPrincipalSaver) {
                         mutableStateOf(PestanaPrincipal.OBRAS)
                     }
-                    val enRaiz = pestana != PestanaPrincipal.OBRAS ||
-                        (obrasState.obraSeleccionada == null && !obrasState.formularioVisible)
-                    BackHandler(enabled = pestana != PestanaPrincipal.OBRAS) { pestana = PestanaPrincipal.OBRAS }
+                    val mostrarObras = pestana == PestanaPrincipal.OBRAS ||
+                        (pestana == PestanaPrincipal.AGENDA && obraAbiertaId != null)
+                    val enRaiz = !mostrarObras ||
+                        (obraAbiertaId == null && !obrasState.formularioVisible && !sugerenciasState.visible)
+                    BackHandler(enabled = !mostrarObras) { pestana = PestanaPrincipal.OBRAS }
                     Scaffold(
                         bottomBar = { if (enRaiz) BarraInferior(pestana) { pestana = it } },
                         contentWindowInsets = WindowInsets(0, 0, 0, 0),
                     ) { padding ->
                         Box(Modifier.padding(padding).consumeWindowInsets(padding)) {
-                            when (pestana) {
+                            when (if (mostrarObras) PestanaPrincipal.OBRAS else pestana) {
                                 // Un relevamiento abierto (detalle o formulario) es una pantalla propia, no un tramo de la obra.
                                 PestanaPrincipal.OBRAS -> if (tareasState.formularioVisible) TareaScreen(
                                     state = tareasState,
@@ -265,6 +267,7 @@ fun ObraTrackApp(
                                     obrasState.lista,
                                     obrasState.edicionVisita,
                                     obrasViewModel::reintentar,
+                                    obrasViewModel::abrirDetalle,
                                     obrasViewModel::editarVisita,
                                     obrasViewModel::cerrarEdicionVisita,
                                     obrasViewModel::guardarVisita,

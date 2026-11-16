@@ -3,6 +3,8 @@ package com.unaj.obratrack.features.obras
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,12 +40,13 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Clock
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AgendaVisitasScreen(
     lista: ListaObrasUiState,
     edicion: EdicionVisitaUiState?,
     onRetry: () -> Unit,
+    onOpenObra: (Obra) -> Unit,
     onEdit: (Obra) -> Unit,
     onCloseEditor: () -> Unit,
     onSave: (LocalDate?, LocalTime?) -> Unit,
@@ -97,12 +100,17 @@ fun AgendaVisitasScreen(
                                             visita.diasSinVisita?.toInt()?.let {
                                                 Text(pluralStringResource(Res.plurals.agenda_days_without_visit, it, it))
                                             }
-                                            TextButton(
-                                                onClick = { onEdit(visita.obra) },
-                                                modifier = Modifier.testTag("agenda_editar_${visita.obra.id}"),
-                                            ) {
-                                                val accion = if (fechaVisita == null) Res.string.agenda_schedule else Res.string.agenda_reschedule
-                                                Text(stringResource(accion))
+                                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                TextButton(onClick = { onOpenObra(visita.obra) }) {
+                                                    Text(stringResource(Res.string.agenda_open_work))
+                                                }
+                                                TextButton(
+                                                    onClick = { onEdit(visita.obra) },
+                                                    modifier = Modifier.testTag("agenda_editar_${visita.obra.id}"),
+                                                ) {
+                                                    val accion = if (fechaVisita == null) Res.string.agenda_schedule else Res.string.agenda_reschedule
+                                                    Text(stringResource(accion))
+                                                }
                                             }
                                         }
                                     }

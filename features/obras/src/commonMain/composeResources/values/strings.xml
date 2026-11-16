@@ -172,6 +172,7 @@
     <string name="agenda_unscheduled">Sin programar</string>
     <string name="agenda_empty">Por ahora no hay visitas para mostrar.</string>
     <string name="agenda_date_time">%1$s · %2$s</string>
+    <string name="agenda_open_work">Ver obra</string>
     <string name="agenda_schedule">Programar visita</string>
     <string name="agenda_reschedule">Reprogramar visita</string>
     <string name="agenda_visit_date">Fecha de visita</string>
@@ -192,7 +193,7 @@
     <string name="sugerencias_select_all">Seleccionar todas</string>
     <string name="sugerencias_select_none">Quitar todas</string>
     <string name="sugerencias_create">Crear tareas (%1$s)</string>
-    <string name="sugerencias_hint">Se crean como pendientes y sin fechas; después podés editarlas.</string>
+    <string name="sugerencias_hint">Se crean pendientes y sin fechas. Se omiten los títulos que ya existen en la obra.</string>
     <string name="sugerencias_error_session">Tu sesión venció. Iniciá sesión nuevamente.</string>
     <string name="sugerencias_error_network">No hay conexión. Revisá tu internet e intentá de nuevo.</string>
     <string name="sugerencias_error_limit">Se alcanzó el límite de uso. Intentá más tarde.</string>

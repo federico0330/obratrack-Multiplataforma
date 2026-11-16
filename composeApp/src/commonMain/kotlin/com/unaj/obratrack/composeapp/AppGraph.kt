@@ -139,7 +139,7 @@ class AppGraph(
     fun crearSugerenciasViewModel() = SugerenciasViewModel(
         ObservarSesion(authRepository),
         SugerirTareas(sugeridorTareas),
-        CrearTareasSugeridas(CrearTarea(tareasRepository)),
+        CrearTareasSugeridas(CrearTarea(tareasRepository), ObservarTareas(tareasRepository)),
         sugeridorIa?.let { SugerirTareasConIa(it) },
     )
 

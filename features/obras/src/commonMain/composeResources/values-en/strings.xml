@@ -172,6 +172,7 @@
     <string name="agenda_unscheduled">Unscheduled</string>
     <string name="agenda_empty">There are no visits to show yet.</string>
     <string name="agenda_date_time">%1$s · %2$s</string>
+    <string name="agenda_open_work">View work</string>
     <string name="agenda_schedule">Schedule visit</string>
     <string name="agenda_reschedule">Reschedule visit</string>
     <string name="agenda_visit_date">Visit date</string>
@@ -192,7 +193,7 @@
     <string name="sugerencias_select_all">Select all</string>
     <string name="sugerencias_select_none">Clear all</string>
     <string name="sugerencias_create">Create tasks (%1$s)</string>
-    <string name="sugerencias_hint">They are created as pending and without dates; you can edit them afterwards.</string>
+    <string name="sugerencias_hint">Tasks are created as pending and without dates. Titles already in this work are skipped.</string>
     <string name="sugerencias_error_session">Your session expired. Please sign in again.</string>
     <string name="sugerencias_error_network">No connection. Check your internet and try again.</string>
     <string name="sugerencias_error_limit">The usage limit was reached. Try again later.</string>
