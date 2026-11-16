@@ -52,9 +52,27 @@ fun RelevamientoScreen(
     BackHandler(enabled = true) {
         when {
             state.aEliminar != null -> acciones.onCancelDelete()
-            enFormulario -> if (!guardando) acciones.onCloseForm()
+            enFormulario -> if (state.formulario.confirmarDescarte) acciones.onKeepEditing() else acciones.onCloseForm()
             else -> if (!state.eliminando) acciones.onBack()
         }
+    }
+
+    if (enFormulario && state.formulario.confirmarDescarte) {
+        AlertDialog(
+            onDismissRequest = acciones.onKeepEditing,
+            title = { Text(stringResource(Res.string.relevamientos_discard_title)) },
+            text = { Text(stringResource(Res.string.relevamientos_discard_message)) },
+            confirmButton = {
+                TextButton(onClick = acciones.onDiscardChanges) {
+                    Text(stringResource(Res.string.relevamientos_discard_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = acciones.onKeepEditing) {
+                    Text(stringResource(Res.string.relevamientos_discard_keep_editing))
+                }
+            },
+        )
     }
 
     state.aEliminar?.let {

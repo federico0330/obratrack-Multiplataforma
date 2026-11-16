@@ -240,4 +240,8 @@
     <string name="sugerencias_ia_button">Suggerisci con l’IA</string>
     <string name="sugerencias_ia_privacy">Solo questo testo viene inviato a Google Gemini per generare i suggerimenti.</string>
     <string name="sugerencias_error_description">Scrivi una descrizione di massimo 500 caratteri.</string>
+    <string name="relevamientos_discard_title">Scartare le modifiche?</string>
+    <string name="relevamientos_discard_message">Se esci ora, perderai le modifiche al rilievo.</string>
+    <string name="relevamientos_discard_confirm">Scarta modifiche</string>
+    <string name="relevamientos_discard_keep_editing">Continua a modificare</string>
 </resources>

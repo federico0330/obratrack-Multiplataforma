@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +51,7 @@ fun AgendaVisitasScreen(
     onEdit: (Obra) -> Unit,
     onCloseEditor: () -> Unit,
     onSave: (LocalDate?, LocalTime?) -> Unit,
+    scroll: LazyListState,
     clock: Clock = Clock.System,
 ) {
     if (edicion != null) {
@@ -75,7 +77,11 @@ fun AgendaVisitasScreen(
                     if (grupos.isEmpty()) {
                         AgendaVacia()
                     } else {
-                        LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        LazyColumn(
+                            state = scroll,
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
                             for ((categoria, visitas) in grupos) {
                                 item {
                                     Text(stringResource(when (categoria) {

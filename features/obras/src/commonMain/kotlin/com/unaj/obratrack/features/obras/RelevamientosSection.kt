@@ -38,6 +38,8 @@ data class RelevamientosAcciones(
     val onRetry: () -> Unit,
     val onRetryTasks: () -> Unit,
     val onCloseForm: () -> Unit,
+    val onKeepEditing: () -> Unit,
+    val onDiscardChanges: () -> Unit,
     val onNoteChange: (String) -> Unit,
     val onDateChange: (String) -> Unit,
     val onTaskChange: (String?) -> Unit,

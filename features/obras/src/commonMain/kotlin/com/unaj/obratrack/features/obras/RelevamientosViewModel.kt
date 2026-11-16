@@ -57,6 +57,7 @@ class RelevamientosViewModel(
     private var obraId: String? = null
     private var contexto = 0L
     private var formularioVersion = 0L
+    private var formularioInicial: FormularioRelevamientoUiState? = null
     private var contextoJob = Job(viewModelScope.coroutineContext[Job])
     private var tareasJob: Job? = null
     private var capturaJob: Job? = null
@@ -98,6 +99,7 @@ class RelevamientosViewModel(
 
     private fun renovarContexto() {
         contexto++
+        formularioInicial = null
         capturaJob = null
         busquedaJob = null
         direccionJob = null
@@ -224,12 +226,14 @@ class RelevamientosViewModel(
         if (_state.value.eliminando) return
         nuevaVersionFormulario()
         val foto = fotoMostrable(item)
-        _state.update { it.copy(formularioVisible = true, errorOperacion = null, formulario = FormularioRelevamientoUiState(
+        val formulario = FormularioRelevamientoUiState(
             id = item.id, nota = item.nota, fechaIso = item.fecha.toLocalDateTime(TimeZone.UTC).date.toString(), tareaId = item.tareaId,
             foto = foto ?: FotoFormulario.Ninguna, fotoOriginal = foto,
             ubicacion = item.ubicacion, ubicacionOriginal = item.ubicacion,
             busqueda = BusquedaDireccionUiState(disponible = buscarDirecciones.estaSoportado()),
-        )) }
+        )
+        formularioInicial = formulario
+        _state.update { it.copy(formularioVisible = true, errorOperacion = null, formulario = formulario) }
     }
 
     /** Solo se muestran URLs web; otro valor en `fotoUrl` se conserva sin tocarlo. */
@@ -261,24 +265,42 @@ class RelevamientosViewModel(
     fun abrirFormulario() {
         if (_state.value.eliminando || _state.value.formulario.guardando) return
         nuevaVersionFormulario()
-        _state.update {
-            it.copy(seleccionado = null, errorOperacion = null, formularioVisible = true, formulario = FormularioRelevamientoUiState(
-                fechaIso = clock.todayIn(TimeZone.currentSystemDefault()).toString(),
-                busqueda = BusquedaDireccionUiState(disponible = buscarDirecciones.estaSoportado()),
-            ))
-        }
+        val formulario = FormularioRelevamientoUiState(
+            fechaIso = clock.todayIn(TimeZone.currentSystemDefault()).toString(),
+            busqueda = BusquedaDireccionUiState(disponible = buscarDirecciones.estaSoportado()),
+        )
+        formularioInicial = formulario
+        _state.update { it.copy(seleccionado = null, errorOperacion = null, formularioVisible = true, formulario = formulario) }
         cargarDireccion(null)
     }
+
+    fun solicitarCerrarFormulario() {
+        val actual = _state.value
+        val form = actual.formulario
+        val inicial = formularioInicial ?: return
+        if (!actual.formularioVisible || form.guardando) return
+
+        val hayCambios = form.nota != inicial.nota || form.fechaIso != inicial.fechaIso ||
+            form.tareaId != inicial.tareaId || form.foto != inicial.foto || form.ubicacion != inicial.ubicacion
+        if (hayCambios) {
+            editarFormulario { copy(confirmarDescarte = true) }
+        } else {
+            cerrarFormulario()
+        }
+    }
+
+    fun seguirEditando() = editarFormulario { copy(confirmarDescarte = false) }
 
     fun cerrarFormulario() {
         if (_state.value.formulario.guardando) return
         nuevaVersionFormulario()
-        _state.update { it.copy(formularioVisible = false, formulario = it.formulario.copy(mapaAbierto = false)) }
+        _state.update { it.copy(formularioVisible = false, formulario = FormularioRelevamientoUiState()) }
     }
 
     /** Invalida lo que dependa del formulario anterior: respuestas tardías y las búsquedas en curso. */
     private fun nuevaVersionFormulario() {
         formularioVersion++
+        formularioInicial = null
         cortarCaptura()
         cortarBusqueda()
     }
@@ -462,6 +484,7 @@ class RelevamientosViewModel(
                 }
                 if (revision != contexto || versionForm != formularioVersion) return@launch
                 if (error == null) {
+                    formularioInicial = null
                     _state.update {
                         val filtro = if (form.id == null) FiltroRelevamientos.Todos else it.filtro
                         it.copy(formularioVisible = false, formulario = FormularioRelevamientoUiState(), filtro = filtro,
