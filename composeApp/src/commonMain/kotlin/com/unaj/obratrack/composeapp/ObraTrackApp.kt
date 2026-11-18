@@ -30,6 +30,8 @@ import com.unaj.appmoviles.obratrack.ui.theme.ObraTrackTheme
 import com.unaj.obratrack.domain.model.IdiomaApp
 import com.unaj.obratrack.domain.model.TemaApp
 import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
+import com.unaj.obratrack.domain.repository.ProgramadorAvisos
+import com.unaj.obratrack.domain.repository.ProgramadorAvisosNulo
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.CuentaViewModel
 import com.unaj.obratrack.features.auth.EditarNombreDialog
@@ -42,6 +44,7 @@ import com.unaj.obratrack.features.auth.RegistroScreen
 import com.unaj.obratrack.features.auth.RegistroViewModel
 import com.unaj.obratrack.features.auth.message
 import com.unaj.obratrack.features.obras.AgendaVisitasScreen
+import com.unaj.obratrack.features.obras.AvisosViewModel
 import com.unaj.obratrack.features.obras.ListaRelevamientosUiState
 import com.unaj.obratrack.features.obras.ListaTareasUiState
 import com.unaj.obratrack.features.obras.MisObrasScreen
@@ -68,6 +71,10 @@ fun ObraTrackApp(
     alAplicarTema: (oscuro: Boolean) -> Unit = {},
     // La plataforma cambia el idioma de la aplicación al elegido (Android reinicia la pantalla).
     alAplicarIdioma: (IdiomaApp) -> Unit = {},
+    // La plataforma pide el permiso de notificaciones cuando se programa una visita; iOS no avisa todavía.
+    alProgramarVisita: () -> Unit = {},
+    // Los avisos locales de visitas: Android aporta WorkManager y iOS el puerto nulo.
+    programadorAvisos: ProgramadorAvisos = ProgramadorAvisosNulo,
     // Clave y modelo de Gemini; sin clave no hay sugerencias con IA. Nunca se versionan.
     claveGemini: String = "",
     modeloGemini: String = "",
@@ -77,10 +84,11 @@ fun ObraTrackApp(
         return
     }
 
-    val graph = remember { AppGraph(proveedorTokenGoogle, claveGemini, modeloGemini) }
+    val graph = remember { AppGraph(proveedorTokenGoogle, programadorAvisos, claveGemini, modeloGemini) }
     val authViewModel: AuthViewModel = viewModel { graph.crearAuthViewModel() }
     val registroViewModel: RegistroViewModel = viewModel { graph.crearRegistroViewModel() }
     val obrasViewModel: ObrasViewModel = viewModel { graph.crearObrasViewModel() }
+    val avisosViewModel: AvisosViewModel = viewModel { graph.crearAvisosViewModel() }
     val tareasViewModel: TareasViewModel = viewModel { graph.crearTareasViewModel() }
     val sugerenciasViewModel: SugerenciasViewModel = viewModel { graph.crearSugerenciasViewModel() }
     val relevamientosViewModel: RelevamientosViewModel = viewModel { graph.crearRelevamientosViewModel() }
@@ -275,7 +283,11 @@ fun ObraTrackApp(
                                     obrasViewModel::abrirDetalle,
                                     obrasViewModel::editarVisita,
                                     obrasViewModel::cerrarEdicionVisita,
-                                    obrasViewModel::guardarVisita,
+                                    onSave = { fecha, hora ->
+                                        // Al programar una visita, la plataforma pide el permiso de avisos (Android 13+).
+                                        alProgramarVisita()
+                                        obrasViewModel.guardarVisita(fecha, hora)
+                                    },
                                     scroll = scrollAgenda,
                                 )
                                 PestanaPrincipal.PERFIL -> {

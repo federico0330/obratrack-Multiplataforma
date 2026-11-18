@@ -38,6 +38,8 @@ import com.unaj.obratrack.core.firebase.auth.GitLiveFirebaseAuthDataSource
 import com.unaj.obratrack.core.firebase.obras.GitLiveFirebaseObraDataSource
 import com.unaj.obratrack.core.firebase.tareas.GitLiveFirebaseTareaDataSource
 import com.unaj.obratrack.domain.repository.ProveedorTokenGoogle
+import com.unaj.obratrack.domain.repository.ProgramadorAvisos
+import com.unaj.obratrack.domain.repository.ProgramadorAvisosNulo
 import com.unaj.obratrack.domain.usecase.ActualizarObra
 import com.unaj.obratrack.domain.usecase.ActualizarTarea
 import com.unaj.obratrack.domain.usecase.CambiarEstadoObra
@@ -54,18 +56,21 @@ import com.unaj.obratrack.domain.usecase.ObservarObras
 import com.unaj.obratrack.domain.usecase.ObservarSesion
 import com.unaj.obratrack.domain.usecase.RegistrarUsuario
 import com.unaj.obratrack.domain.usecase.ProgramarVisita
+import com.unaj.obratrack.domain.usecase.SincronizarAvisosVisitas
 import com.unaj.obratrack.features.auth.AuthViewModel
 import com.unaj.obratrack.features.auth.PerfilViewModel
 import com.unaj.obratrack.features.auth.RegistroViewModel
+import com.unaj.obratrack.features.obras.AvisosViewModel
 import com.unaj.obratrack.features.obras.ObrasViewModel
 import com.unaj.obratrack.features.obras.TareasViewModel
 
 /**
  * Composition root compartido; cada plataforma inicializa Firebase antes de crear este grafo y
- * aporta su implementación de [ProveedorTokenGoogle].
+ * aporta su implementación de [ProveedorTokenGoogle] y del programador de avisos locales.
  */
 class AppGraph(
     private val proveedorTokenGoogle: ProveedorTokenGoogle,
+    private val programadorAvisos: ProgramadorAvisos = ProgramadorAvisosNulo,
     claveGemini: String = "",
     modeloGemini: String = "",
 ) {
@@ -134,6 +139,12 @@ class AppGraph(
         CambiarEstadoObra(obrasRepository),
         EliminarObra(obrasRepository),
         ProgramarVisita(obrasRepository),
+    )
+
+    fun crearAvisosViewModel() = AvisosViewModel(
+        ObservarSesion(authRepository),
+        ObservarObras(obrasRepository),
+        SincronizarAvisosVisitas(programadorAvisos),
     )
 
     fun crearSugerenciasViewModel() = SugerenciasViewModel(
