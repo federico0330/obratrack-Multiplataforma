@@ -2,20 +2,17 @@
 
 Aplicación de seguimiento de obras desarrollada por Federico Oviedo y Sabrina Russell con Kotlin Multiplatform y Compose Multiplatform. Comparte las pantallas y la lógica entre Android e iOS, y utiliza el mismo Firebase que ObraTrack nativo.
 
-## Avance del trabajo
+## Lo que incluye la app
 
-- [x] Inicializamos el proyecto por módulos y separamos dominio, datos, Firebase y presentación.
-- [x] Incorporamos acceso por correo y contraseña, registro, sesión e inicio con Google.
-- [x] Implementamos alta, listado, detalle, edición, estados y eliminación de obras propias.
-- [x] Compartimos las pantallas con iOS y agregamos su aplicación anfitriona en SwiftUI.
-- [x] Incorporamos el ABM de tareas, categorías, fechas, estados y resumen de atrasadas.
-- [x] Incorporamos el ABM de relevamientos, vínculo opcional con tareas, filtros y actualización de la última visita.
-- [x] Sumamos fotos desde cámara y galería, compresión, carga a Cloudinary y miniaturas.
-- [x] Sumamos ubicación, búsqueda de direcciones y selección de un punto en el mapa.
-- [x] Organizamos el detalle de obra en pestañas, con formularios propios para tareas y relevamientos.
-- [x] Implementamos Agenda con visitas agrupadas y opciones para programar, reprogramar y cancelar, con hora opcional.
-- [x] Agregamos perfil con resumen de obras, tema claro/oscuro del sistema y textos en español, inglés e italiano.
-- [x] Incorporamos pruebas de reglas de negocio, repositorios y ViewModels, y recorridos de integración e interfaz en Android.
+- [x] Acceso por correo y contraseña, registro, recuperación de contraseña e inicio con Google, con sesión persistente.
+- [x] Obras propias: alta, listado, detalle en pestañas, edición, cambio de estado (activa, pausada, finalizada) y baja con sus datos relacionados. Cliente y dirección opcionales.
+- [x] Tareas: alta, edición, cambio de estado y baja eligiendo si los relevamientos vinculados se desvinculan o se eliminan; fechas, categorías y resumen de atrasadas.
+- [x] Sugerencias de tareas por tipo de obra desde plantillas y, con clave de Gemini, desde una descripción; se ofrecen al crear la obra y desde su pestaña de tareas.
+- [x] Relevamientos: alta, edición, baja y filtros, con foto de cámara o galería subida a Cloudinary y ubicación por GPS, búsqueda de direcciones o punto en el mapa.
+- [x] Agenda de visitas: agrupadas en vencidas, hoy, esta semana, próximas y sin programar; programar, reprogramar y cancelar, con hora opcional.
+- [x] Avisos locales de visitas: el dispositivo muestra un recordatorio a la fecha y hora programadas aunque la app esté cerrada; el permiso de notificaciones se pide al programar una visita y denegarlo no afecta el resto de la app.
+- [x] Perfil con resumen de obras y cuenta, tema claro/oscuro e idioma en español, inglés o italiano, preferencias que se conservan entre sesiones.
+- [x] 519 pruebas de host (dominio, datos, Firebase, autenticación y pantallas), recorridos de integración e interfaz en un teléfono Android con Firebase real, y el recorrido de acceso en iOS verificado en el workflow «iOS Simulator» de GitHub Actions.
 
 ## Cómo ejecutarlo
 
@@ -26,7 +23,7 @@ Clonar el repositorio y abrir su carpeta raíz. Para probar el acceso y los dato
 | Android | `androidApp/google-services.json` |
 | iOS | `iosApp/GoogleService-Info.plist` |
 
-Crear una cuenta desde **Crear cuenta** o utilizar una cuenta de prueba del proyecto. El teléfono o simulador necesita conexión para autenticar, guardar cambios, subir fotos y cargar mapas. Google requiere además la configuración OAuth correspondiente a la plataforma. En Android, el SHA de la firma usada para compilar debe estar registrado en Firebase. Para el recorrido de evaluación se puede usar correo y contraseña.
+Crear una cuenta desde **Crear cuenta** o utilizar la cuenta de demostración (credenciales entregadas por privado). El teléfono o simulador necesita conexión para autenticar, guardar cambios, subir fotos, cargar mapas y recibir los avisos. En Android, el SHA de la firma usada para compilar debe estar registrado en Firebase; para el recorrido de evaluación alcanza con correo y contraseña.
 
 ### Android Studio, en emulador o teléfono
 
@@ -38,7 +35,7 @@ Crear una cuenta desde **Crear cuenta** o utilizar una cuenta de prueba del proy
 
 | Destino | Preparación |
 | --- | --- |
-| Emulador | En **Tools → Device Manager**, crear e iniciar un dispositivo virtual con Android 8.0/API 26 o superior. Para el recorrido recomendamos Android 14 o 15. Seleccionarlo en la barra de ejecución. |
+| Emulador | En **Tools → Device Manager**, crear e iniciar un dispositivo virtual con Android 8.0/API 26 o superior. Para el recorrido recomendamos Android 14 o 15, que permite probar también el permiso de notificaciones. Seleccionarlo en la barra de ejecución. |
 | Teléfono Android | Activar **Opciones de desarrollador → Depuración USB**, conectarlo por USB, aceptar la autorización de la PC y seleccionarlo en la barra de ejecución. |
 
 La ubicación se puede simular desde los controles del emulador. En un teléfono se usan su GPS, cámara y galería. Referencia para conectar un equipo físico en la [documentación de Android Studio](https://developer.android.com/studio/run/device).
@@ -67,47 +64,32 @@ open ObraTrackIOS.xcworkspace
 | Simulador iOS | Seleccionar un iPhone virtual disponible en Xcode y pulsar **Run ▶**. |
 | iPhone físico | Conectarlo a la Mac, aceptar la confianza y habilitar **Developer Mode** si se solicita. En **Signing & Capabilities**, seleccionar el equipo de desarrollo y habilitar la firma automática. Elegir el iPhone y pulsar **Run ▶**. |
 
-Conservar el bundle ID `com.unaj.appmoviles.obratrack.ios`, que coincide con Firebase. Si la firma requiere otro identificador, hay que registrar esa aplicación en Firebase y utilizar su configuración. Para Google, el plist debe incluir `CLIENT_ID` y `REVERSED_CLIENT_ID`. El proyecto copia este último al URL scheme durante la compilación.
+Conservar el bundle ID `com.unaj.appmoviles.obratrack.ios`, que coincide con Firebase. Si la firma requiere otro identificador, hay que registrar esa aplicación en Firebase y utilizar su configuración. Para Google, el plist debe incluir `CLIENT_ID` y `REVERSED_CLIENT_ID`. El proyecto copia este último al URL scheme durante la compilación. La integración del framework Kotlin se realiza mediante CocoaPods, y el archivo `GoogleService-Info.plist.example` se usa para la prueba visual de acceso con datos ficticios. Referencias de [integración CocoaPods](https://kotlinlang.org/docs/multiplatform/multiplatform-cocoapods-xcode.html) y [ejecución desde Xcode](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices).
 
-La integración del framework Kotlin se realiza mediante CocoaPods. El archivo `GoogleService-Info.plist.example` se utiliza en la prueba visual de acceso y tiene datos ficticios. Referencias de [integración CocoaPods](https://kotlinlang.org/docs/multiplatform/multiplatform-cocoapods-xcode.html) y [ejecución desde Xcode](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices).
+El recorrido completo con Firebase real está verificado en Android. En iOS, el workflow «iOS Simulator» de GitHub Actions compila la app en cada cambio y verifica el recorrido de acceso (login → registro → login) en el simulador; el resto del flujo con datos reales se puede probar con el plist real siguiendo estos pasos.
 
-## Recorrido para evaluar el avance
+## Recorrido sugerido para evaluar
 
-La cuenta de demostración tiene tres obras ficticias. **Casa Los Aromos** incluye tareas, relevamientos con foto y ubicación, y una próxima visita. **Local San Martín** permite revisar una tarea atrasada y otro avance con foto. **Ampliación Los Tilos** queda sin próxima visita programada. Los datos y las imágenes son ejemplos para la evaluación. Las credenciales se entregan por privado.
+La cuenta de demostración tiene tres obras ficticias. **Casa Los Aromos** incluye tareas, relevamientos con foto y ubicación, y una próxima visita. **Local San Martín** permite revisar una tarea atrasada y otro avance con foto. **Ampliación Los Tilos** queda sin próxima visita programada, ideal para probar el aviso. Los datos y las imágenes son ejemplos para la evaluación. Las credenciales se entregan por privado.
 
 1. **Acceso.** Crear una cuenta o iniciar sesión con correo y contraseña. Comprobar que al volver a abrir la aplicación se conserva la sesión.
-2. **Obras.** Crear una obra con nombre, cliente, dirección y fecha. Abrir su detalle, editarla, pausarla y reactivarla. La visibilidad se guarda, aunque la exploración de obras públicas todavía está pendiente.
-3. **Tareas.** Entrar en la pestaña **Tareas**, crear una, elegir su categoría y opcionalmente ambas fechas. Editarla y pasarla de pendiente a en curso y completada. Revisar el resumen de la lista.
-4. **Relevamientos.** Entrar en **Relevamientos**, cargar fecha y nota, y vincular una tarea si corresponde. Agregar una foto de cámara o galería y una ubicación mediante GPS, dirección o mapa. Guardar, abrir el detalle, editar y probar los filtros por tarea.
-5. **Agenda.** Volver al listado principal y abrir **Agenda**. Programar una visita, indicar una hora opcional y guardarla. Verificar su grupo, reprogramarla y cancelar la visita con confirmación.
-6. **Perfil.** Revisar la cuenta y el resumen de obras. Cerrar sesión y volver a ingresar para comprobar la persistencia de los datos.
-7. **Bajas.** Usar los registros de prueba para comprobar la cancelación y confirmación de cada baja. Al eliminar una tarea se puede conservar sus relevamientos sin vínculo o eliminarlos también. Al eliminar una obra se borran sus registros relacionados.
+2. **Obras.** Crear una obra con nombre, cliente y dirección opcionales, y fecha. Al guardar se ofrece **Sugerir tareas**: elegir el tipo de obra, marcar las sugeridas (plantillas o, con clave configurada, IA) y crearlas, u **Omitir**.
+3. **Tareas.** Entrar en la pestaña **Tareas** de una obra, crear una tarea con categoría y fechas opcionales, editarla, pasarla de pendiente a en curso y completada, y revisar el resumen de atrasadas. Desde ahí también se pueden sugerir tareas para una obra ya creada.
+4. **Relevamientos.** Entrar en **Relevamientos**, cargar fecha y nota, y vincular una tarea si corresponde. Agregar una foto de cámara o galería y una ubicación mediante GPS, búsqueda de dirección o punto en el mapa. Guardar, abrir el detalle, editar y probar los filtros por tarea.
+5. **Agenda y avisos.** Volver al listado principal y abrir **Agenda**. Tocar **Programar visita** en una obra sin fecha, elegir hoy y una hora a un par de minutos, y guardar: Android pide permitir las notificaciones, aceptar. Cerrar la app y esperar la hora programada: llega el recordatorio con el nombre de la obra, la fecha y la hora; al tocarlo se abre la app. Reprogramar la visita a otra hora (el aviso anterior se reemplaza) y luego cancelar la visita con confirmación.
+6. **Perfil.** Revisar la cuenta y el resumen de obras, cambiar el tema y el idioma, y comprobar que las preferencias se conservan. Cerrar sesión y volver a ingresar.
+7. **Bajas.** Usar los registros de prueba para comprobar la cancelación y confirmación de cada baja. Al eliminar una tarea se puede conservar sus relevamientos sin vínculo o eliminarlos también. Al eliminar una obra se borran sus registros relacionados y queda sin aviso pendiente.
 
-## Arquitectura y comparación con el nativo
+## Estructura del proyecto
 
 | Módulo | Responsabilidad |
 | --- | --- |
 | `core/domain` | Modelos, reglas, casos de uso y contratos. |
-| `core/data` | Repositorios, mapeos y servicios de fotos y ubicación. |
+| `core/data` | Repositorios, mapeos y servicios de fotos, avisos y ubicación. |
 | `core/firebase` | Adaptadores de autenticación y Firestore. |
 | `core/ui` | Componentes visuales reutilizables. |
 | `features/auth`, `features/obras` | Pantallas, estado y ViewModels. |
 | `composeApp` | Navegación, tema y dependencias construidas en `AppGraph`. |
 | `androidApp`, `iosApp` | Entradas y configuración de cada plataforma. |
 
-Se mantuvieron Clean Architecture, contratos e inyección por constructor. Las pantallas reciben estado y acciones, los ViewModels llaman a los casos de uso y los repositorios conectan el dominio con los adaptadores.
-
-Respecto de ObraTrack nativo, el cambio principal está en compartir modelos, reglas, casos de uso, ViewModels y pantallas en `commonMain`. Las integraciones específicas se resuelven en cada plataforma. Se conserva el formato de documentos de Firestore para que ambas aplicaciones puedan utilizar los mismos datos.
-
-## Verificación y pendientes
-
-La revisión del 10/11 incluye 413 pruebas de host, compilación Android y cuatro recorridos aprobados en un teléfono Android 15 con Firebase local. También se cargó y abrió la cuenta de demostración en Firebase real, con las fotografías subidas a Cloudinary. El detalle queda en `docs/PROGRESO.md`.
-
-El host iOS y la navegación inicial entre login y registro se ejecutaron anteriormente en el simulador del workflow macOS, con configuración ficticia. La integración real de Firebase y las funciones posteriores requieren una nueva ejecución en iOS. El workflow está deshabilitado manualmente.
-
-- [ ] Completar la verificación de acceso, datos, cámara, ubicación y mapas en iOS.
-- [ ] Incorporar cronograma Gantt, avisos de visitas y pronóstico.
-- [ ] Incorporar exploración de obras públicas y seguimiento.
-- [ ] Completar gestión de cuenta y preferencias persistentes.
-- [ ] Completar operación sin conexión y reintentos de fotos.
-- [ ] Incorporar informes PDF y compartir archivos.
+Las pantallas y la lógica viven en `commonMain` compartido; las integraciones específicas (tokens de Google, avisos locales, fotos y ubicación) se resuelven en cada plataforma. El detalle del trabajo paso a paso queda en `docs/PROGRESO.md`.
