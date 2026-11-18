@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aviso_canal">Promemoria delle visite</string>
+    <string name="aviso_canal_descripcion">Promemoria per le visite pianificate delle opere</string>
+    <string name="aviso_visita">Visita in programma per il %1$s alle %2$s</string>
+</resources>

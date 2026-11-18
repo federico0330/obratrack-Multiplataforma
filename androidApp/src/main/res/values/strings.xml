@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aviso_canal">Recordatorios de visitas</string>
+    <string name="aviso_canal_descripcion">Avisos de las visitas programadas de las obras</string>
+    <string name="aviso_visita">Visita programada para el %1$s a las %2$s</string>
+</resources>

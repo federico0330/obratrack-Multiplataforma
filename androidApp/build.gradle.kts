@@ -55,6 +55,8 @@ dependencies {
     androidTestImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation(project(":composeApp"))
     implementation(project(":core:domain"))
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.core:core-ktx:1.17.0")
     // Motor gráfico del mapa (misma versión que la librería). OpenGL y no Vulkan, por compatibilidad.
     runtimeOnly("org.maplibre.compose:maplibre-compose-runtime-opengl-android:0.20.0")
     implementation("androidx.credentials:credentials:1.6.0")

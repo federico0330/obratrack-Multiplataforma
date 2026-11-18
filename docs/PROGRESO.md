@@ -154,7 +154,7 @@ La captura de una foto de 50 MP y el GPS físico con precisión aproximada sigue
 - Mantener `obras` raíz con `userId`, `nombre`, `cliente`, `publica`, `direccion`, `fechaInicio` Timestamp y `estado` minúsculo.
 - No crear `usuarios/{uid}` ni modificar/desplegar reglas. Visibilidad pública no habilita explorar ni seguir obras en este corte.
 - “Hoy” se calcula con la zona local; `fechaInicio` se guarda desde medianoche UTC. La hora de visita son minutos desde medianoche.
-- Sin fotos en Firebase Storage; se acordó Cloudinary. Sin FCM para avisos locales.
+- Sin fotos en Firebase Storage; se acordó Cloudinary. Avisos de visitas locales del dispositivo (WorkManager), sin FCM ni backend de notificaciones.
 - Errores tipados; cancellation se relanza; no convertir escrituras fallidas en éxito.
 
 
@@ -261,3 +261,13 @@ La captura de una foto de 50 MP y el GPS físico con precisión aproximada sigue
 - Atrás, la flecha y Cancelar piden confirmación si cambió la nota, la fecha, la tarea, la foto o la ubicación. Es posible seguir editando o salir descartando. Un formulario sin cambios se cierra directamente.
 - Agenda conserva la tarjeta visible y el desplazamiento al entrar a una obra y volver. El estado de la lista se conserva en `ObraTrackApp` y se lo pasa a la pantalla.
 - Android compiló y pasaron 125 pruebas de host de obras. En el emulador se comprobó el descarte de alta y edición, la conservación de la nota al seguir editando y la posición exacta de Agenda al volver con Atrás y la flecha.
+
+## Avisos locales de visitas (rama `feat/avisos-visitas`)
+
+- Hasta ahora la app no enviaba notificaciones: la Agenda de visitas avisaba solo en pantalla y el sistema mostraba «Esta app no envía notificaciones» (la app nunca declaró `POST_NOTIFICATIONS` ni programó alarmas). Se implementaron avisos locales: cuando la agenda tiene una visita futura, el dispositivo muestra un recordatorio a su fecha y hora aunque la app esté cerrada.
+- Decisión: avisos **locales** con WorkManager, no push. Las visitas ya llegan al dispositivo por la suscripción a obras, y un recordatorio no necesita backend, funciona sin conexión y evita FCM (decisión vigente). Un push exigiría FCM más un planificador de servidor, fuera del alcance acordado. Android es la plataforma verificada; iOS aporta el puerto nulo y queda pendiente como el resto de su flujo real.
+- Dominio: `AvisoVisita` y el puerto `ProgramadorAvisos` (`programados`, `programar`, `cancelar`), más el planificador puro `planificarAvisos` y `SincronizarAvisosVisitas`: reutiliza `agendaVisitas`, programa las visitas futuras (HOY, ESTA_SEMANA, PROXIMAS) a su hora local — o 9:00 si no tiene hora — y cancela los avisos vencidos, reprogramados o desaparecidos. Solo toca el puerto cuando algo cambia. Cada plataforma aporta su implementación al grafo, igual que el proveedor de tokens de Google.
+- Android: `ProgramadorAvisosAndroid` con WorkManager (trabajo único por obra, se reemplaza al reprogramar, persiste reinicios y sin alarmas exactas: el sistema puede atrasarlo unos minutos para ahorrar batería). El worker publica la notificación en el canal «Recordatorios de visitas» con el ícono de campana y textos es/en/it; tocarla abre la app. Los datos viajan en las etiquetas del trabajo, así que `programados()` consulta al propio WorkManager sin otra fuente de verdad.
+- Permiso: `POST_NOTIFICATIONS` declarado en el manifest y pedido al programar una visita (Android 13+), que es el momento con sentido; denegarlo no rompe nada y la Agenda sigue siendo la referencia en pantalla. `ObraTrackApp` recibió `alProgramarVisita` y `programadorAvisos` como parámetros con valores por defecto, así las llamadas existentes (iOS incluido) no cambian.
+- `AvisosViewModel` (`features:obras`) observa sesión y obras como Perfil/Obras y sincroniza de mejor esfuerzo, sin estado visible: un fallo de avisos no ensucia la interfaz y la próxima emisión corrige el plan.
+- CI: el workflow «iOS Simulator» daba rojo en `main` porque la prueba de acceso no hallaba los botones sin desplazar el formulario; se integró el ajuste de `test/ios-navegacion-registro` (desplazar antes de tocar) que pasó verde en ese workflow.

@@ -1,14 +1,18 @@
 package com.unaj.appmoviles.obratrack
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.Manifest
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import com.unaj.obratrack.composeapp.ObraTrackApp
 import com.unaj.obratrack.composeapp.idiomaGuardado
 import com.unaj.obratrack.domain.model.IdiomaApp
@@ -23,6 +27,10 @@ class MainActivity : ComponentActivity() {
     // Idioma con el que se creó esta actividad; si el guardado cambia, se vuelve a crear.
     private var idiomaAplicado = IdiomaApp.SISTEMA
 
+    // El permiso se pide al programar una visita: es el momento en que el aviso tiene sentido.
+    private val pedirPermisoAvisos =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* Denegado: la agenda sigue avisando en pantalla. */ }
+
     override fun attachBaseContext(base: Context) {
         idiomaAplicado = idiomaGuardado()
         super.attachBaseContext(base.conIdioma(idiomaAplicado))
@@ -32,7 +40,8 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        val proveedorTokenGoogle = (application as ObraTrackApplication).proveedorTokenGoogle
+        val aplicacion = application as ObraTrackApplication
+        val proveedorTokenGoogle = aplicacion.proveedorTokenGoogle
         proveedorTokenGoogle.adjuntar(this)
         setContent {
             Box(Modifier.semantics { testTagsAsResourceId = true }) {
@@ -40,10 +49,20 @@ class MainActivity : ComponentActivity() {
                     proveedorTokenGoogle,
                     alAplicarTema = ::aplicarBarrasDelSistema,
                     alAplicarIdioma = ::aplicarIdioma,
+                    alProgramarVisita = ::pedirPermisoNotificaciones,
+                    programadorAvisos = aplicacion.programadorAvisos,
                     claveGemini = BuildConfig.GEMINI_API_KEY,
                     modeloGemini = BuildConfig.GEMINI_MODEL,
                 )
             }
+        }
+    }
+
+    private fun pedirPermisoNotificaciones() {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            pedirPermisoAvisos.launch(Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 

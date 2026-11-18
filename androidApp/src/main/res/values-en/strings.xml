@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="aviso_canal">Visit reminders</string>
+    <string name="aviso_canal_descripcion">Reminders for the scheduled visits of the works</string>
+    <string name="aviso_visita">Visit scheduled for %1$s at %2$s</string>
+</resources>
