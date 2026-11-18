@@ -27,3 +27,7 @@ GoogleService-Info.plist
 
 # Pruebas locales y material para la defensa
 /pruebas/
+
+# Registros locales de depuración de Firebase
+/firebase-debug.log
+/firestore-debug.log
